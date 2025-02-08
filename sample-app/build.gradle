@@ -1,0 +1,64 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Exclude Google AndroidX.
+configurations.all {
+    exclude group: 'androidx.appcompat', module: 'appcompat'
+    exclude group: 'androidx.core', module: 'core'
+}
+
+android {
+    compileSdk target_sdk
+
+    defaultConfig {
+        // Use Samsung internal package name to enable theming.
+        applicationId "com.sec.sesl.tester"
+
+        minSdk 23
+        targetSdk target_sdk
+
+        versionCode sample_version_code
+        versionName sample_version_name
+
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    buildFeatures {
+        buildConfig true
+        viewBinding true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+
+    implementation("io.github.oneuiproject.sesl:appcompat:$sesl_appcompat_version")
+    implementation("io.github.oneuiproject.sesl:apppickerview:$sesl_apppickerview_version")
+    implementation("io.github.oneuiproject.sesl:material:$sesl_material_version")
+    implementation("io.github.oneuiproject.sesl:indexscroll:$sesl_indexscroll_version")
+    implementation("io.github.oneuiproject.sesl:picker-basic:$sesl_picker_basic_version")
+    implementation("io.github.oneuiproject.sesl:picker-color:$sesl_picker_color_version")
+    implementation("io.github.oneuiproject.sesl:preference:$sesl_preference_version")
+    implementation("io.github.oneuiproject.sesl:recyclerview:$sesl_recyclerview_version")
+    implementation("io.github.oneuiproject.sesl:swiperefreshlayout:$sesl_swiperefreshlayout_version")
+
+    implementation("androidx.constraintlayout:constraintlayout:$androidx_constraintlayout_version")
+
+    implementation 'com.airbnb.android:lottie:5.2.0'
+    implementation 'io.github.oneuiproject:icons:1.1.0'
+
+    implementation project(path: ':lib')
+    //implementation("io.github.oneuiproject:design:$lib_version")
+}
