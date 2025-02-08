@@ -1,2 +1,2 @@
-include ':lib'
-include ':sample-app'
+include ':library'
+include ':homework'
