@@ -59,6 +59,6 @@ dependencies {
     implementation 'com.airbnb.android:lottie:5.2.0'
     implementation 'io.github.oneuiproject:icons:1.1.0'
 
-    implementation project(path: ':lib')
+    implementation project(path: ':library')
     //implementation("io.github.oneuiproject:design:$lib_version")
 }
