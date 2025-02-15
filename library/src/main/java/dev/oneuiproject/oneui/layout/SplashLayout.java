@@ -38,7 +38,7 @@ public class SplashLayout extends LinearLayout {
         try {
             animated = attr.getBoolean(R.styleable.SplashLayout_animated, true);
             mText = attr.getString(R.styleable.SplashLayout_title);
-            if (mText == null) mText = context.getString(R.string.app_name);
+            if (mText == null) mText = context.getString(R.string.applicationName);
 
             if (animated) {
                 mImage_foreground = attr.getDrawable(R.styleable.SplashLayout_foreground_image);

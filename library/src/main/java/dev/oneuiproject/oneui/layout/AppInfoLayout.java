@@ -136,7 +136,7 @@ public class AppInfoLayout extends ToolbarLayout {
         } finally {
             a.recycle();
         }
-        if (mAppName == null) mAppName = mContext.getString(R.string.app_name);
+        if (mAppName == null) mAppName = mContext.getString(R.string.applicationName);
     }
 
     private void setLayoutMargins() {

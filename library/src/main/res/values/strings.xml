@@ -1,20 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
-
-    <!-- RelatedCard -->
     <string name="oui_relative_description">Looking for something else?</string>
-
-    <!-- GridMenuDialog -->
     <string name="oui_new_badge_text">N</string>
-
-    <!-- ToolbarLayout -->
     <string name="oui_navigation_drawer">Navigation drawer</string>
     <string name="oui_action_mode_all_checkbox">All</string>
     <string name="oui_action_mode_n_selected">%d selected</string>
     <string name="oui_action_mode_select_items">Select items</string>
-
-    <!-- AppInfoLayout -->
-    <string name="app_name" />
+    <string name="applicationName" />
     <string name="app_info">App info</string>
     <string name="version_info">Version %s</string>
     <string name="update">Update</string>
@@ -23,12 +16,8 @@
     <string name="latest_version">The latest version is already installed.</string>
     <string name="cant_check_for_updates_phone">"Can't check for updates. Your phone's network connection isn't stable."</string>
     <string name="cant_check_for_updates_tablet">"Can't check for updates. Your tablet's network connection isn't stable."</string>
-
-    <!-- StartEndTimePicker -->
     <string name="oui_time_dialog_end">End</string>
     <string name="oui_time_dialog_start">Start</string>
-
-    <!-- Common -->
     <string name="oui_common_add">Add</string>
     <string name="oui_common_apply">Apply</string>
     <string name="oui_common_button_yes">Yes</string>
@@ -38,8 +27,5 @@
     <string name="oui_common_done">Done</string>
     <string name="oui_common_edit">Edit</string>
     <string name="oui_common_close">Close</string>
-
-    <!-- TipPopup -->
     <string name="sem_tip_popup_hint_string">Double tap this button to learn more.</string>
-
 </resources>
