@@ -1,6 +1,5 @@
 buildscript {
 	apply from: 'manifest.gradle'
-
 	repositories {
 		google()
 		mavenCentral()
@@ -47,10 +46,7 @@ subprojects {
 		}
 
 		signing {
-			def signingKeyIdentifier = System.getenv("SIGNING_KEYID")
-			def signingKey = System.getenv("SIGNING_PRIVATE_KEY")
-			def signingPassword = System.getenv("SIGNING_PASSWORD")
-			useInMemoryPgpKeys(signingKeyIdentifier, signingKey, signingPassword)
+			useInMemoryPgpKeys(System.getenv("SIGNING_KEYID"), System.getenv("SIGNING_PRIVATE_KEY"), System.getenv("SIGNING_PASSWORD"))
 			sign publishing.publications
 		}
 	}
