@@ -7,10 +7,10 @@ plugins {
 android {
 	compileSdk target_sdk
 	defaultConfig {
-		minSdk 23
+		minSdk minimum_sdk
 		targetSdk target_sdk
 		versionCode 1
-		versionName library_version
+		versionName "1.2.6"
 		vectorDrawables.useSupportLibrary = true
 	}
 

@@ -2,7 +2,7 @@ plugins {
 	id 'com.android.application'
 }
 
-configurations.all {
+configurations.configureEach {
 	exclude group: 'androidx.appcompat', module: 'appcompat'
 	exclude group: 'androidx.core', module: 'core'
 }
@@ -11,7 +11,7 @@ android {
 	compileSdk target_sdk
 	defaultConfig {
 		applicationId "com.sec.sesl.khopan.homework"
-		minSdk 26
+		minSdk minimum_sdk
 		targetSdk target_sdk
 		versionCode version_code
 		versionName version_name
