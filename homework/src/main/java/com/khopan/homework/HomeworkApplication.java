@@ -14,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
+import androidx.picker.widget.SeslDatePicker;
 
 import java.lang.reflect.Method;
 
@@ -52,11 +53,14 @@ public class HomeworkApplication extends AppCompatActivity {
 		linearLayout.setOrientation(LinearLayout.VERTICAL);
 		scrollView.addView(linearLayout);
 
-		TextView textView = new TextView(this);
+		/*TextView textView = new TextView(this);
 		textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		textView.setGravity(Gravity.CENTER);
 		textView.setText("Homework");
 		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.0f);
-		linearLayout.addView(textView);
+		linearLayout.addView(textView);*/
+		CalendarView calendar = new CalendarView(this);
+		calendar.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		linearLayout.addView(calendar);
 	}
 }
