@@ -3,20 +3,21 @@ package com.khopan.homework;
 import android.annotation.SuppressLint;
 import android.content.res.TypedArray;
 import android.os.Bundle;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
-import androidx.picker.widget.SeslDatePicker;
+import androidx.viewpager2.widget.ViewPager2;
+
+import com.khopan.homework.calendar.CalendarView;
+import com.khopan.homework.calendar.MonthAdapter;
 
 import java.lang.reflect.Method;
+import java.util.Calendar;
 
 import dev.oneuiproject.oneui.layout.ToolbarLayout;
 
@@ -49,9 +50,9 @@ public class HomeworkApplication extends AppCompatActivity {
 
 		scrollView.setVerticalScrollBarEnabled(true);
 		frameLayout.addView(scrollView);
-		LinearLayout linearLayout = new LinearLayout(this);
+		/*LinearLayout linearLayout = new LinearLayout(this);
 		linearLayout.setOrientation(LinearLayout.VERTICAL);
-		scrollView.addView(linearLayout);
+		scrollView.addView(linearLayout);*/
 
 		/*TextView textView = new TextView(this);
 		textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -59,8 +60,24 @@ public class HomeworkApplication extends AppCompatActivity {
 		textView.setText("Homework");
 		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.0f);
 		linearLayout.addView(textView);*/
-		CalendarView calendar = new CalendarView(this);
-		calendar.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		linearLayout.addView(calendar);
+		//SeslSimpleMonthView calendar = new SeslSimpleMonthView(this);
+		//MaterialCalendarView calendar = new MaterialCalendarView(this);
+		//CalendarView calendar = new CalendarView(this);
+		//calendar.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		/*calendar.setDynamicHeightEnabled(true);
+		calendar.setPagingEnabled(true);
+		calendar.setTopbarVisible(true);
+		calendar.addDecorator(new Decorator());*/
+		//scrollView.addView(calendar);
+
+		ViewPager2 monthPager = new ViewPager2(this);
+		monthPager.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		monthPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
+
+		// Start from current month
+		Calendar startCalendar = Calendar.getInstance();
+
+		monthPager.setAdapter(new MonthAdapter(this, startCalendar));
+		scrollView.addView(monthPager);
 	}
 }
