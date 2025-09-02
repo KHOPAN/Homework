@@ -1,22 +1,19 @@
 package com.khopan.homework;
 
-import android.annotation.SuppressLint;
-import android.content.res.TypedArray;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
+import android.widget.Button;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.widget.NestedScrollView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.khopan.homework.calendar.CalendarView;
 import com.khopan.homework.calendar.MonthAdapter;
+import com.sec.sesl.khopan.homework.R;
 
-import java.lang.reflect.Method;
 import java.util.Calendar;
 
 import dev.oneuiproject.oneui.layout.ToolbarLayout;
@@ -25,7 +22,53 @@ public class HomeworkApplication extends AppCompatActivity {
 	@Override
 	public void onCreate(@Nullable Bundle bundle) {
 		super.onCreate(bundle);
-		ToolbarLayout toolbarLayout = new ToolbarLayout(this, null);
+		TriStateLayout layout = new TriStateLayout(this);
+
+		Button first = new Button(this);
+		first.setText("First");
+		layout.addView(first);
+
+		Button second = new Button(this);
+		second.setText("Second");
+		layout.addView(second);
+
+		Button third = new Button(this);
+		third.setText("Third");
+		layout.addView(third);
+
+		this.setContentView(layout);
+		//View top = new View(this);
+		//top.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		//top.setBackgroundColor(Color.RED);
+
+		/*ViewPager2 monthPager = new ViewPager2(this);
+		//monthPager.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		monthPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
+
+		// Start from current month
+		Calendar startCalendar = Calendar.getInstance();
+
+		monthPager.setAdapter(new MonthAdapter(this, startCalendar));
+		//scrollView.addView(monthPager);
+
+		Button button = new Button(this);
+		button.setText("Test");
+		button.setNestedScrollingEnabled(true);
+
+		TwoStageScroller scroller = new TwoStageScroller(this);
+		scroller.setViews(button, new View(this));
+		this.setContentView(scroller);
+
+		/*super.onCreate(bundle);
+		final Resources resources = this.getResources();
+		final ToolbarLayout toolbar = new ToolbarLayout(this, null);
+		toolbar.setExpanded(false, false);
+		toolbar.setTitle("Homework");
+		toolbar.setNavigationButtonVisible(true);
+		this.setContentView(toolbar);*/
+
+		//toolbar.setTitle(resources.getString(R.string.title));
+		/*ToolbarLayout toolbarLayout = new ToolbarLayout(this, null);
 		this.setContentView(toolbarLayout);
 		toolbarLayout.setTitle("Homework");
 		toolbarLayout.setExpanded(false, false);
@@ -70,7 +113,7 @@ public class HomeworkApplication extends AppCompatActivity {
 		calendar.addDecorator(new Decorator());*/
 		//scrollView.addView(calendar);
 
-		ViewPager2 monthPager = new ViewPager2(this);
+		/*ViewPager2 monthPager = new ViewPager2(this);
 		monthPager.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		monthPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
 
@@ -78,6 +121,6 @@ public class HomeworkApplication extends AppCompatActivity {
 		Calendar startCalendar = Calendar.getInstance();
 
 		monthPager.setAdapter(new MonthAdapter(this, startCalendar));
-		scrollView.addView(monthPager);
+		scrollView.addView(monthPager);*/
 	}
 }

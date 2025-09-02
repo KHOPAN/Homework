@@ -45,14 +45,5 @@ dependencies {
 	implementation("io.github.oneuiproject.sesl:material:$material")
 	implementation("io.github.oneuiproject.sesl:preference:$preference")
 	implementation("io.github.oneuiproject.sesl:recyclerview:$recyclerview")
-	implementation("com.github.prolificinteractive:material-calendarview:1.6.0") {
-		exclude group: "com.google.android.material", module: "material"
-		exclude group: "androidx.coordinatorlayout", module: "coordinatorlayout"
-		exclude group: "androidx.customview", module: "customview"
-		exclude group: "androidx.drawerlayout", module: "drawerlayout"
-		exclude group: "androidx.fragment", module: "fragment"
-		exclude group: "androidx.viewpager", module: "viewpager"
-	}
-
 	implementation project(path: ":library")
 }
