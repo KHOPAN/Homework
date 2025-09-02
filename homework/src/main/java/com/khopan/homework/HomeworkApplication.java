@@ -1,42 +1,58 @@
 package com.khopan.homework;
 
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ScrollView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewpager2.widget.ViewPager2;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.khopan.homework.calendar.MonthAdapter;
-import com.sec.sesl.khopan.homework.R;
-
-import java.util.Calendar;
-
-import dev.oneuiproject.oneui.layout.ToolbarLayout;
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 public class HomeworkApplication extends AppCompatActivity {
 	@Override
 	public void onCreate(@Nullable Bundle bundle) {
 		super.onCreate(bundle);
-		TriStateLayout layout = new TriStateLayout(this);
+		CoordinatorLayout root = new CoordinatorLayout(this);
+
+		AppBarLayout bar = new AppBarLayout(this);
+		bar.setLayoutParams(new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+		CollapsingToolbarLayout toolbar = new CollapsingToolbarLayout(this);
+		toolbar.setLayoutParams(new AppBarLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+		Button button = new Button(this);
+		button.setText("Hello, world!");
+		toolbar.addView(button);
+
+		bar.addView(toolbar);
+
+		ScrollView scrollView = new ScrollView(this);
+		scrollView.setLayoutParams(new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+		Button test = new Button(this);
+		test.setText("Test");
+		scrollView.addView(test);
+
+		root.addView(scrollView);
+
+		root.addView(bar);
+
+		this.setContentView(root);
+		/*TestLayout layout = new TestLayout(this);
 
 		Button first = new Button(this);
 		first.setText("First");
-		layout.addView(first);
 
 		Button second = new Button(this);
 		second.setText("Second");
-		layout.addView(second);
 
-		Button third = new Button(this);
-		third.setText("Third");
-		layout.addView(third);
-
-		this.setContentView(layout);
+		layout.setViews(first, second);
+		this.setContentView(layout);*/
 		//View top = new View(this);
 		//top.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		//top.setBackgroundColor(Color.RED);
