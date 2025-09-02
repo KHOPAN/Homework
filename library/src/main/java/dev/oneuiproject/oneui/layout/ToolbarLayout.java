@@ -1020,8 +1020,9 @@ public class ToolbarLayout extends LinearLayout {
         }
 
         // KHOPAN: Impossibility Fix
-        public ToolbarLayoutParams(int width, int height) {
+        public ToolbarLayoutParams(final int width, final int height, final int layoutLocation) {
             super(width, height);
+            this.layout_location = layoutLocation;
         }
     }
 

@@ -2,22 +2,23 @@ package com.khopan.homework;
 
 import android.os.Bundle;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ScrollView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
+import dev.oneuiproject.oneui.layout.DrawerLayout;
 
 public class HomeworkApplication extends AppCompatActivity {
 	@Override
 	public void onCreate(@Nullable Bundle bundle) {
 		super.onCreate(bundle);
-		CoordinatorLayout root = new CoordinatorLayout(this);
+		final DrawerLayout drawerLayout = new DrawerLayout(this, null);
+		drawerLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		drawerLayout.setExpandable(false);
+		drawerLayout.setExpanded(false);
+		drawerLayout.setTitle("Homework");
+		this.setContentView(drawerLayout);
+		/*CoordinatorLayout root = new CoordinatorLayout(this);
 
 		AppBarLayout bar = new AppBarLayout(this);
 		bar.setLayoutParams(new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
