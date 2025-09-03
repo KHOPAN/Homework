@@ -1,143 +1,138 @@
 package com.khopan.homework;
 
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.khopan.homework.fragment.TestFragment;
+import com.sec.sesl.khopan.homework.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import dev.oneuiproject.oneui.layout.DrawerLayout;
+import dev.oneuiproject.oneui.layout.ToolbarLayout;
 
 public class HomeworkApplication extends AppCompatActivity {
+	private final List<Fragment> fragments;
+	private final List<Fragment> drawerItems;
+
+	public HomeworkApplication() {
+		this.fragments = new ArrayList<>();
+		this.fragments.add(new TestFragment());
+		this.drawerItems = new ArrayList<>();
+		this.drawerItems.add(this.fragments.get(0));
+		this.drawerItems.add(null);
+		this.drawerItems.add(this.fragments.get(0));
+	}
+
 	@Override
-	public void onCreate(@Nullable Bundle bundle) {
+	public void onCreate(@Nullable final Bundle bundle) {
 		super.onCreate(bundle);
 		final DrawerLayout drawerLayout = new DrawerLayout(this, null);
 		drawerLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		drawerLayout.setDrawerButtonIcon(this.getDrawable(R.drawable.ic_oui_info_outline));
+		drawerLayout.setDrawerButtonOnClickListener(null);
 		drawerLayout.setExpandable(false);
 		drawerLayout.setExpanded(false);
 		drawerLayout.setTitle("Homework");
+
+		final FrameLayout frameLayout = new FrameLayout(this);
+		frameLayout.setId(ViewGroup.generateViewId());
+		drawerLayout.addView(frameLayout, -1, new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 0));
+
+		final RecyclerView recyclerView = new RecyclerView(this);
+		recyclerView.setAdapter(new Adapter());
+		recyclerView.setHasFixedSize(true);
+		//recyclerView.setHorizontalScrollBarEnabled(false);
+		recyclerView.setLayoutManager(new LinearLayoutManager(this));
+		//recyclerView.setVerticalScrollBarEnabled(true);
+		drawerLayout.addView(recyclerView, -1, new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 5));
+
 		this.setContentView(drawerLayout);
-		/*CoordinatorLayout root = new CoordinatorLayout(this);
 
-		AppBarLayout bar = new AppBarLayout(this);
-		bar.setLayoutParams(new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		final FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
+		this.fragments.forEach(fragment -> transaction.add(frameLayout.getId(), fragment));
+		transaction.commitNow();
+	}
 
-		CollapsingToolbarLayout toolbar = new CollapsingToolbarLayout(this);
-		toolbar.setLayoutParams(new AppBarLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-		Button button = new Button(this);
-		button.setText("Hello, world!");
-		toolbar.addView(button);
-
-		bar.addView(toolbar);
-
-		ScrollView scrollView = new ScrollView(this);
-		scrollView.setLayoutParams(new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-		Button test = new Button(this);
-		test.setText("Test");
-		scrollView.addView(test);
-
-		root.addView(scrollView);
-
-		root.addView(bar);
-
-		this.setContentView(root);
-		/*TestLayout layout = new TestLayout(this);
-
-		Button first = new Button(this);
-		first.setText("First");
-
-		Button second = new Button(this);
-		second.setText("Second");
-
-		layout.setViews(first, second);
-		this.setContentView(layout);*/
-		//View top = new View(this);
-		//top.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		//top.setBackgroundColor(Color.RED);
-
-		/*ViewPager2 monthPager = new ViewPager2(this);
-		//monthPager.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		monthPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
-
-		// Start from current month
-		Calendar startCalendar = Calendar.getInstance();
-
-		monthPager.setAdapter(new MonthAdapter(this, startCalendar));
-		//scrollView.addView(monthPager);
-
-		Button button = new Button(this);
-		button.setText("Test");
-		button.setNestedScrollingEnabled(true);
-
-		TwoStageScroller scroller = new TwoStageScroller(this);
-		scroller.setViews(button, new View(this));
-		this.setContentView(scroller);
-
-		/*super.onCreate(bundle);
-		final Resources resources = this.getResources();
-		final ToolbarLayout toolbar = new ToolbarLayout(this, null);
-		toolbar.setExpanded(false, false);
-		toolbar.setTitle("Homework");
-		toolbar.setNavigationButtonVisible(true);
-		this.setContentView(toolbar);*/
-
-		//toolbar.setTitle(resources.getString(R.string.title));
-		/*ToolbarLayout toolbarLayout = new ToolbarLayout(this, null);
-		this.setContentView(toolbarLayout);
-		toolbarLayout.setTitle("Homework");
-		toolbarLayout.setExpanded(false, false);
-		toolbarLayout.setNavigationButtonVisible(false);
-		FrameLayout frameLayout = new FrameLayout(this);
-		frameLayout.setLayoutParams(new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		toolbarLayout.addView(frameLayout);
-		NestedScrollView scrollView = new NestedScrollView(this);
-		scrollView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		scrollView.setFillViewport(true);
-		scrollView.setOverScrollMode(NestedScrollView.OVER_SCROLL_ALWAYS);
-
-		try {
-			String methodName = "initializeScrollbars";
-			@SuppressLint("DiscouragedPrivateApi")
-			Method method = View.class.getDeclaredMethod(methodName, TypedArray.class);
-			method.setAccessible(true);
-			method.invoke(scrollView, this.obtainStyledAttributes(null, new int[] {}));
-		} catch(Throwable ignored) {
-
+	private class Adapter extends RecyclerView.Adapter<ViewHolder> {
+		@Override
+		public int getItemCount() {
+			return HomeworkApplication.this.drawerItems.size();
 		}
 
-		scrollView.setVerticalScrollBarEnabled(true);
-		frameLayout.addView(scrollView);
-		/*LinearLayout linearLayout = new LinearLayout(this);
-		linearLayout.setOrientation(LinearLayout.VERTICAL);
-		scrollView.addView(linearLayout);*/
+		@Override
+		public int getItemViewType(final int position) {
+			return HomeworkApplication.this.drawerItems.get(position) == null ? ViewHolder.VIEW_TYPE_SEPARATOR : ViewHolder.VIEW_TYPE_DRAWER_ITEM;
+		}
 
-		/*TextView textView = new TextView(this);
-		textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		textView.setGravity(Gravity.CENTER);
-		textView.setText("Homework");
-		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.0f);
-		linearLayout.addView(textView);*/
-		//SeslSimpleMonthView calendar = new SeslSimpleMonthView(this);
-		//MaterialCalendarView calendar = new MaterialCalendarView(this);
-		//CalendarView calendar = new CalendarView(this);
-		//calendar.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		/*calendar.setDynamicHeightEnabled(true);
-		calendar.setPagingEnabled(true);
-		calendar.setTopbarVisible(true);
-		calendar.addDecorator(new Decorator());*/
-		//scrollView.addView(calendar);
+		@Override
+		public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
+			if(holder.separator) {
+				return;
+			}
 
-		/*ViewPager2 monthPager = new ViewPager2(this);
-		monthPager.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		monthPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
+			Fragment fragment = HomeworkApplication.this.drawerItems.get(position);
+		}
 
-		// Start from current month
-		Calendar startCalendar = Calendar.getInstance();
+		@NonNull
+		@Override
+		public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
+			return new ViewHolder(type == ViewHolder.VIEW_TYPE_SEPARATOR);
+		}
+	}
 
-		monthPager.setAdapter(new MonthAdapter(this, startCalendar));
-		scrollView.addView(monthPager);*/
+	private class ViewHolder extends RecyclerView.ViewHolder {
+		private static final int VIEW_TYPE_SEPARATOR = 0;
+		private static final int VIEW_TYPE_DRAWER_ITEM = 1;
+
+		private final boolean separator;
+
+		private ViewHolder(final boolean separator) {
+			super(separator ? new View(HomeworkApplication.this) : new FrameLayout(HomeworkApplication.this));
+			this.separator = separator;
+			final DisplayMetrics metrics = HomeworkApplication.this.getResources().getDisplayMetrics();
+			final int margin;
+			final ViewGroup.MarginLayoutParams parameters;
+
+			if(this.separator) {
+				margin = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24.0f, metrics));
+				parameters = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3.0f, metrics)));
+				parameters.setMarginStart(margin);
+				parameters.setMarginEnd(margin);
+				parameters.topMargin = parameters.bottomMargin = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6.0f, metrics));
+				this.itemView.setLayoutParams(parameters);
+				this.itemView.setForeground(HomeworkApplication.this.getDrawable(R.drawable.drawer_separator));
+				return;
+			}
+
+			margin = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12.0f, metrics));
+			parameters = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			parameters.setMarginStart(margin);
+			parameters.setMarginEnd(margin);
+			this.itemView.setLayoutParams(parameters);
+			this.itemView.setBackground(HomeworkApplication.this.getDrawable(R.drawable.drawer_selector));
+
+			final LinearLayout linearLayout = new LinearLayout(HomeworkApplication.this);
+			linearLayout.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			linearLayout.setBackground(HomeworkApplication.this.getDrawable(R.drawable.drawer_ripple));
+			linearLayout.setGravity(Gravity.CENTER_VERTICAL);
+
+			((ViewGroup) this.itemView).addView(linearLayout);
+		}
 	}
 }
