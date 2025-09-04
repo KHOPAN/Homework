@@ -25,6 +25,6 @@ public class TestFragment extends AbstractFragment {
 
 	@Override
 	public String getName() {
-		return "Test Fragment";
+		return "Settings";
 	}
 }
