@@ -1,6 +1,7 @@
 package com.khopan.homework;
 
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -17,7 +18,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,8 +32,11 @@ import dev.oneuiproject.oneui.layout.DrawerLayout;
 import dev.oneuiproject.oneui.layout.ToolbarLayout;
 
 public class HomeworkApplication extends AppCompatActivity {
-	private final List<Fragment> fragments;
-	private final List<Fragment> drawerItems;
+	private static final Typeface TYPEFACE_NORMAL = Typeface.create("sec-roboto-light", Typeface.NORMAL);
+	private static final Typeface TYPEFACE_SELECTED = Typeface.create("sec-roboto-light", Typeface.BOLD);
+
+	private final List<AbstractFragment> fragments;
+	private final List<AbstractFragment> drawerItems;
 
 	private Resources resources;
 	private DisplayMetrics metrics;
@@ -98,24 +101,28 @@ public class HomeworkApplication extends AppCompatActivity {
 
 		@Override
 		public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-			if(holder.separator) {
+			if(holder.iconView == null || holder.textView == null) {
 				return;
 			}
 
-			Fragment fragment = HomeworkApplication.this.drawerItems.get(position);
-			holder.setSelected(position == this.selectedItem);
-			holder.textView.setText(fragment.getClass().getSimpleName());
-			holder.iconView.setImageResource(R.drawable.ic_oui_add_filled);
+			final boolean selected = this.selectedItem == position;
+			final AbstractFragment fragment = HomeworkApplication.this.drawerItems.get(position);
+			holder.iconView.setImageResource(fragment.getIcon());
+			holder.textView.setEllipsize(selected ? TextUtils.TruncateAt.MARQUEE : TextUtils.TruncateAt.END);
+			holder.textView.setText(fragment.getName());
+			holder.textView.setTypeface(selected ? HomeworkApplication.TYPEFACE_SELECTED : HomeworkApplication.TYPEFACE_NORMAL);
 			holder.itemView.setOnClickListener(view -> {
 				this.selectedItem = holder.getBindingAdapterPosition();
 				this.notifyItemRangeChanged(0, this.getItemCount());
 			});
+
+			holder.itemView.setSelected(selected);
 		}
 
 		@NonNull
 		@Override
 		public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
-			return new ViewHolder(type == ViewHolder.VIEW_TYPE_SEPARATOR);
+			return new ViewHolder(type != ViewHolder.VIEW_TYPE_DRAWER_ITEM);
 		}
 	}
 
@@ -123,17 +130,15 @@ public class HomeworkApplication extends AppCompatActivity {
 		private static final int VIEW_TYPE_SEPARATOR = 0;
 		private static final int VIEW_TYPE_DRAWER_ITEM = 1;
 
-		private final boolean separator;
 		private final AppCompatImageView iconView;
 		private final TextView textView;
 
 		private ViewHolder(final boolean separator) {
 			super(separator ? new View(HomeworkApplication.this) : new FrameLayout(HomeworkApplication.this));
-			this.separator = separator;
 			final int margin;
 			final ViewGroup.MarginLayoutParams parameters;
 
-			if(this.separator) {
+			if(separator) {
 				this.iconView = null;
 				this.textView = null;
 				margin = HomeworkApplication.this.getPixelSize(24.0f);
@@ -183,15 +188,6 @@ public class HomeworkApplication extends AppCompatActivity {
 			this.textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18.0f);
 			linearLayout.addView(this.textView);
 			((ViewGroup) this.itemView).addView(linearLayout);
-		}
-
-		private void setSelected(boolean selected) {
-			if(this.separator) {
-				return;
-			}
-
-			this.itemView.setSelected(selected);
-			this.textView.setEllipsize(selected ? TextUtils.TruncateAt.MARQUEE : TextUtils.TruncateAt.END);
 		}
 	}
 }
