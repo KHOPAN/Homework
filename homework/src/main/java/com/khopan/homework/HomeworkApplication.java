@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -131,6 +132,16 @@ public class HomeworkApplication extends AppCompatActivity {
 			linearLayout.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 			linearLayout.setBackground(HomeworkApplication.this.getDrawable(R.drawable.drawer_ripple));
 			linearLayout.setGravity(Gravity.CENTER_VERTICAL);
+
+			final FrameLayout frameLayout = new FrameLayout(HomeworkApplication.this);
+			frameLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			linearLayout.addView(frameLayout);
+
+			final RelativeLayout relativeLayout = new RelativeLayout(HomeworkApplication.this);
+			final LinearLayout.LayoutParams relativeLayouParameters = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT);
+			relativeLayouParameters.weight = 1.0f;
+			frameLayout.setLayoutParams(relativeLayouParameters);
+			linearLayout.addView(relativeLayout);
 
 			((ViewGroup) this.itemView).addView(linearLayout);
 		}
