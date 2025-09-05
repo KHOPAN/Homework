@@ -40,6 +40,7 @@ public class HomeworkApplication extends AppCompatActivity {
 	private final List<AbstractFragment> drawerItems;
 
 	private DisplayMetrics metrics;
+	private DrawerLayout drawerLayout;
 
 	public HomeworkApplication() {
 		final HomeworkFragment fragmentHomework = new HomeworkFragment();
@@ -55,50 +56,69 @@ public class HomeworkApplication extends AppCompatActivity {
 		this.drawerItems.add(fragmentSettings);
 		this.drawerItems.add(null);
 		this.drawerItems.add(fragmentTest);
-		this.drawerItems.add(null);
-	}
 
-	@Override
-	public void onCreate(@Nullable final Bundle bundle) {
-		super.onCreate(bundle);
-		this.metrics = this.getResources().getDisplayMetrics();
-		final DrawerLayout drawerLayout = new DrawerLayout(this, null);
-		drawerLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		drawerLayout.setDrawerButtonIcon(this.getDrawable(R.drawable.ic_oui_info_outline));
-		drawerLayout.setDrawerButtonOnClickListener(null);
-		drawerLayout.setExpandable(false);
-		drawerLayout.setExpanded(false);
-		drawerLayout.setTitle("Homework");
-
-		final FrameLayout frameLayout = new FrameLayout(this);
-		frameLayout.setId(ViewGroup.generateViewId());
-		drawerLayout.addView(frameLayout, -1, new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 0));
-
-		final RecyclerView recyclerView = new RecyclerView(this);
-		recyclerView.setAdapter(new Adapter());
-		recyclerView.setHasFixedSize(true);
-		//recyclerView.setHorizontalScrollBarEnabled(false);
-		recyclerView.setLayoutManager(new LinearLayoutManager(this));
-		//recyclerView.setVerticalScrollBarEnabled(true);
-		drawerLayout.addView(recyclerView, -1, new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 5));
-
-		this.setContentView(drawerLayout);
-
-		final FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
-		this.fragments.forEach(fragment -> transaction.add(frameLayout.getId(), fragment));
-		transaction.commitNow();
+		for(int i = 0; i < 50; i++) {
+			this.drawerItems.add(null);
+			this.drawerItems.add(fragmentHomework);
+		}
 	}
 
 	private int getPixelSize(float size) {
 		return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, size, this.metrics));
 	}
 
+	@Override
+	public void onCreate(@Nullable final Bundle bundle) {
+		super.onCreate(bundle);
+		this.metrics = this.getResources().getDisplayMetrics();
+		this.drawerLayout = new DrawerLayout(this, null);
+		this.drawerLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		this.drawerLayout.setDrawerButtonIcon(this.getDrawable(R.drawable.ic_oui_info_outline));
+		this.drawerLayout.setDrawerButtonOnClickListener(null); // TODO: Starts a new about activity
+		this.drawerLayout.setExpandable(false);
+		this.drawerLayout.setExpanded(false);
+		final FrameLayout frameLayout = new FrameLayout(this);
+		frameLayout.setLayoutParams(new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 0));
+		final int identifier = ViewGroup.generateViewId();
+		frameLayout.setId(identifier);
+		this.drawerLayout.addView(frameLayout);
+		final RecyclerView recyclerView = new RecyclerView(this);
+		recyclerView.setLayoutParams(new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 5));
+		recyclerView.setAdapter(new Adapter());
+		recyclerView.setClipToPadding(false);
+		recyclerView.setHasFixedSize(true);
+		recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+		recyclerView.setPadding(0, 0, 0, this.getPixelSize(200.0f));
+		this.drawerLayout.addView(recyclerView);
+		this.setContentView(this.drawerLayout);
+		final FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
+		this.fragments.forEach(fragment -> transaction.add(identifier, fragment));
+		this.selectFragment(transaction, 0).commitNow();
+	}
+
+	private FragmentTransaction selectFragment(final FragmentTransaction transaction, final int index) {
+		this.fragments.forEach(transaction::hide);
+		final AbstractFragment fragment = this.drawerItems.get(index);
+		transaction.show(fragment);
+		this.drawerLayout.setTitle(this.getString(fragment.name));
+		return transaction;
+	}
+
 	private class Adapter extends RecyclerView.Adapter<ViewHolder> {
 		private int selectedItem;
+
+		private Adapter() {
+			this.setHasStableIds(true);
+		}
 
 		@Override
 		public int getItemCount() {
 			return HomeworkApplication.this.drawerItems.size();
+		}
+
+		@Override
+		public long getItemId(final int position) {
+			return position;
 		}
 
 		@Override
@@ -114,13 +134,23 @@ public class HomeworkApplication extends AppCompatActivity {
 
 			final boolean selected = this.selectedItem == position;
 			final AbstractFragment fragment = HomeworkApplication.this.drawerItems.get(position);
-			holder.iconView.setImageResource(fragment.getIcon());
+			holder.iconView.setImageResource(fragment.icon);
 			holder.textView.setEllipsize(selected ? TextUtils.TruncateAt.MARQUEE : TextUtils.TruncateAt.END);
-			holder.textView.setText(fragment.getName());
+			holder.textView.setText(HomeworkApplication.this.getString(fragment.name));
 			holder.textView.setTypeface(selected ? HomeworkApplication.TYPEFACE_SELECTED : HomeworkApplication.TYPEFACE_NORMAL);
 			holder.itemView.setOnClickListener(view -> {
-				this.selectedItem = holder.getBindingAdapterPosition();
-				this.notifyItemRangeChanged(0, this.getItemCount());
+				final int selectedItem = holder.getBindingAdapterPosition();
+
+				if(this.selectedItem == selectedItem) {
+					HomeworkApplication.this.drawerLayout.setDrawerOpen(false, true);
+					return;
+				}
+
+				this.notifyItemChanged(this.selectedItem);
+				this.selectedItem = selectedItem;
+				this.notifyItemChanged(selectedItem);
+				HomeworkApplication.this.selectFragment(HomeworkApplication.this.getSupportFragmentManager().beginTransaction(), position).commit();
+				HomeworkApplication.this.drawerLayout.setDrawerOpen(false, true);
 			});
 
 			holder.itemView.setSelected(selected);
