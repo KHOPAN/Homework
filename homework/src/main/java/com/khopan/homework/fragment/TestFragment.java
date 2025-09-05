@@ -20,11 +20,11 @@ public class TestFragment extends AbstractFragment {
 
 	@Override
 	public int getIcon() {
-		return R.drawable.ic_oui_ratio_portrait_on;
+		return R.drawable.ic_oui_add_pdf;
 	}
 
 	@Override
 	public String getName() {
-		return "Settings";
+		return "Testing";
 	}
 }

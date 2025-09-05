@@ -1,6 +1,5 @@
 package com.khopan.homework;
 
-import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -23,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.khopan.homework.fragment.HomeworkFragment;
+import com.khopan.homework.fragment.SettingsFragment;
 import com.khopan.homework.fragment.TestFragment;
 import com.sec.sesl.khopan.homework.R;
 
@@ -39,27 +39,29 @@ public class HomeworkApplication extends AppCompatActivity {
 	private final List<AbstractFragment> fragments;
 	private final List<AbstractFragment> drawerItems;
 
-	private Resources resources;
 	private DisplayMetrics metrics;
 
 	public HomeworkApplication() {
+		final HomeworkFragment fragmentHomework = new HomeworkFragment();
+		final SettingsFragment fragmentSettings = new SettingsFragment();
+		final TestFragment fragmentTest = new TestFragment();
 		this.fragments = new ArrayList<>();
-		this.fragments.add(new HomeworkFragment());
-		this.fragments.add(new TestFragment());
+		this.fragments.add(fragmentHomework);
+		this.fragments.add(fragmentSettings);
+		this.fragments.add(fragmentTest);
 		this.drawerItems = new ArrayList<>();
-		this.drawerItems.add(this.fragments.get(0));
-		this.drawerItems.add(this.fragments.get(1));
+		this.drawerItems.add(fragmentHomework);
 		this.drawerItems.add(null);
-		this.drawerItems.add(this.fragments.get(1));
+		this.drawerItems.add(fragmentSettings);
 		this.drawerItems.add(null);
+		this.drawerItems.add(fragmentTest);
 		this.drawerItems.add(null);
 	}
 
 	@Override
 	public void onCreate(@Nullable final Bundle bundle) {
 		super.onCreate(bundle);
-		this.resources = this.getResources();
-		this.metrics = this.resources.getDisplayMetrics();
+		this.metrics = this.getResources().getDisplayMetrics();
 		final DrawerLayout drawerLayout = new DrawerLayout(this, null);
 		drawerLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		drawerLayout.setDrawerButtonIcon(this.getDrawable(R.drawable.ic_oui_info_outline));
