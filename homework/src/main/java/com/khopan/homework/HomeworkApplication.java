@@ -23,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.khopan.homework.fragment.HomeworkFragment;
 import com.khopan.homework.fragment.SettingsFragment;
-import com.khopan.homework.fragment.TestFragment;
 import com.sec.sesl.khopan.homework.R;
 
 import java.util.ArrayList;
@@ -45,17 +44,13 @@ public class HomeworkApplication extends AppCompatActivity {
 	public HomeworkApplication() {
 		final HomeworkFragment fragmentHomework = new HomeworkFragment();
 		final SettingsFragment fragmentSettings = new SettingsFragment();
-		final TestFragment fragmentTest = new TestFragment();
 		this.fragments = new ArrayList<>();
 		this.fragments.add(fragmentHomework);
 		this.fragments.add(fragmentSettings);
-		this.fragments.add(fragmentTest);
 		this.drawerItems = new ArrayList<>();
 		this.drawerItems.add(fragmentHomework);
 		this.drawerItems.add(null);
 		this.drawerItems.add(fragmentSettings);
-		this.drawerItems.add(null);
-		this.drawerItems.add(fragmentTest);
 
 		for(int i = 0; i < 50; i++) {
 			this.drawerItems.add(null);
