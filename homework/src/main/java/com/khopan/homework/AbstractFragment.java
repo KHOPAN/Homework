@@ -5,10 +5,10 @@ import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 
 public abstract class AbstractFragment extends Fragment {
-	protected final @DrawableRes int icon;
-	protected final @StringRes int name;
+	protected @DrawableRes final int icon;
+	protected @StringRes final int name;
 
-	public AbstractFragment(final @DrawableRes int icon, final @StringRes int name) {
+	public AbstractFragment(@DrawableRes final int icon, @StringRes final int name) {
 		this.icon = icon;
 		this.name = name;
 	}

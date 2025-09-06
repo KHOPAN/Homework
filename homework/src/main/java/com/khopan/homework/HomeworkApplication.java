@@ -63,7 +63,7 @@ public class HomeworkApplication extends AppCompatActivity {
 		}
 	}
 
-	private int getPixelSize(float size) {
+	private int getPixelSize(final float size) {
 		return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, size, this.metrics));
 	}
 
@@ -79,7 +79,7 @@ public class HomeworkApplication extends AppCompatActivity {
 		this.drawerLayout.setExpanded(false);
 		final FrameLayout frameLayout = new FrameLayout(this);
 		frameLayout.setLayoutParams(new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 0));
-		final int identifier = ViewGroup.generateViewId();
+		final int identifier = View.generateViewId();
 		frameLayout.setId(identifier);
 		this.drawerLayout.addView(frameLayout);
 		final RecyclerView recyclerView = new RecyclerView(this);
