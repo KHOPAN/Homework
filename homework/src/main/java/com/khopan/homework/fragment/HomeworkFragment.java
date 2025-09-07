@@ -94,6 +94,150 @@ public class HomeworkFragment extends AbstractFragment {
 			}
 		}
 
+		/*@Override
+		public boolean onInterceptTouchEvent(MotionEvent event) {
+			if(((event.getAction() == MotionEvent.ACTION_MOVE) && this.dragging) || super.onInterceptTouchEvent(event)) {
+				return true;
+			}
+
+			switch(event.getActionMasked()) {
+			case MotionEvent.ACTION_MOVE: {
+				final int activePointerId = this.activePointer;
+
+				if(activePointerId == MotionEvent.INVALID_POINTER_ID) {
+					break;
+				}
+
+				final int pointerIndex = event.findPointerIndex(activePointerId);
+
+				if(pointerIndex == -1) {
+					break;
+				}
+
+				final int y = (int) event.getY(pointerIndex);
+				final int yDiff = Math.abs(y - this.lastY);
+
+				if (yDiff > mTouchSlop && (getNestedScrollAxes() & SCROLL_AXIS_VERTICAL) == 0) {
+					mIsBeingDragged = true;
+					mLastMotionY = y;
+					initVelocityTrackerIfNotExists();
+					mVelocityTracker.addMovement(ev);
+					mNestedYOffset = 0;
+					if (mScrollStrictSpan == null) {
+						mScrollStrictSpan = StrictMode.enterCriticalSpan("ScrollView-scroll");
+					}
+					final ViewParent parent = getParent();
+					if (parent != null) {
+						parent.requestDisallowInterceptTouchEvent(true);
+					}
+				}
+
+				break;
+			}
+			case MotionEvent.ACTION_DOWN: {
+				final int y = (int) ev.getY();
+
+				if(!inChild((int) ev.getX(), (int) y)) {
+					mIsBeingDragged = false;
+					recycleVelocityTracker();
+					break;
+				}
+
+				mLastMotionY = y;
+				mActivePointerId = ev.getPointerId(0);
+				initOrResetVelocityTracker();
+				mVelocityTracker.addMovement(ev);
+				mScroller.computeScrollOffset();
+				mIsBeingDragged = !mScroller.isFinished() || !mEdgeGlowBottom.isFinished()
+						|| !mEdgeGlowTop.isFinished();
+
+				if(!mEdgeGlowTop.isFinished()) {
+					mEdgeGlowTop.onPullDistance(0f, ev.getX() / getWidth());
+				}
+
+				if(!mEdgeGlowBottom.isFinished()) {
+					mEdgeGlowBottom.onPullDistance(0f, 1f - ev.getX() / getWidth());
+				}
+
+				if(mIsBeingDragged && mScrollStrictSpan == null) {
+					mScrollStrictSpan = StrictMode.enterCriticalSpan("ScrollView-scroll");
+				}
+
+				startNestedScroll(SCROLL_AXIS_VERTICAL);
+				break;
+			}
+			case MotionEvent.ACTION_CANCEL:
+			case MotionEvent.ACTION_UP:
+				this.dragging = false;
+				this.activePointer = MotionEvent.INVALID_POINTER_ID;
+				recycleVelocityTracker();
+
+				if(this.scroller.springBack(mScrollX, mScrollY, 0, 0, 0, getScrollRange())) {
+					postInvalidateOnAnimation();
+				}
+
+				stopNestedScroll();
+				break;
+			case MotionEvent.ACTION_POINTER_UP:
+				onSecondaryPointerUp(ev);
+				break;
+			}
+
+			return this.dragging;
+		}*/
+
+		@Override
+		public boolean onInterceptTouchEvent(MotionEvent event) {
+			if(((event.getAction() == MotionEvent.ACTION_MOVE) && this.dragging) || super.onInterceptTouchEvent(event)) {
+				return true;
+			}
+
+			switch(event.getActionMasked()) {
+			case MotionEvent.ACTION_CANCEL:
+			case MotionEvent.ACTION_UP:
+				this.activePointer = MotionEvent.INVALID_POINTER_ID;
+				this.dragging = false;
+				break;
+			case MotionEvent.ACTION_DOWN:
+				this.lastY = event.getY();
+				this.activePointer = event.getPointerId(0);
+				//this.scroller.computeScrollOffset();
+				this.dragging = !this.scroller.isFinished();
+				break;
+			case MotionEvent.ACTION_MOVE: {
+				if(this.activePointer == MotionEvent.INVALID_POINTER_ID) {
+					break;
+				}
+
+				final int pointerIndex = event.findPointerIndex(this.activePointer);
+
+				if(pointerIndex == -1) {
+					break;
+				}
+
+				final double y = event.getY(pointerIndex);
+
+				if(Math.abs(y - this.lastY) > this.touchSlop && (this.getNestedScrollAxes() & SCROLL_AXIS_VERTICAL) == 0) {
+					this.lastY = y;
+					this.dragging = true;
+				}
+
+				break;
+			}
+			case MotionEvent.ACTION_POINTER_UP: {
+				final int pointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+
+				if(this.activePointer == event.getPointerId(pointerIndex)) {
+					this.activePointer = event.getPointerId(pointerIndex == 0 ? 1 : 0);
+				}
+
+				break;
+			}
+			}
+
+			return this.dragging;
+		}
+
 		@Override
 		protected void onLayout(final boolean changed, final int left, final int top, final int right, final int bottom) {
 			final int width = this.getWidth();
