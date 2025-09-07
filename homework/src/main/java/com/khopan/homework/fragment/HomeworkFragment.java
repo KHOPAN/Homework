@@ -1,40 +1,24 @@
 package com.khopan.homework.fragment;
 
-import static androidx.customview.widget.ViewDragHelper.INVALID_POINTER;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.StrictMode;
-import android.util.Log;
-import android.view.GestureDetector;
-import android.view.Gravity;
-import android.view.InputDevice;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.ViewParent;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.OverScroller;
-import android.widget.ScrollView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.customview.widget.ViewDragHelper;
 
 import com.khopan.homework.AbstractFragment;
 import com.sec.sesl.khopan.homework.R;
 
 import java.util.Locale;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class HomeworkFragment extends AbstractFragment {
 	public HomeworkFragment() {
