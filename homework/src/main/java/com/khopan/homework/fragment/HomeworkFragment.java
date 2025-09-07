@@ -14,6 +14,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.khopan.homework.AbstractFragment;
 import com.sec.sesl.khopan.homework.R;
@@ -41,12 +43,18 @@ public class HomeworkFragment extends AbstractFragment {
 		textView.setText("Title - Stub");
 		linearLayout.addView(textView);
 		linearLayout.addView(new HomeworkLayout(context));
+
+		/*final ViewPager2 pager = new ViewPager2(context);
+		pager.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		pager.setAdapter(new CalendarAdapter(context));
+		linearLayout.addView(pager);*/
+
 		return linearLayout;
 	}
 
 	private static class HomeworkLayout extends ViewGroup {
 		private final OverScroller scroller;
-		private final View topView;
+		private final ViewPager2 topView;
 		private final View bottomView;
 		private final double touchSlop;
 
@@ -64,11 +72,15 @@ public class HomeworkFragment extends AbstractFragment {
 			super(context);
 			this.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 			this.scroller = new OverScroller(context);
-			this.addView(this.topView = new MonthView(context));
+			this.topView = new ViewPager2(context);
+			//this.topView.setLayoutParams(new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+			this.topView.setAdapter(new CalendarAdapter(context));
+			//this.addView(this.topView = new MonthView(context));
+			this.addView(this.topView);
 			this.bottomView = new View(context);
 			this.bottomView.setBackgroundColor(0xFF0000FF);
 			this.addView(this.bottomView);
-			this.touchSlop = ((double) ViewConfiguration.get(context).getScaledTouchSlop());
+			this.touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 			this.divider = -1.0d;
 			this.position = Position.SPLIT;
 		}
@@ -99,6 +111,13 @@ public class HomeworkFragment extends AbstractFragment {
 			this.bottomView.layout(0, divider, width, height);
 		}
 
+		@Override
+		protected void onMeasure(int widthMeasure, int heightMeasure) {
+			this.setMeasuredDimension(MeasureSpec.getSize(widthMeasure), MeasureSpec.getSize(heightMeasure));
+			this.topView.measure(widthMeasure, heightMeasure);
+			this.bottomView.measure(widthMeasure, heightMeasure);
+		}
+
 		@SuppressLint("ClickableViewAccessibility")
 		@Override
 		public boolean onTouchEvent(MotionEvent event) {
@@ -109,12 +128,12 @@ public class HomeworkFragment extends AbstractFragment {
 					this.dragging = false;
 				}
 
-				break;
+				return true;
 			case MotionEvent.ACTION_DOWN:
 				this.lastY = event.getY();
 				this.lastDivider = this.divider;
 				this.activePointer = event.getPointerId(0);
-				break;
+				return true;
 			case MotionEvent.ACTION_MOVE: {
 				final int pointerIndex = event.findPointerIndex(this.activePointer);
 
@@ -135,11 +154,11 @@ public class HomeworkFragment extends AbstractFragment {
 					this.requestLayout();
 				}
 
-				break;
+				return true;
 			}
 			case MotionEvent.ACTION_POINTER_DOWN:
 				this.activePointer = event.getPointerId(event.getActionIndex());
-				break;
+				return true;
 			case MotionEvent.ACTION_POINTER_UP: {
 				final int pointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
 
@@ -147,7 +166,7 @@ public class HomeworkFragment extends AbstractFragment {
 					this.activePointer = event.getPointerId(pointerIndex == 0 ? 1 : 0);
 				}
 
-				break;
+				return true;
 			}
 			case MotionEvent.ACTION_UP: {
 				if(!this.dragging) {
@@ -179,11 +198,11 @@ public class HomeworkFragment extends AbstractFragment {
 				this.activePointer = MotionEvent.INVALID_POINTER_ID;
 				this.dragging = false;
 				this.postInvalidateOnAnimation();
-				break;
+				return true;
 			}
 			}
 
-			return true;
+			return super.onTouchEvent(event);
 		}
 
 		private enum Position {
@@ -207,7 +226,7 @@ public class HomeworkFragment extends AbstractFragment {
 
 		@Override
 		protected void onLayout(final boolean changed, final int left, final int top, final int right, final int bottom) {
-			// 2 -> 0
+			/*// 2 -> 0
 			// 10 -> height
 			final double width = ((double) this.getWidth()) / 7.0d;
 			//final double height = ((double) this.getHeight()) / 6.0d;
@@ -219,7 +238,47 @@ public class HomeworkFragment extends AbstractFragment {
 				int x = i % 7;
 				int y = i / 7;
 				view.layout((int) Math.round(width * ((double) x)), (int) Math.round(height * ((double) y)) + translationX, (int) Math.round(width * ((double) (x + 1))), (int) Math.round(height * ((double) (y + 1))) + translationX);
+			}*/
+
+			final double width = ((double) this.getWidth()) / 7.0d;
+			final double height = ((double) this.getHeight()) / 6.0d;
+
+			for(int y = 0; y < 6; y++) {
+				for(int x = 0; x < 7; x++) {
+					this.getChildAt(y * 7 + x).layout((int) Math.round(width * ((double) x)), (int) Math.round(height * ((double) y)), (int) Math.round(width * ((double) (x + 1))), (int) Math.round(height * ((double) (y + 1))));
+				}
 			}
+		}
+	}
+
+	private static class CalendarAdapter extends RecyclerView.Adapter<DayHolder> {
+		private final Context context;
+
+		private CalendarAdapter(@NonNull final Context context) {
+			this.context = context;
+		}
+
+		@NonNull
+		@Override
+		public DayHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
+			return new DayHolder(new MonthView(this.context));
+		}
+
+		@Override
+		public void onBindViewHolder(@NonNull final DayHolder holder, final int position) {
+
+		}
+
+		@Override
+		public int getItemCount() {
+			return Integer.MAX_VALUE;
+		}
+	}
+
+	private static class DayHolder extends RecyclerView.ViewHolder {
+		public DayHolder(@NonNull final View view) {
+			super(view);
+			view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		}
 	}
 }
