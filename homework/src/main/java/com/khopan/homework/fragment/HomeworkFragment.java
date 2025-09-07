@@ -186,6 +186,8 @@ public class HomeworkFragment extends AbstractFragment {
 			return this.dragging;
 		}*/
 
+		private double lastMotionY;
+
 		@Override
 		public boolean onInterceptTouchEvent(MotionEvent event) {
 			if(((event.getAction() == MotionEvent.ACTION_MOVE) && this.dragging) || super.onInterceptTouchEvent(event)) {
@@ -199,7 +201,7 @@ public class HomeworkFragment extends AbstractFragment {
 				this.dragging = false;
 				break;
 			case MotionEvent.ACTION_DOWN:
-				this.lastY = event.getY();
+				this.lastMotionY = event.getY();
 				this.activePointer = event.getPointerId(0);
 				//this.scroller.computeScrollOffset();
 				this.dragging = !this.scroller.isFinished();
@@ -217,8 +219,8 @@ public class HomeworkFragment extends AbstractFragment {
 
 				final double y = event.getY(pointerIndex);
 
-				if(Math.abs(y - this.lastY) > this.touchSlop && (this.getNestedScrollAxes() & SCROLL_AXIS_VERTICAL) == 0) {
-					this.lastY = y;
+				if(Math.abs(y - this.lastMotionY) > this.touchSlop && (this.getNestedScrollAxes() & SCROLL_AXIS_VERTICAL) == 0) {
+					this.lastMotionY = y;
 					this.dragging = true;
 				}
 
