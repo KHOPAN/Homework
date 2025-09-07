@@ -288,11 +288,19 @@ public class HomeworkFragment extends AbstractFragment {
 			}*/
 
 				final double width = ((double) this.getWidth()) / 7.0d;
-				final double height = Math.max(this.getHeight(), HomeworkLayout.this.positionSplit) / 6.0d;
+				final double height = Math.max(this.getHeight(), HomeworkLayout.this.positionSplit) / 5.0d;
+				final double factor = (1.0d - (this.getHeight() - HomeworkLayout.this.positionWeek) / (HomeworkLayout.this.positionSplit - HomeworkLayout.this.positionWeek));
+				final int offset;
 
-				for(int y = 0; y < 6; y++) {
+				if(this.getHeight() < HomeworkLayout.this.positionSplit) {
+					offset = -(int) Math.round(height * factor);
+				} else {
+					offset = 0;
+				}
+
+				for(int y = 0; y < 5; y++) {
 					for(int x = 0; x < 7; x++) {
-						this.getChildAt(y * 7 + x).layout((int) Math.round(width * ((double) x)), (int) Math.round(height * ((double) y)), (int) Math.round(width * ((double) (x + 1))), (int) Math.round(height * ((double) (y + 1))));
+						this.getChildAt(y * 7 + x).layout((int) Math.round(width * ((double) x)), (int) Math.round(height * ((double) y)) + offset, (int) Math.round(width * ((double) (x + 1))), (int) Math.round(height * ((double) (y + 1))) + offset);
 					}
 				}
 			}
