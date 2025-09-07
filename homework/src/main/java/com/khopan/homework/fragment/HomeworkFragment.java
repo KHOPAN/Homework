@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.customview.widget.ViewDragHelper;
 
 import com.khopan.homework.AbstractFragment;
 import com.sec.sesl.khopan.homework.R;
@@ -60,10 +61,15 @@ public class HomeworkFragment extends AbstractFragment {
 
 	private static class HomeworkLayout extends ViewGroup {
 		private final Context context;
+		private final double coefficient;
+		private final double deacceleration;
 		private final OverScroller scroller;
-		private final GestureDetector detector;
 		private final View topView;
 		private final View bottomView;
+		private final int touchSlop;
+		private int minimum;
+		private int maximum;
+		private int middle;
 
 		private int divider;
 		private VelocityTracker velocityTracker;
@@ -71,21 +77,13 @@ public class HomeworkFragment extends AbstractFragment {
 		private HomeworkLayout(@NonNull final Context context) {
 			super(context);
 			final ViewConfiguration configuration = ViewConfiguration.get(context);
+			this.touchSlop = configuration.getScaledTouchSlop();
 			this.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 			this.context = context;
+			this.coefficient = ViewConfiguration.getScrollFriction() * this.context.getResources().getDisplayMetrics().density * SensorManager.GRAVITY_EARTH * 5291.328d;
+			this.deacceleration = Math.log(0.78d) / Math.log(0.9d) / (Math.log(0.78d) / Math.log(0.9d) - 1.0d);
 			this.scroller = new OverScroller(this.context);
-			this.detector = new GestureDetector(this.context, new GestureDetector.SimpleOnGestureListener() {
-				/*@Override
-				public boolean onScroll(MotionEvent downEvent, MotionEvent moveEvent, float distanceX, float distanceY) {
-					HomeworkLayout.this.divider -= Math.round(distanceY);
-					HomeworkLayout.this.requestLayout();
-					return true;
-				}*/
-			});
-
-			this.topView = new MonthView(this.context);//new View(this.context);
-			//this.topView.setBackgroundColor(0xFFFF0000);
-			this.addView(this.topView);
+			this.addView(this.topView = new MonthView(this.context));
 			this.bottomView = new View(this.context);
 			this.bottomView.setBackgroundColor(0xFF0000FF);
 			this.addView(this.bottomView);
@@ -98,11 +96,15 @@ public class HomeworkFragment extends AbstractFragment {
 			final int height = this.getHeight();
 			this.topView.layout(0, 0, width, this.divider);
 			this.bottomView.layout(0, this.divider, width, height);
+			this.minimum = 100;
+			this.maximum = height;
+			this.middle = height / 2;
 		}
 
 		private int lastY;
 		private int lastDivider;
 		private boolean dragging;
+		private int activePointer;
 
 		@Override
 		public boolean onTouchEvent(MotionEvent event) {
@@ -111,53 +113,94 @@ public class HomeworkFragment extends AbstractFragment {
 			}
 
 			switch(event.getActionMasked()) {
+			case MotionEvent.ACTION_CANCEL:
+				if(this.dragging) {
+					this.activePointer = MotionEvent.INVALID_POINTER_ID;
+					this.dragging = false;
+					this.velocityTracker.recycle();
+					this.velocityTracker = null;
+				}
+
+				break;
 			case MotionEvent.ACTION_DOWN:
 				if(!this.scroller.isFinished()) {
 					this.scroller.abortAnimation();
 				}
 
-				this.lastY = Math.round(event.getY());
+				this.activePointer = event.getPointerId(0);
 				this.lastDivider = this.divider;
+				this.lastY = Math.round(event.getY());
 				break;
-			case MotionEvent.ACTION_MOVE:
-				final int y = Math.round(event.getY());
-				int deltaY = this.lastY - y;
+			case MotionEvent.ACTION_MOVE: {
+				final int activePointerIndex = event.findPointerIndex(this.activePointer);
 
-				if(!this.dragging && Math.abs(deltaY) > ViewConfiguration.get(this.context).getScaledTouchSlop()) {
-					this.dragging = true;
-					deltaY += ViewConfiguration.get(this.context).getScaledTouchSlop() * (deltaY > 0 ? -1 : 1);
-				}
-
-				if(!this.dragging) {
+				if(activePointerIndex == -1) {
 					break;
 				}
 
-				this.divider = this.lastDivider - deltaY;
-				this.requestLayout();
+				final int y = Math.round(event.getY(activePointerIndex));
+				int deltaY = this.lastY - y;
+
+				if(!this.dragging && Math.abs(deltaY) > this.touchSlop) {
+					this.dragging = true;
+					deltaY -= Math.round(ViewConfiguration.get(this.context).getScaledTouchSlop() * Math.signum(deltaY));
+				}
+
+				if(this.dragging) {
+					this.divider = Math.min(Math.max(this.lastDivider - deltaY, this.minimum), this.maximum);
+					this.requestLayout();
+				}
+
 				break;
-			case MotionEvent.ACTION_UP:
+			}
+			case MotionEvent.ACTION_POINTER_DOWN:
+				this.activePointer = event.getPointerId(event.getActionIndex());
+				break;
+			case MotionEvent.ACTION_POINTER_UP: {
+				final int pointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+				final int pointer = event.getPointerId(pointerIndex);
+
+				if(this.activePointer != pointer) {
+					break;
+				}
+
+				this.activePointer = event.getPointerId(pointerIndex == 0 ? 1 : 0);
+
+				if(this.velocityTracker != null) {
+					this.velocityTracker.clear();
+				}
+
+				break;
+			}
+			case MotionEvent.ACTION_UP: {
 				if(!this.dragging || this.velocityTracker == null) {
 					break;
 				}
 
-				final int height = this.getHeight();
 				this.velocityTracker.computeCurrentVelocity(1000);
+				final double velocity = this.velocityTracker.getYVelocity(this.activePointer) / 10.0d;
+				final double finalDivider = Math.exp(Math.log(Math.abs(velocity) / this.coefficient * 0.35d) * this.deacceleration) * this.coefficient * Math.signum(velocity) + ((double) this.divider);
 
-				if(this.divider + calculateY(Math.round(this.velocityTracker.getYVelocity())) < height / 2) {
-					this.scroller.startScroll(0, this.divider, 0, -this.divider);
-				} else {
-					this.scroller.startScroll(0, this.divider, 0, height - this.divider);
+				final double distanceMinimum = Math.abs(this.minimum - finalDivider);
+				final double distanceMiddle = Math.abs(this.middle - finalDivider);
+				final double distanceMaximum = Math.abs(this.maximum - finalDivider);
+				final double nearest = Math.min(Math.min(distanceMinimum, distanceMiddle), distanceMaximum);
+
+				if(nearest == distanceMinimum) {
+					this.scroller.startScroll(0, this.divider, 0, this.minimum - this.divider);
+				} else if(nearest == distanceMiddle) {
+					this.scroller.startScroll(0, this.divider, 0, this.middle - this.divider);
+				} else if(nearest == distanceMaximum) {
+					this.scroller.startScroll(0, this.divider, 0, this.maximum - this.divider);
 				}
 
-				//this.velocityTracker.computeCurrentVelocity(1000);
-				//this.scroller.fling(0, this.divider, 0, Math.round(this.velocityTracker.getYVelocity()), 0, 0, 100, 10000);
-				//final int change = 700 - this.divider;
-				//Log.i("Test", "Velocity: " + this.velocityTracker.getYVelocity() + " Change: " + change);
-				//Log.i("Homework", "Predicted: " + this.predictFinalY(this.divider, this.velocityTracker.getYVelocity()));
-				//Log.i("Homework", "Better Prediction: " + (this.divider + this.calculateY(Math.round(this.velocityTracker.getYVelocity()))));
-				//this.scroller.startScroll(0, this.divider, 0, change, (int) Math.round(((double) this.velocityTracker.getYVelocity()) / ((double) change)));
+				this.activePointer = MotionEvent.INVALID_POINTER_ID;
+				this.dragging = false;
+				this.velocityTracker.recycle();
+				this.velocityTracker = null;
 				this.postInvalidateOnAnimation();
 				break;
+			}
 			}
 
 			if(this.velocityTracker != null) {
@@ -170,42 +213,10 @@ public class HomeworkFragment extends AbstractFragment {
 		@Override
 		public void computeScroll() {
 			if(this.scroller.computeScrollOffset()) {
-				this.divider = this.scroller.getCurrY();
-				Log.i("Homework", "Actual: " + this.divider);
+				this.divider = Math.min(Math.max(this.scroller.getCurrY(), this.minimum), this.maximum);
 				this.requestLayout();
 				this.invalidate();
 			}
-		}
-
-		private int predictFinalY(int startY, float velocityY) {
-			// Get default friction used by Scroller
-			final float friction = ViewConfiguration.getScrollFriction();
-			final float physicalCoeff = getContext().getResources().getDisplayMetrics().density
-					* 160.0f * 39.37f * SensorManager.GRAVITY_EARTH;  // ~ 386.0878 * density
-
-			final float deceleration = physicalCoeff * friction;
-
-			// Distance = v^2 / (2 * a)
-			float distance = (velocityY * velocityY) / (2 * deceleration);
-
-			if (velocityY < 0) distance = -distance;
-
-			return startY + Math.round(distance);
-		}
-
-		private int calculateY(final int velocity) {
-			float DECELERATION_RATE = (float) (Math.log(0.78) / Math.log(0.9));
-			float INFLEXION = 0.35f;
-			final float ppi = context.getResources().getDisplayMetrics().density * 160.0f;
-			float mPhysicalCoeff = SensorManager.GRAVITY_EARTH // g (m/s^2)
-					* 39.37f // inch/meter
-					* ppi
-					* 0.84f;
-			float mFlingFriction = ViewConfiguration.getScrollFriction();
-
-			final double l = Math.log(INFLEXION * Math.abs(velocity) / (mFlingFriction * mPhysicalCoeff));
-			final double decelMinusOne = DECELERATION_RATE - 1.0;
-			return (int) Math.round(mFlingFriction * mPhysicalCoeff * Math.exp(DECELERATION_RATE / decelMinusOne * l) * Math.signum(velocity));
 		}
 	}
 
