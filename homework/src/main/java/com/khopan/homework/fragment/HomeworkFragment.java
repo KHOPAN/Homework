@@ -43,12 +43,6 @@ public class HomeworkFragment extends AbstractFragment {
 		textView.setText("Title - Stub");
 		linearLayout.addView(textView);
 		linearLayout.addView(new HomeworkLayout(context));
-
-		/*final ViewPager2 pager = new ViewPager2(context);
-		pager.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		pager.setAdapter(new CalendarAdapter(context));
-		linearLayout.addView(pager);*/
-
 		return linearLayout;
 	}
 
@@ -65,6 +59,7 @@ public class HomeworkFragment extends AbstractFragment {
 		private double positionMonth;
 		private boolean dragging;
 		private int activePointer;
+		private double lastX;
 		private double lastY;
 		private double lastDivider;
 
@@ -73,7 +68,6 @@ public class HomeworkFragment extends AbstractFragment {
 			this.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 			this.scroller = new OverScroller(context);
 			this.topView = new ViewPager2(context);
-			//this.topView.setLayoutParams(new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 			this.topView.setAdapter(new CalendarAdapter(context));
 			//this.addView(this.topView = new MonthView(context));
 			this.addView(this.topView);
@@ -94,150 +88,48 @@ public class HomeworkFragment extends AbstractFragment {
 			}
 		}
 
-		/*@Override
-		public boolean onInterceptTouchEvent(MotionEvent event) {
-			if(((event.getAction() == MotionEvent.ACTION_MOVE) && this.dragging) || super.onInterceptTouchEvent(event)) {
-				return true;
-			}
-
-			switch(event.getActionMasked()) {
-			case MotionEvent.ACTION_MOVE: {
-				final int activePointerId = this.activePointer;
-
-				if(activePointerId == MotionEvent.INVALID_POINTER_ID) {
-					break;
-				}
-
-				final int pointerIndex = event.findPointerIndex(activePointerId);
-
-				if(pointerIndex == -1) {
-					break;
-				}
-
-				final int y = (int) event.getY(pointerIndex);
-				final int yDiff = Math.abs(y - this.lastY);
-
-				if (yDiff > mTouchSlop && (getNestedScrollAxes() & SCROLL_AXIS_VERTICAL) == 0) {
-					mIsBeingDragged = true;
-					mLastMotionY = y;
-					initVelocityTrackerIfNotExists();
-					mVelocityTracker.addMovement(ev);
-					mNestedYOffset = 0;
-					if (mScrollStrictSpan == null) {
-						mScrollStrictSpan = StrictMode.enterCriticalSpan("ScrollView-scroll");
-					}
-					final ViewParent parent = getParent();
-					if (parent != null) {
-						parent.requestDisallowInterceptTouchEvent(true);
-					}
-				}
-
-				break;
-			}
-			case MotionEvent.ACTION_DOWN: {
-				final int y = (int) ev.getY();
-
-				if(!inChild((int) ev.getX(), (int) y)) {
-					mIsBeingDragged = false;
-					recycleVelocityTracker();
-					break;
-				}
-
-				mLastMotionY = y;
-				mActivePointerId = ev.getPointerId(0);
-				initOrResetVelocityTracker();
-				mVelocityTracker.addMovement(ev);
-				mScroller.computeScrollOffset();
-				mIsBeingDragged = !mScroller.isFinished() || !mEdgeGlowBottom.isFinished()
-						|| !mEdgeGlowTop.isFinished();
-
-				if(!mEdgeGlowTop.isFinished()) {
-					mEdgeGlowTop.onPullDistance(0f, ev.getX() / getWidth());
-				}
-
-				if(!mEdgeGlowBottom.isFinished()) {
-					mEdgeGlowBottom.onPullDistance(0f, 1f - ev.getX() / getWidth());
-				}
-
-				if(mIsBeingDragged && mScrollStrictSpan == null) {
-					mScrollStrictSpan = StrictMode.enterCriticalSpan("ScrollView-scroll");
-				}
-
-				startNestedScroll(SCROLL_AXIS_VERTICAL);
-				break;
-			}
-			case MotionEvent.ACTION_CANCEL:
-			case MotionEvent.ACTION_UP:
-				this.dragging = false;
-				this.activePointer = MotionEvent.INVALID_POINTER_ID;
-				recycleVelocityTracker();
-
-				if(this.scroller.springBack(mScrollX, mScrollY, 0, 0, 0, getScrollRange())) {
-					postInvalidateOnAnimation();
-				}
-
-				stopNestedScroll();
-				break;
-			case MotionEvent.ACTION_POINTER_UP:
-				onSecondaryPointerUp(ev);
-				break;
-			}
-
-			return this.dragging;
-		}*/
-
-		private double lastMotionY;
-
 		@Override
 		public boolean onInterceptTouchEvent(MotionEvent event) {
-			if(((event.getAction() == MotionEvent.ACTION_MOVE) && this.dragging) || super.onInterceptTouchEvent(event)) {
-				return true;
-			}
-
 			switch(event.getActionMasked()) {
 			case MotionEvent.ACTION_CANCEL:
 			case MotionEvent.ACTION_UP:
-				this.activePointer = MotionEvent.INVALID_POINTER_ID;
-				this.dragging = false;
-				break;
-			case MotionEvent.ACTION_DOWN:
-				this.lastMotionY = event.getY();
-				this.activePointer = event.getPointerId(0);
-				//this.scroller.computeScrollOffset();
-				this.dragging = !this.scroller.isFinished();
-				break;
-			case MotionEvent.ACTION_MOVE: {
-				if(this.activePointer == MotionEvent.INVALID_POINTER_ID) {
-					break;
+				if(this.dragging) {
+					this.activePointer = MotionEvent.INVALID_POINTER_ID;
+					this.dragging = false;
 				}
 
+				return false;
+			case MotionEvent.ACTION_DOWN:
+				this.lastX = event.getX();
+				this.lastY = event.getY();
+				this.lastDivider = this.divider;
+				this.activePointer = event.getPointerId(0);
+				this.dragging = false;
+				return false;
+			case MotionEvent.ACTION_MOVE: {
 				final int pointerIndex = event.findPointerIndex(this.activePointer);
 
 				if(pointerIndex == -1) {
 					break;
 				}
 
-				final double y = event.getY(pointerIndex);
+				double deltaY = this.lastY - ((double) event.getY(pointerIndex));
 
-				if(Math.abs(y - this.lastMotionY) > this.touchSlop && (this.getNestedScrollAxes() & SCROLL_AXIS_VERTICAL) == 0) {
-					this.lastMotionY = y;
+				if(!this.dragging && Math.abs(deltaY) > Math.abs(this.lastX - ((double) event.getX())) && Math.abs(deltaY) > this.touchSlop) {
 					this.dragging = true;
+					deltaY -= Math.signum(deltaY) * this.touchSlop;
 				}
 
-				break;
-			}
-			case MotionEvent.ACTION_POINTER_UP: {
-				final int pointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-
-				if(this.activePointer == event.getPointerId(pointerIndex)) {
-					this.activePointer = event.getPointerId(pointerIndex == 0 ? 1 : 0);
+				if(this.dragging) {
+					this.divider = this.lastDivider - deltaY;
+					this.requestLayout();
 				}
 
-				break;
+				return this.dragging;
 			}
 			}
 
-			return this.dragging;
+			return super.onInterceptTouchEvent(event);
 		}
 
 		@Override
@@ -276,9 +168,11 @@ public class HomeworkFragment extends AbstractFragment {
 
 				return true;
 			case MotionEvent.ACTION_DOWN:
+				this.lastX = event.getX();
 				this.lastY = event.getY();
 				this.lastDivider = this.divider;
 				this.activePointer = event.getPointerId(0);
+				this.dragging = false;
 				return true;
 			case MotionEvent.ACTION_MOVE: {
 				final int pointerIndex = event.findPointerIndex(this.activePointer);
@@ -287,10 +181,9 @@ public class HomeworkFragment extends AbstractFragment {
 					break;
 				}
 
-				final double y = event.getY(pointerIndex);
-				double deltaY = this.lastY - y;
+				double deltaY = this.lastY - ((double) event.getY(pointerIndex));
 
-				if(!this.dragging && Math.abs(deltaY) > this.touchSlop) {
+				if(!this.dragging && Math.abs(deltaY) > Math.abs(this.lastX - ((double) event.getX())) && Math.abs(deltaY) > this.touchSlop) {
 					this.dragging = true;
 					deltaY -= Math.signum(deltaY) * this.touchSlop;
 				}
@@ -326,7 +219,7 @@ public class HomeworkFragment extends AbstractFragment {
 				}
 
 				final double y = event.getY(pointerIndex);
-				double deltaY = this.lastY - y;
+				final double deltaY = this.lastY - y;
 
 				switch(this.position) {
 				case WEEK:
