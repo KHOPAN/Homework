@@ -2,6 +2,7 @@ package com.khopan.homework.fragment;
 
 import static androidx.customview.widget.ViewDragHelper.INVALID_POINTER;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -60,58 +61,61 @@ public class HomeworkFragment extends AbstractFragment {
 	}
 
 	private static class HomeworkLayout extends ViewGroup {
-		private final Context context;
 		private final OverScroller scroller;
 		private final View topView;
 		private final View bottomView;
-		private final int touchSlop;
+		private final double touchSlop;
 
-		private int divider;
-
-		private int positionWeek;
-		private int positionSplit;
-		private int positionMonth;
+		private double divider;
 		private Position position;
+		private double positionWeek;
+		private double positionSplit;
+		private double positionMonth;
+		private boolean dragging;
+		private int activePointer;
+		private double lastY;
+		private double lastDivider;
 
 		private HomeworkLayout(@NonNull final Context context) {
 			super(context);
-			final ViewConfiguration configuration = ViewConfiguration.get(context);
-			this.touchSlop = configuration.getScaledTouchSlop();
 			this.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-			this.context = context;
-			this.scroller = new OverScroller(this.context);
-			this.addView(this.topView = new MonthView(this.context));
-			this.bottomView = new View(this.context);
+			this.scroller = new OverScroller(context);
+			this.addView(this.topView = new MonthView(context));
+			this.bottomView = new View(context);
 			this.bottomView.setBackgroundColor(0xFF0000FF);
 			this.addView(this.bottomView);
+			this.touchSlop = ((double) ViewConfiguration.get(context).getScaledTouchSlop());
+			this.divider = -1.0d;
 			this.position = Position.SPLIT;
+		}
+
+		@Override
+		public void computeScroll() {
+			if(this.scroller.computeScrollOffset()) {
+				this.divider = Math.min(Math.max(this.scroller.getCurrY(), this.positionWeek), this.positionMonth);
+				this.requestLayout();
+				this.invalidate();
+			}
 		}
 
 		@Override
 		protected void onLayout(final boolean changed, final int left, final int top, final int right, final int bottom) {
 			final int width = this.getWidth();
 			final int height = this.getHeight();
-			this.positionWeek = (int) Math.round(((double) height) / 10.0d);
-			this.positionSplit = (int) Math.round(((double) height) / 2.0d);
+			this.positionWeek = ((double) height) / 10.0d;
+			this.positionSplit = ((double) height) / 2.0d;
 			this.positionMonth = height;
 
-			if(this.divider < this.positionWeek) {
-				this.divider = this.positionWeek;
-				//this.position = Position.WEEK;
-			} else if(this.divider > this.positionMonth) {
-				this.divider = this.positionMonth;
-				//this.position = Position.MONTH;
+			if(this.divider < 0.0d) {
+				this.divider = Position.WEEK.equals(this.position) ? this.positionWeek : Position.MONTH.equals(this.position) ? this.positionMonth : this.positionSplit;
 			}
 
-			this.topView.layout(0, 0, width, this.divider);
-			this.bottomView.layout(0, this.divider, width, height);
+			final int divider = (int) Math.round(this.divider = Math.min(Math.max(this.divider, this.positionWeek), this.positionMonth));
+			this.topView.layout(0, 0, width, divider);
+			this.bottomView.layout(0, divider, width, height);
 		}
 
-		private int lastY;
-		private int lastDivider;
-		private boolean dragging;
-		private int activePointer;
-
+		@SuppressLint("ClickableViewAccessibility")
 		@Override
 		public boolean onTouchEvent(MotionEvent event) {
 			switch(event.getActionMasked()) {
@@ -123,27 +127,23 @@ public class HomeworkFragment extends AbstractFragment {
 
 				break;
 			case MotionEvent.ACTION_DOWN:
-				if(!this.scroller.isFinished()) {
-					this.scroller.abortAnimation();
-				}
-
-				this.activePointer = event.getPointerId(0);
+				this.lastY = event.getY();
 				this.lastDivider = this.divider;
-				this.lastY = Math.round(event.getY());
+				this.activePointer = event.getPointerId(0);
 				break;
 			case MotionEvent.ACTION_MOVE: {
-				final int activePointerIndex = event.findPointerIndex(this.activePointer);
+				final int pointerIndex = event.findPointerIndex(this.activePointer);
 
-				if(activePointerIndex == -1) {
+				if(pointerIndex == -1) {
 					break;
 				}
 
-				final int y = Math.round(event.getY(activePointerIndex));
-				int deltaY = this.lastY - y;
+				final double y = event.getY(pointerIndex);
+				double deltaY = this.lastY - y;
 
 				if(!this.dragging && Math.abs(deltaY) > this.touchSlop) {
 					this.dragging = true;
-					deltaY -= Math.round(ViewConfiguration.get(this.context).getScaledTouchSlop() * Math.signum(deltaY));
+					deltaY -= Math.signum(deltaY) * this.touchSlop;
 				}
 
 				if(this.dragging) {
@@ -158,70 +158,40 @@ public class HomeworkFragment extends AbstractFragment {
 				break;
 			case MotionEvent.ACTION_POINTER_UP: {
 				final int pointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-				final int pointer = event.getPointerId(pointerIndex);
 
-				if(this.activePointer != pointer) {
-					break;
+				if(this.activePointer == event.getPointerId(pointerIndex)) {
+					this.activePointer = event.getPointerId(pointerIndex == 0 ? 1 : 0);
 				}
 
-				this.activePointer = event.getPointerId(pointerIndex == 0 ? 1 : 0);
 				break;
 			}
 			case MotionEvent.ACTION_UP: {
 				if(!this.dragging) {
 					break;
 				}
-				final int activePointerIndex = event.findPointerIndex(this.activePointer);
 
-				if(activePointerIndex == -1) {
+				final int pointerIndex = event.findPointerIndex(this.activePointer);
+
+				if(pointerIndex == -1) {
 					break;
 				}
-				final int y = Math.round(event.getY(activePointerIndex));
-				int deltaY = this.lastY - y;
-				if(deltaY > 0) {
-					switch(this.position) {
-					case SPLIT:
-						this.position = Position.WEEK;
-						break;
-					case MONTH:
-						this.position = Position.SPLIT;
-						break;
-					}
-				} else {
-					switch(this.position) {
-					case WEEK:
-						this.position = Position.SPLIT;
-						break;
-					case SPLIT:
-						this.position = Position.MONTH;
-						break;
-					}
-				}
 
-				final int target;
+				final double y = event.getY(pointerIndex);
+				double deltaY = this.lastY - y;
 
 				switch(this.position) {
 				case WEEK:
-					target = this.positionWeek;
+					this.position = deltaY > 0 ? Position.WEEK : Position.SPLIT;
 					break;
 				case MONTH:
-					target = this.positionMonth;
+					this.position = deltaY > 0 ? Position.SPLIT : Position.MONTH;
 					break;
 				default:
-					target = this.positionSplit;
+					this.position = deltaY > 0 ? Position.WEEK : Position.MONTH;
+					break;
 				}
 
-				this.scroller.startScroll(0, this.divider, 0, target - this.divider);
-				this.postInvalidateOnAnimation();
-
-				/*if(nearest == distanceMinimum) {
-					this.scroller.startScroll(0, this.divider, 0, this.minimum - this.divider);
-				} else if(nearest == distanceMiddle) {
-					this.scroller.startScroll(0, this.divider, 0, this.middle - this.divider);
-				} else if(nearest == distanceMaximum) {
-					this.scroller.startScroll(0, this.divider, 0, this.maximum - this.divider);
-				}*/
-
+				this.scroller.startScroll(0, (int) Math.round(this.divider), 0, (int) Math.round((Position.WEEK.equals(this.position) ? this.positionWeek : Position.MONTH.equals(this.position) ? this.positionMonth : this.positionSplit) - this.divider));
 				this.activePointer = MotionEvent.INVALID_POINTER_ID;
 				this.dragging = false;
 				this.postInvalidateOnAnimation();
@@ -230,15 +200,6 @@ public class HomeworkFragment extends AbstractFragment {
 			}
 
 			return true;
-		}
-
-		@Override
-		public void computeScroll() {
-			if(this.scroller.computeScrollOffset()) {
-				this.divider = Math.min(Math.max(this.scroller.getCurrY(), this.positionWeek), this.positionMonth);
-				this.requestLayout();
-				this.invalidate();
-			}
 		}
 
 		private enum Position {
