@@ -3,6 +3,7 @@ package com.khopan.homework.fragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.khopan.homework.AbstractFragment;
@@ -47,6 +49,7 @@ public class HomeworkFragment extends AbstractFragment {
 	}
 
 	private static class HomeworkLayout extends ViewGroup {
+		private final Context context;
 		private final OverScroller scroller;
 		private final ViewPager2 topView;
 		private final View bottomView;
@@ -65,18 +68,19 @@ public class HomeworkFragment extends AbstractFragment {
 
 		private HomeworkLayout(@NonNull final Context context) {
 			super(context);
-			this.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-			this.scroller = new OverScroller(context);
-			this.topView = new ViewPager2(context);
-			this.topView.setAdapter(new CalendarAdapter(context));
-			//this.addView(this.topView = new MonthView(context));
+			this.context = context;
+			this.scroller = new OverScroller(this.context);
+			this.topView = new ViewPager2(this.context);
+			this.topView.setAdapter(new CalendarAdapter());
+			this.topView.setCurrentItem(Integer.MAX_VALUE / 2, false);
 			this.addView(this.topView);
-			this.bottomView = new View(context);
+			this.bottomView = new View(this.context);
 			this.bottomView.setBackgroundColor(0xFF0000FF);
 			this.addView(this.bottomView);
-			this.touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+			this.touchSlop = ViewConfiguration.get(this.context).getScaledTouchSlop();
 			this.divider = -1.0d;
 			this.position = Position.SPLIT;
+			this.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		}
 
 		@Override
@@ -150,10 +154,21 @@ public class HomeworkFragment extends AbstractFragment {
 		}
 
 		@Override
-		protected void onMeasure(int widthMeasure, int heightMeasure) {
-			this.setMeasuredDimension(MeasureSpec.getSize(widthMeasure), MeasureSpec.getSize(heightMeasure));
-			this.topView.measure(widthMeasure, heightMeasure);
-			this.bottomView.measure(widthMeasure, heightMeasure);
+		protected void onMeasure(final int widthMeasure, final int heightMeasure) {
+			final int width = MeasureSpec.getSize(widthMeasure);
+			final int height = MeasureSpec.getSize(heightMeasure);
+			this.setMeasuredDimension(width, height);
+			this.positionWeek = ((double) height) / 10.0d;
+			this.positionSplit = ((double) height) / 2.0d;
+			this.positionMonth = height;
+
+			if(this.divider < 0.0d) {
+				this.divider = Position.WEEK.equals(this.position) ? this.positionWeek : Position.MONTH.equals(this.position) ? this.positionMonth : this.positionSplit;
+			}
+
+			final int divider = (int) Math.round(this.divider = Math.min(Math.max(this.divider, this.positionWeek), this.positionMonth));
+			this.topView.measure(widthMeasure, MeasureSpec.makeMeasureSpec(divider, MeasureSpec.EXACTLY));
+			this.bottomView.measure(widthMeasure, MeasureSpec.makeMeasureSpec(height - divider, MeasureSpec.EXACTLY));
 		}
 
 		@SuppressLint("ClickableViewAccessibility")
@@ -244,27 +259,20 @@ public class HomeworkFragment extends AbstractFragment {
 			return super.onTouchEvent(event);
 		}
 
-		private enum Position {
-			WEEK,
-			SPLIT,
-			MONTH
-		}
-	}
+		private class MonthView extends ViewGroup {
+			public MonthView() {
+				super(HomeworkLayout.this.context);
 
-	private static class MonthView extends ViewGroup {
-		public MonthView(@NonNull final Context context) {
-			super(context);
-
-			for(int i = 0; i < 6 * 7; i++) {
-				final TextView view = new TextView(context);
-				view.setText(String.format(Locale.getDefault(), "%d", i));
-				view.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
-				this.addView(view);
+				for(int i = 0; i < 6 * 7; i++) {
+					final TextView view = new TextView(HomeworkLayout.this.context);
+					view.setText(String.format(Locale.getDefault(), "%d", i));
+					view.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
+					this.addView(view);
+				}
 			}
-		}
 
-		@Override
-		protected void onLayout(final boolean changed, final int left, final int top, final int right, final int bottom) {
+			@Override
+			protected void onLayout(final boolean changed, final int left, final int top, final int right, final int bottom) {
 			/*// 2 -> 0
 			// 10 -> height
 			final double width = ((double) this.getWidth()) / 7.0d;
@@ -279,45 +287,46 @@ public class HomeworkFragment extends AbstractFragment {
 				view.layout((int) Math.round(width * ((double) x)), (int) Math.round(height * ((double) y)) + translationX, (int) Math.round(width * ((double) (x + 1))), (int) Math.round(height * ((double) (y + 1))) + translationX);
 			}*/
 
-			final double width = ((double) this.getWidth()) / 7.0d;
-			final double height = ((double) this.getHeight()) / 6.0d;
+				final double width = ((double) this.getWidth()) / 7.0d;
+				final double height = Math.max(this.getHeight(), HomeworkLayout.this.positionSplit) / 6.0d;
 
-			for(int y = 0; y < 6; y++) {
-				for(int x = 0; x < 7; x++) {
-					this.getChildAt(y * 7 + x).layout((int) Math.round(width * ((double) x)), (int) Math.round(height * ((double) y)), (int) Math.round(width * ((double) (x + 1))), (int) Math.round(height * ((double) (y + 1))));
+				for(int y = 0; y < 6; y++) {
+					for(int x = 0; x < 7; x++) {
+						this.getChildAt(y * 7 + x).layout((int) Math.round(width * ((double) x)), (int) Math.round(height * ((double) y)), (int) Math.round(width * ((double) (x + 1))), (int) Math.round(height * ((double) (y + 1))));
+					}
 				}
 			}
 		}
-	}
 
-	private static class CalendarAdapter extends RecyclerView.Adapter<DayHolder> {
-		private final Context context;
+		private class CalendarAdapter extends RecyclerView.Adapter<DayHolder> {
+			@NonNull
+			@Override
+			public DayHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
+				return new DayHolder(new MonthView());
+			}
 
-		private CalendarAdapter(@NonNull final Context context) {
-			this.context = context;
+			@Override
+			public void onBindViewHolder(@NonNull final DayHolder holder, final int position) {
+
+			}
+
+			@Override
+			public int getItemCount() {
+				return Integer.MAX_VALUE;
+			}
 		}
 
-		@NonNull
-		@Override
-		public DayHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
-			return new DayHolder(new MonthView(this.context));
+		private static class DayHolder extends RecyclerView.ViewHolder {
+			public DayHolder(@NonNull final View view) {
+				super(view);
+				view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+			}
 		}
 
-		@Override
-		public void onBindViewHolder(@NonNull final DayHolder holder, final int position) {
-
-		}
-
-		@Override
-		public int getItemCount() {
-			return Integer.MAX_VALUE;
-		}
-	}
-
-	private static class DayHolder extends RecyclerView.ViewHolder {
-		public DayHolder(@NonNull final View view) {
-			super(view);
-			view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		private enum Position {
+			WEEK,
+			SPLIT,
+			MONTH
 		}
 	}
 }
