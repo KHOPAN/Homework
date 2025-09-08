@@ -3,6 +3,7 @@ package com.khopan.homework.fragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.khopan.homework.AbstractFragment;
+import com.khopan.homework.calendar.MonthView;
 import com.sec.sesl.khopan.homework.R;
 
 import java.time.DayOfWeek;
@@ -78,8 +80,11 @@ public class HomeworkFragment extends AbstractFragment {
 			this.topView.setAdapter(new CalendarAdapter());
 			this.topView.setCurrentItem(Integer.MAX_VALUE / 2, false);
 			this.addView(this.topView);
-			this.bottomView = new View(this.context);
-			this.bottomView.setBackgroundColor(0xFF0000FF);
+			//this.bottomView = new View(this.context);
+			//this.bottomView.setBackgroundColor(0xFF0000FF);
+			this.bottomView = new TextView(this.context);
+			((TextView) this.bottomView).setText("EVENTS GOES HERE!");
+			((TextView) this.bottomView).setGravity(Gravity.CENTER);
 			this.addView(this.bottomView);
 			this.touchSlop = ViewConfiguration.get(this.context).getScaledTouchSlop();
 			this.divider = -1.0d;
@@ -263,7 +268,7 @@ public class HomeworkFragment extends AbstractFragment {
 			return super.onTouchEvent(event);
 		}
 
-		private class MonthView extends ViewGroup {
+		/*private class MonthView extends ViewGroup {
 			private final int rows;
 
 			public MonthView(final int rows) {
@@ -271,10 +276,22 @@ public class HomeworkFragment extends AbstractFragment {
 				this.rows = rows;
 
 				for(int i = 0; i < this.rows * 7; i++) {
+					/*final TextView view = new TextView(HomeworkLayout.this.context);
+					view.setText(String.format(Locale.getDefault(), "%d", i));
+					view.setTextAlignment(TextView.TET_ALIGNMENT_CENTER);
+					this.addView(view);
+					final LinearLayout layout = new LinearLayout(HomeworkLayout.this.context);
+					layout.setOrientation(LinearLayout.VERTICAL);
 					final TextView view = new TextView(HomeworkLayout.this.context);
+					view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 					view.setText(String.format(Locale.getDefault(), "%d", i));
 					view.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
-					this.addView(view);
+					layout.addView(view);
+					final View test = new View(HomeworkLayout.this.context);
+					test.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 50));
+					test.setBackgroundColor(0xFF00FF00);
+					layout.addView(test);
+					this.addView(layout);
 				}
 			}
 
@@ -291,7 +308,22 @@ public class HomeworkFragment extends AbstractFragment {
 					}
 				}
 			}
-		}
+
+			@Override
+			protected void measureChildren(int widthMeasure, int heightMeasure) {
+				final int widths = MeasureSpec.getSize(widthMeasure);
+				final int heights = MeasureSpec.getSize(heightMeasure);
+				this.setMeasuredDimension(widths, heights);
+				final double width = ((double) widths) / 7.0d;
+				final double height = Math.max(heights, HomeworkLayout.this.positionSplit) / ((double) this.rows);
+
+				for(int y = 0; y < this.rows; y++) {
+					for(int x = 0; x < 7; x++) {
+						this.getChildAt(y * 7 + x).measure(MeasureSpec.makeMeasureSpec((int) Math.round(width), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec((int) Math.round(height), MeasureSpec.EXACTLY));
+					}
+				}
+			}
+		}*/
 
 		private class CalendarAdapter extends RecyclerView.Adapter<DayHolder> {
 			private static final int INITIAL_POSITION = Integer.MAX_VALUE / 2;
@@ -299,7 +331,7 @@ public class HomeworkFragment extends AbstractFragment {
 			@NonNull
 			@Override
 			public DayHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
-				return new DayHolder(new MonthView(type));
+				return new DayHolder(new MonthView(HomeworkLayout.this.context));
 			}
 
 			@Override
