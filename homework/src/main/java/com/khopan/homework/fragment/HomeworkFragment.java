@@ -22,7 +22,9 @@ import com.sec.sesl.khopan.homework.R;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.YearMonth;
+import java.time.chrono.IsoChronology;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -320,52 +322,8 @@ public class HomeworkFragment extends AbstractFragment {
 				return  this.getCalendarRows(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
 			}
 
-			/**
-			 * Determines if a given month and year will occupy 6 rows on a calendar.
-			 * Assumes the calendar week starts on Sunday.
-			 *
-			 * @param year The year.
-			 * @param month The month (1-12).
-			 * @return true if the month occupies 6 rows, false otherwise.
-			 */
-			public boolean hasSixRows(int year, int month) {
-				LocalDate firstDayOfMonth = LocalDate.of(year, month, 1);
-				int daysInMonth = firstDayOfMonth.lengthOfMonth();
-				DayOfWeek startDay = firstDayOfMonth.getDayOfWeek();
-
-				// Adjust for a Sunday-based calendar (Sunday=1, Monday=2, etc.)
-				int startDayValue = startDay.getValue() % 7 + 1;
-
-				if (daysInMonth == 31 && (startDayValue == 6 || startDayValue == 7)) {
-					// A 31-day month starting on Friday or Saturday
-					return true;
-				} else if (daysInMonth == 30 && startDayValue == 7) {
-					// A 30-day month starting on Saturday
-					return true;
-				}
-
-				return false;
-			}
-
 			public int getCalendarRows(int year, int month) {
-				// Get YearMonth instance for given year & month
-				YearMonth ym = YearMonth.of(year, month);
-
-				// 1. Number of days in the month
-				int daysInMonth = ym.lengthOfMonth();
-
-				// 2. Day of week of first day (1=Monday ... 7=Sunday in ISO)
-				LocalDate firstDay = ym.atDay(1);
-				int startDayOfWeek = firstDay.getDayOfWeek().getValue();
-
-				// Convert so Sunday=0, Monday=1, ... Saturday=6 (like calendar grids)
-				int offset = startDayOfWeek % 7;
-
-				// 3. Total slots needed
-				int totalCells = offset + daysInMonth;
-
-				// 4. Rows = ceil(totalCells / 7.0)
-				return (int) Math.ceil(totalCells / 7.0);
+				return (int) Math.ceil(((double) (Month.of(month).length(IsoChronology.INSTANCE.isLeapYear(year)) + LocalDate.of(year, month, 1).getDayOfWeek().getValue() % 7)) / 7.0d);
 			}
 
 			@Override
