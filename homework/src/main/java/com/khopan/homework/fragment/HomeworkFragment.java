@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.khopan.homework.AbstractFragment;
-import com.khopan.homework.calendar.MonthView;
 import com.sec.sesl.khopan.homework.R;
 
 import java.time.DayOfWeek;
@@ -268,7 +267,7 @@ public class HomeworkFragment extends AbstractFragment {
 			return super.onTouchEvent(event);
 		}
 
-		/*private class MonthView extends ViewGroup {
+		private class MonthView extends ViewGroup {
 			private final int rows;
 
 			public MonthView(final int rows) {
@@ -279,18 +278,20 @@ public class HomeworkFragment extends AbstractFragment {
 					/*final TextView view = new TextView(HomeworkLayout.this.context);
 					view.setText(String.format(Locale.getDefault(), "%d", i));
 					view.setTextAlignment(TextView.TET_ALIGNMENT_CENTER);
-					this.addView(view);
+					this.addView(view);*/
 					final LinearLayout layout = new LinearLayout(HomeworkLayout.this.context);
+					layout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 					layout.setOrientation(LinearLayout.VERTICAL);
 					final TextView view = new TextView(HomeworkLayout.this.context);
-					view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+					view.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 					view.setText(String.format(Locale.getDefault(), "%d", i));
 					view.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
 					layout.addView(view);
 					final View test = new View(HomeworkLayout.this.context);
-					test.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 50));
+					test.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 					test.setBackgroundColor(0xFF00FF00);
 					layout.addView(test);
+					//layout.setBackgroundColor(0xFF00FF00);
 					this.addView(layout);
 				}
 			}
@@ -305,12 +306,13 @@ public class HomeworkFragment extends AbstractFragment {
 				for(int y = 0; y < this.rows; y++) {
 					for(int x = 0; x < 7; x++) {
 						this.getChildAt(y * 7 + x).layout((int) Math.round(width * ((double) x)), (int) Math.round(height * ((double) y)) + offset, (int) Math.round(width * ((double) (x + 1))), (int) Math.round(height * ((double) (y + 1))) + offset);
+						this.getChildAt(y * 7 + x).requestLayout();
 					}
 				}
 			}
 
 			@Override
-			protected void measureChildren(int widthMeasure, int heightMeasure) {
+			protected void onMeasure(int widthMeasure, int heightMeasure) {
 				final int widths = MeasureSpec.getSize(widthMeasure);
 				final int heights = MeasureSpec.getSize(heightMeasure);
 				this.setMeasuredDimension(widths, heights);
@@ -319,11 +321,12 @@ public class HomeworkFragment extends AbstractFragment {
 
 				for(int y = 0; y < this.rows; y++) {
 					for(int x = 0; x < 7; x++) {
-						this.getChildAt(y * 7 + x).measure(MeasureSpec.makeMeasureSpec((int) Math.round(width), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec((int) Math.round(height), MeasureSpec.EXACTLY));
+						this.getChildAt(y * 7 + x).measure(MeasureSpec.makeMeasureSpec((int) width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec((int) height, MeasureSpec.EXACTLY));
+						this.getChildAt(y * 7 + x).requestLayout();
 					}
 				}
 			}
-		}*/
+		}
 
 		private class CalendarAdapter extends RecyclerView.Adapter<DayHolder> {
 			private static final int INITIAL_POSITION = Integer.MAX_VALUE / 2;
@@ -331,7 +334,7 @@ public class HomeworkFragment extends AbstractFragment {
 			@NonNull
 			@Override
 			public DayHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
-				return new DayHolder(new MonthView(HomeworkLayout.this.context));
+				return new DayHolder(new MonthView(type));
 			}
 
 			@Override
