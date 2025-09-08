@@ -22,6 +22,7 @@ import com.sec.sesl.khopan.homework.R;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -261,13 +262,13 @@ public class HomeworkFragment extends AbstractFragment {
 		}
 
 		private class MonthView extends ViewGroup {
-			private final boolean sixRows;
+			private final int rows;
 
-			public MonthView(final boolean sixRows) {
+			public MonthView(final int rows) {
 				super(HomeworkLayout.this.context);
-				this.sixRows = sixRows;
+				this.rows = rows;
 
-				for(int i = 0; i < (this.sixRows ? 6 : 5) * 7; i++) {
+				for(int i = 0; i < this.rows * 7; i++) {
 					final TextView view = new TextView(HomeworkLayout.this.context);
 					view.setText(String.format(Locale.getDefault(), "%d", i));
 					view.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
@@ -277,32 +278,12 @@ public class HomeworkFragment extends AbstractFragment {
 
 			@Override
 			protected void onLayout(final boolean changed, final int left, final int top, final int right, final int bottom) {
-			/*// 2 -> 0
-			// 10 -> height
-			final double width = ((double) this.getWidth()) / 7.0d;
-			//final double height = ((double) this.getHeight()) / 6.0d;
-			final double height = ((double) ((ViewGroup) this.getParent()).getHeight()) / 10.0d;
-			final int translationX = (int) Math.round((((ViewGroup) this.getParent()).getHeight() / (double) this.getHeight() - 2.0d) / 8.0d * -height);
-
-			for(int i = 0; i < this.getChildCount(); i++) {
-				final View view = this.getChildAt(i);
-				int x = i % 7;
-				int y = i / 7;
-				view.layout((int) Math.round(width * ((double) x)), (int) Math.round(height * ((double) y)) + translationX, (int) Math.round(width * ((double) (x + 1))), (int) Math.round(height * ((double) (y + 1))) + translationX);
-			}*/
-
 				final double width = ((double) this.getWidth()) / 7.0d;
-				final double height = Math.max(this.getHeight(), HomeworkLayout.this.positionSplit) / (this.sixRows ? 6.0d : 5.0d);
+				final double height = Math.max(this.getHeight(), HomeworkLayout.this.positionSplit) / ((double) this.rows);
 				final double factor = (1.0d - (this.getHeight() - HomeworkLayout.this.positionWeek) / (HomeworkLayout.this.positionSplit - HomeworkLayout.this.positionWeek));
-				final int offset;
+				final int offset = this.getHeight() < HomeworkLayout.this.positionSplit ? (int) Math.round(-height * factor) : 0;
 
-				if(this.getHeight() < HomeworkLayout.this.positionSplit) {
-					offset = -(int) Math.round(height * factor * 1.0d);
-				} else {
-					offset = 0;
-				}
-
-				for(int y = 0; y < (this.sixRows ? 6 : 5); y++) {
+				for(int y = 0; y < this.rows; y++) {
 					for(int x = 0; x < 7; x++) {
 						this.getChildAt(y * 7 + x).layout((int) Math.round(width * ((double) x)), (int) Math.round(height * ((double) y)) + offset, (int) Math.round(width * ((double) (x + 1))), (int) Math.round(height * ((double) (y + 1))) + offset);
 					}
@@ -316,7 +297,7 @@ public class HomeworkFragment extends AbstractFragment {
 			@NonNull
 			@Override
 			public DayHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
-				return new DayHolder(new MonthView(type == 1));
+				return new DayHolder(new MonthView(type));
 			}
 
 			@Override
@@ -335,7 +316,8 @@ public class HomeworkFragment extends AbstractFragment {
 				final Calendar calendar = Calendar.getInstance();
 				calendar.set(Calendar.DAY_OF_MONTH, 1);
 				calendar.add(Calendar.MONTH, position - CalendarAdapter.INITIAL_POSITION);
-				return this.hasSixRows(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1) ? 1 : 0;
+				//return this.hasSixRows(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1) ? 1 : 0;
+				return  this.getCalendarRows(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
 			}
 
 			/**
@@ -363,6 +345,27 @@ public class HomeworkFragment extends AbstractFragment {
 				}
 
 				return false;
+			}
+
+			public int getCalendarRows(int year, int month) {
+				// Get YearMonth instance for given year & month
+				YearMonth ym = YearMonth.of(year, month);
+
+				// 1. Number of days in the month
+				int daysInMonth = ym.lengthOfMonth();
+
+				// 2. Day of week of first day (1=Monday ... 7=Sunday in ISO)
+				LocalDate firstDay = ym.atDay(1);
+				int startDayOfWeek = firstDay.getDayOfWeek().getValue();
+
+				// Convert so Sunday=0, Monday=1, ... Saturday=6 (like calendar grids)
+				int offset = startDayOfWeek % 7;
+
+				// 3. Total slots needed
+				int totalCells = offset + daysInMonth;
+
+				// 4. Rows = ceil(totalCells / 7.0)
+				return (int) Math.ceil(totalCells / 7.0);
 			}
 
 			@Override
