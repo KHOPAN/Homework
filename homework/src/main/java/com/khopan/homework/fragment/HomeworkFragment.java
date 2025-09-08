@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SeslToggleSwitch;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -287,9 +288,8 @@ public class HomeworkFragment extends AbstractFragment {
 					view.setText(String.format(Locale.getDefault(), "%d", i));
 					view.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
 					layout.addView(view);
-					final View test = new View(HomeworkLayout.this.context);
+					final SeslToggleSwitch test = new SeslToggleSwitch(HomeworkLayout.this.context);
 					test.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-					test.setBackgroundColor(0xFF00FF00);
 					layout.addView(test);
 					//layout.setBackgroundColor(0xFF00FF00);
 					this.addView(layout);
