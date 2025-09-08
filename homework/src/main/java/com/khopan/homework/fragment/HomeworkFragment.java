@@ -3,7 +3,6 @@ package com.khopan.homework.fragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,12 +15,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.khopan.homework.AbstractFragment;
 import com.sec.sesl.khopan.homework.R;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.Locale;
 
 public class HomeworkFragment extends AbstractFragment {
@@ -260,10 +261,13 @@ public class HomeworkFragment extends AbstractFragment {
 		}
 
 		private class MonthView extends ViewGroup {
-			public MonthView() {
-				super(HomeworkLayout.this.context);
+			private final boolean sixRows;
 
-				for(int i = 0; i < 6 * 7; i++) {
+			public MonthView(final boolean sixRows) {
+				super(HomeworkLayout.this.context);
+				this.sixRows = sixRows;
+
+				for(int i = 0; i < (this.sixRows ? 6 : 5) * 7; i++) {
 					final TextView view = new TextView(HomeworkLayout.this.context);
 					view.setText(String.format(Locale.getDefault(), "%d", i));
 					view.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
@@ -288,17 +292,17 @@ public class HomeworkFragment extends AbstractFragment {
 			}*/
 
 				final double width = ((double) this.getWidth()) / 7.0d;
-				final double height = Math.max(this.getHeight(), HomeworkLayout.this.positionSplit) / 5.0d;
+				final double height = Math.max(this.getHeight(), HomeworkLayout.this.positionSplit) / (this.sixRows ? 6.0d : 5.0d);
 				final double factor = (1.0d - (this.getHeight() - HomeworkLayout.this.positionWeek) / (HomeworkLayout.this.positionSplit - HomeworkLayout.this.positionWeek));
 				final int offset;
 
 				if(this.getHeight() < HomeworkLayout.this.positionSplit) {
-					offset = -(int) Math.round(height * factor);
+					offset = -(int) Math.round(height * factor * 1.0d);
 				} else {
 					offset = 0;
 				}
 
-				for(int y = 0; y < 5; y++) {
+				for(int y = 0; y < (this.sixRows ? 6 : 5); y++) {
 					for(int x = 0; x < 7; x++) {
 						this.getChildAt(y * 7 + x).layout((int) Math.round(width * ((double) x)), (int) Math.round(height * ((double) y)) + offset, (int) Math.round(width * ((double) (x + 1))), (int) Math.round(height * ((double) (y + 1))) + offset);
 					}
@@ -307,15 +311,58 @@ public class HomeworkFragment extends AbstractFragment {
 		}
 
 		private class CalendarAdapter extends RecyclerView.Adapter<DayHolder> {
+			private static final int INITIAL_POSITION = Integer.MAX_VALUE / 2;
+
 			@NonNull
 			@Override
 			public DayHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
-				return new DayHolder(new MonthView());
+				return new DayHolder(new MonthView(type == 1));
 			}
 
 			@Override
 			public void onBindViewHolder(@NonNull final DayHolder holder, final int position) {
+				final int offsetFromCenter = position - INITIAL_POSITION;
+				java.util.Calendar cal = java.util.Calendar.getInstance();
+				cal.set(java.util.Calendar.DAY_OF_MONTH, 1);
+				cal.add(java.util.Calendar.MONTH, offsetFromCenter);
+				int year = cal.get(java.util.Calendar.YEAR);
+				int month = cal.get(java.util.Calendar.MONTH); // 0-based
+				//((MonthView) holder.itemView).setMonth(year, month);
+			}
 
+			@Override
+			public int getItemViewType(int position) {
+				final Calendar calendar = Calendar.getInstance();
+				calendar.set(Calendar.DAY_OF_MONTH, 1);
+				calendar.add(Calendar.MONTH, position - CalendarAdapter.INITIAL_POSITION);
+				return this.hasSixRows(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1) ? 1 : 0;
+			}
+
+			/**
+			 * Determines if a given month and year will occupy 6 rows on a calendar.
+			 * Assumes the calendar week starts on Sunday.
+			 *
+			 * @param year The year.
+			 * @param month The month (1-12).
+			 * @return true if the month occupies 6 rows, false otherwise.
+			 */
+			public boolean hasSixRows(int year, int month) {
+				LocalDate firstDayOfMonth = LocalDate.of(year, month, 1);
+				int daysInMonth = firstDayOfMonth.lengthOfMonth();
+				DayOfWeek startDay = firstDayOfMonth.getDayOfWeek();
+
+				// Adjust for a Sunday-based calendar (Sunday=1, Monday=2, etc.)
+				int startDayValue = startDay.getValue() % 7 + 1;
+
+				if (daysInMonth == 31 && (startDayValue == 6 || startDayValue == 7)) {
+					// A 31-day month starting on Friday or Saturday
+					return true;
+				} else if (daysInMonth == 30 && startDayValue == 7) {
+					// A 30-day month starting on Saturday
+					return true;
+				}
+
+				return false;
 			}
 
 			@Override
