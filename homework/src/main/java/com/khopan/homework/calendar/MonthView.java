@@ -45,6 +45,7 @@ public class MonthView extends View {
 		canvas.drawText("Hello", (float) left, (float) top, this.paint);
 		this.paint.setColor(0xFFFF0000);
 		this.paint.setStyle(Paint.Style.STROKE);
-		canvas.drawRoundRect((float) left, (float) top, (float) right, (float) bottom, 10.0f, 10.0f, this.paint);
+		this.paint.setStrokeWidth(4.0f);
+		canvas.drawRoundRect((float) left, (float) top, (float) right, (float) bottom, 20.0f, 20.0f, this.paint);
 	}
 }
