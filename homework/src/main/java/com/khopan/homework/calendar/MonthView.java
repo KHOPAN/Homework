@@ -8,7 +8,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 public class MonthView extends View {
@@ -39,9 +38,13 @@ public class MonthView extends View {
 
 	private void renderDay(Random random, final Canvas canvas, final double left, final double top, final double right, final double bottom) {
 		this.paint.setColor(random.nextInt(0xFFFFFF + 1) | 0xFF000000);
+		this.paint.setStyle(Paint.Style.FILL);
 		canvas.drawRect((float) left, (float) top, (float) right, (float) bottom, this.paint);
 		this.paint.setColor(0xFF000000);
 		this.paint.setTextSize(50.0f);
 		canvas.drawText("Hello", (float) left, (float) top, this.paint);
+		this.paint.setColor(0xFFFF0000);
+		this.paint.setStyle(Paint.Style.STROKE);
+		canvas.drawRoundRect((float) left, (float) top, (float) right, (float) bottom, 10.0f, 10.0f, this.paint);
 	}
 }

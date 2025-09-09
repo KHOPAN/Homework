@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.khopan.homework.AbstractFragment;
+import com.khopan.homework.calendar.MonthView;
 import com.sec.sesl.khopan.homework.R;
 
 import java.time.DayOfWeek;
@@ -268,7 +269,7 @@ public class HomeworkFragment extends AbstractFragment {
 			return super.onTouchEvent(event);
 		}
 
-		private class MonthView extends ViewGroup {
+		/*private class MonthView extends ViewGroup {
 			private final int rows;
 
 			public MonthView(final int rows) {
@@ -276,10 +277,6 @@ public class HomeworkFragment extends AbstractFragment {
 				this.rows = rows;
 
 				for(int i = 0; i < this.rows * 7; i++) {
-					/*final TextView view = new TextView(HomeworkLayout.this.context);
-					view.setText(String.format(Locale.getDefault(), "%d", i));
-					view.setTextAlignment(TextView.TET_ALIGNMENT_CENTER);
-					this.addView(view);*/
 					final LinearLayout layout = new LinearLayout(HomeworkLayout.this.context);
 					layout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 					layout.setOrientation(LinearLayout.VERTICAL);
@@ -291,7 +288,6 @@ public class HomeworkFragment extends AbstractFragment {
 					final SeslToggleSwitch test = new SeslToggleSwitch(HomeworkLayout.this.context);
 					test.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 					layout.addView(test);
-					//layout.setBackgroundColor(0xFF00FF00);
 					this.addView(layout);
 				}
 			}
@@ -326,7 +322,7 @@ public class HomeworkFragment extends AbstractFragment {
 					}
 				}
 			}
-		}
+		}*/
 
 		private class CalendarAdapter extends RecyclerView.Adapter<DayHolder> {
 			private static final int INITIAL_POSITION = Integer.MAX_VALUE / 2;
@@ -334,7 +330,7 @@ public class HomeworkFragment extends AbstractFragment {
 			@NonNull
 			@Override
 			public DayHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
-				return new DayHolder(new MonthView(type));
+				return new DayHolder(new MonthView(HomeworkLayout.this.context, () -> HomeworkLayout.this.positionSplit));
 			}
 
 			@Override
