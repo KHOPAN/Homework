@@ -1,8 +1,11 @@
 package com.khopan.homework.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -78,6 +81,13 @@ public class HomeworkFragment extends AbstractFragment {
 		}
 
 		@Override
+		public boolean onInterceptTouchEvent(final MotionEvent event) {
+			Log.i("Homework", "onInterceptTouchEvent(" + event.getX() + ", " + event.getY() + ")");
+			//return super.onInterceptTouchEvent(event);
+			return true;
+		}
+
+		@Override
 		protected void onLayout(final boolean changed, final int left, final int top, final int right, final int bottom) {
 			final int width = this.getWidth();
 			this.calendarView.layout(0, 0, width, this.separatorY);
@@ -92,6 +102,14 @@ public class HomeworkFragment extends AbstractFragment {
 			final int measuredWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
 			this.calendarView.measure(measuredWidth, MeasureSpec.makeMeasureSpec(this.separatorY, MeasureSpec.EXACTLY));
 			this.dayView.measure(measuredWidth, MeasureSpec.makeMeasureSpec(height - this.separatorY, MeasureSpec.EXACTLY));
+		}
+
+		@SuppressLint("ClickableViewAccessibility")
+		@Override
+		public boolean onTouchEvent(final MotionEvent event) {
+			Log.i("Homework", "onTouchEvent(" + event.getX() + ", " + event.getY() + ")");
+			//return super.onTouchEvent(event);
+			return true;
 		}
 	}
 }
