@@ -9,6 +9,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -58,7 +60,8 @@ public class HomeworkFragment extends AbstractFragment {
 	private static class CalendarLayout extends ViewGroup {
 		private final Context context;
 		private final ViewPager2 calendarView;
-		private final LinearLayout dayView;
+		private final ScrollView dayView;
+		//private final LinearLayout dayView;
 
 		private int separatorY;
 
@@ -73,16 +76,52 @@ public class HomeworkFragment extends AbstractFragment {
 			this.calendarView = new ViewPager2(this.context);
 			this.calendarView.setAdapter(new CalendarAdapter());
 			this.addView(this.calendarView);
-			this.dayView = new LinearLayout(this.context);
+			this.dayView = new ScrollView(this.context);
+			final LinearLayout linearLayout = new LinearLayout(this.context);
+			linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+			for(int i = 0; i < 100; i++) {
+				final TextView view = new TextView(this.context);
+				view.setText("" + i);
+				linearLayout.addView(view, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+			}
+
+			this.dayView.addView(linearLayout, new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+			/*this.dayView = new LinearLayout(this.context);
 			this.dayView.setOrientation(LinearLayout.VERTICAL);
-			this.dayView.setBackgroundColor(0xFF0000FF);
+			this.dayView.setBackgroundColor(0xFF0000FF);*/
 			this.addView(this.dayView);
 			this.separatorY = 0;
 		}
 
+		private String action(final int action) {
+			switch(action) {
+			case MotionEvent.ACTION_DOWN: return "ACTION_DOWN";
+			case MotionEvent.ACTION_UP: return "ACTION_UP";
+			case MotionEvent.ACTION_MOVE: return "ACTION_MOVE";
+			case MotionEvent.ACTION_CANCEL: return "ACTION_CANCEL";
+			case MotionEvent.ACTION_OUTSIDE: return "ACTION_OUTSIDE";
+			case MotionEvent.ACTION_POINTER_DOWN: return "ACTION_POINTER_DOWN";
+			case MotionEvent.ACTION_POINTER_UP: return "ACTION_POINTER_UP";
+			case MotionEvent.ACTION_HOVER_MOVE: return "ACTION_HOVER_MOVE";
+			case MotionEvent.ACTION_POINTER_INDEX_SHIFT: return "ACTION_POINTER_INDEX_SHIFT";
+			case MotionEvent.ACTION_HOVER_ENTER: return "ACTION_HOVER_ENTER";
+			case MotionEvent.ACTION_HOVER_EXIT: return "ACTION_HOVER_EXIT";
+			case MotionEvent.ACTION_BUTTON_PRESS: return "ACTION_BUTTON_PRESS";
+			case MotionEvent.ACTION_BUTTON_RELEASE: return "ACTION_BUTTON_RELEASE";
+			default: return null;
+			}
+		}
+
 		@Override
 		public boolean onInterceptTouchEvent(final MotionEvent event) {
-			Log.i("Homework", "onInterceptTouchEvent(" + event.getX() + ", " + event.getY() + ")");
+			/*switch(event.getActionMasked()) {
+			case MotionEvent.ACTION_DOWN:
+				Log.i("Homework", "onInterceptTouchEvent(ACTION_DOWN, " + event.getX() + ", " + event.getY() + ")");
+				return false;
+			}*/
+
+			Log.i("Homework", "onInterceptTouchEvent(" + this.action(event.getActionMasked()) + ", " + event.getX() + ", " + event.getY() + ")");
 			//return super.onInterceptTouchEvent(event);
 			return true;
 		}
