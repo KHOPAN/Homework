@@ -63,7 +63,9 @@ public class HomeworkFragment extends AbstractFragment {
 		private final ScrollView dayView;
 		//private final LinearLayout dayView;
 
-		private int separatorY;
+		private double separatorY;
+		private double pressedX;
+		private double pressedY;
 
 		private CalendarLayout(final Context context) {
 			super(context);
@@ -91,7 +93,9 @@ public class HomeworkFragment extends AbstractFragment {
 			this.dayView.setOrientation(LinearLayout.VERTICAL);
 			this.dayView.setBackgroundColor(0xFF0000FF);*/
 			this.addView(this.dayView);
-			this.separatorY = 0;
+			this.separatorY = 0.0d;
+			this.pressedX = 0;
+			this.pressedY = 0;
 		}
 
 		private String action(final int action) {
@@ -115,11 +119,12 @@ public class HomeworkFragment extends AbstractFragment {
 
 		@Override
 		public boolean onInterceptTouchEvent(final MotionEvent event) {
-			/*switch(event.getActionMasked()) {
+			switch(event.getActionMasked()) {
 			case MotionEvent.ACTION_DOWN:
-				Log.i("Homework", "onInterceptTouchEvent(ACTION_DOWN, " + event.getX() + ", " + event.getY() + ")");
+				this.pressedX = event.getX();
+				this.pressedY = event.getY();
 				return false;
-			}*/
+			}
 
 			Log.i("Homework", "onInterceptTouchEvent(" + this.action(event.getActionMasked()) + ", " + event.getX() + ", " + event.getY() + ")");
 			//return super.onInterceptTouchEvent(event);
@@ -129,8 +134,9 @@ public class HomeworkFragment extends AbstractFragment {
 		@Override
 		protected void onLayout(final boolean changed, final int left, final int top, final int right, final int bottom) {
 			final int width = this.getWidth();
-			this.calendarView.layout(0, 0, width, this.separatorY);
-			this.dayView.layout(0, this.separatorY, width, this.getHeight());
+			final int separatorY = (int) Math.round(this.separatorY);
+			this.calendarView.layout(0, 0, width, separatorY);
+			this.dayView.layout(0, separatorY, width, this.getHeight());
 		}
 
 		@Override
@@ -139,8 +145,9 @@ public class HomeworkFragment extends AbstractFragment {
 			final int height = MeasureSpec.getSize(measureHeight);
 			this.setMeasuredDimension(width, height);
 			final int measuredWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
-			this.calendarView.measure(measuredWidth, MeasureSpec.makeMeasureSpec(this.separatorY, MeasureSpec.EXACTLY));
-			this.dayView.measure(measuredWidth, MeasureSpec.makeMeasureSpec(height - this.separatorY, MeasureSpec.EXACTLY));
+			final int separatorY = (int) Math.round(this.separatorY);
+			this.calendarView.measure(measuredWidth, MeasureSpec.makeMeasureSpec(separatorY, MeasureSpec.EXACTLY));
+			this.dayView.measure(measuredWidth, MeasureSpec.makeMeasureSpec(height - separatorY, MeasureSpec.EXACTLY));
 		}
 
 		@SuppressLint("ClickableViewAccessibility")
