@@ -63,9 +63,9 @@ public class HomeworkFragment extends AbstractFragment {
 		private final ScrollView dayView;
 		//private final LinearLayout dayView;
 
-		private double separatorY;
-		private double pressedX;
-		private double pressedY;
+		private float separatorY;
+		private float pressedX;
+		private float pressedY;
 
 		private CalendarLayout(final Context context) {
 			super(context);
@@ -93,9 +93,9 @@ public class HomeworkFragment extends AbstractFragment {
 			this.dayView.setOrientation(LinearLayout.VERTICAL);
 			this.dayView.setBackgroundColor(0xFF0000FF);*/
 			this.addView(this.dayView);
-			this.separatorY = 0.0d;
-			this.pressedX = 0;
-			this.pressedY = 0;
+			this.separatorY = 0.0f;
+			this.pressedX = 0.0f;
+			this.pressedY = 0.0f;
 		}
 
 		private String action(final int action) {
@@ -124,6 +124,8 @@ public class HomeworkFragment extends AbstractFragment {
 				this.pressedX = event.getX();
 				this.pressedY = event.getY();
 				return false;
+			case MotionEvent.ACTION_MOVE:
+				break;
 			}
 
 			Log.i("Homework", "onInterceptTouchEvent(" + this.action(event.getActionMasked()) + ", " + event.getX() + ", " + event.getY() + ")");
@@ -134,7 +136,7 @@ public class HomeworkFragment extends AbstractFragment {
 		@Override
 		protected void onLayout(final boolean changed, final int left, final int top, final int right, final int bottom) {
 			final int width = this.getWidth();
-			final int separatorY = (int) Math.round(this.separatorY);
+			final int separatorY = Math.round(this.separatorY);
 			this.calendarView.layout(0, 0, width, separatorY);
 			this.dayView.layout(0, separatorY, width, this.getHeight());
 		}
@@ -145,7 +147,7 @@ public class HomeworkFragment extends AbstractFragment {
 			final int height = MeasureSpec.getSize(measureHeight);
 			this.setMeasuredDimension(width, height);
 			final int measuredWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
-			final int separatorY = (int) Math.round(this.separatorY);
+			final int separatorY = Math.round(this.separatorY);
 			this.calendarView.measure(measuredWidth, MeasureSpec.makeMeasureSpec(separatorY, MeasureSpec.EXACTLY));
 			this.dayView.measure(measuredWidth, MeasureSpec.makeMeasureSpec(height - separatorY, MeasureSpec.EXACTLY));
 		}
