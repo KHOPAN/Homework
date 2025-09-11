@@ -2,6 +2,8 @@ package com.khopan.homework.fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,11 +16,15 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.NestedScrollingParent3;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.khopan.homework.AbstractFragment;
 import com.sec.sesl.khopan.homework.R;
+
+import java.util.Random;
 
 public class HomeworkFragment extends AbstractFragment {
 	public HomeworkFragment() {
@@ -32,6 +38,12 @@ public class HomeworkFragment extends AbstractFragment {
 	}
 
 	private static class CalendarAdapter extends RecyclerView.Adapter<CalendarDayHolder> {
+		private final CalendarLayout layout;
+
+		private CalendarAdapter(final CalendarLayout layout) {
+			this.layout = layout;
+		}
+
 		@Override
 		public int getItemCount() {
 			return Integer.MAX_VALUE;
@@ -45,22 +57,59 @@ public class HomeworkFragment extends AbstractFragment {
 		@NonNull
 		@Override
 		public CalendarDayHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-			return new CalendarDayHolder(new View(parent.getContext()));
+			return new CalendarDayHolder(new CalendarDay(this.layout));
+		}
+	}
+
+	private static class CalendarDay extends View {
+		private final CalendarLayout layout;
+		private final Paint paint;
+
+		public CalendarDay(final CalendarLayout layout) {
+			super(layout.context);
+			this.layout = layout;
+			this.paint = new Paint();
+			this.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		}
+
+		@Override
+		protected void onDraw(final Canvas canvas) {
+			final int width = this.getWidth();
+			final int height = this.getHeight();
+			final double cellWidth = ((double) width) / 7.0d;
+			final double cellHeight = Math.max(height, this.layout.separatorY) / 6.0d;
+
+			for(int y = 0; y < 6; y++) {
+				for(int x = 0; x < 7; x++) {
+					this.renderDay(new Random(y * 6 + x), canvas, (int) Math.round(cellWidth * ((double) x)), (int) Math.round(cellHeight * ((double) y)), (int) Math.round(cellWidth * ((double) (x + 1))), (int) Math.round(cellHeight * ((double) (y + 1))));
+				}
+			}
+		}
+
+		private void renderDay(Random random, final Canvas canvas, final double left, final double top, final double right, final double bottom) {
+			this.paint.setColor(random.nextInt(0xFFFFFF + 1) | 0xFF000000);
+			this.paint.setStyle(Paint.Style.FILL);
+			canvas.drawRect((float) left, (float) top, (float) right, (float) bottom, this.paint);
+			this.paint.setColor(0xFF000000);
+			this.paint.setTextSize(50.0f);
+			canvas.drawText("Hello", (float) left, (float) top, this.paint);
+			this.paint.setColor(0xFFFF0000);
+			this.paint.setStyle(Paint.Style.STROKE);
+			this.paint.setStrokeWidth(4.0f);
+			canvas.drawRoundRect((float) left, (float) top, (float) right, (float) bottom, 20.0f, 20.0f, this.paint);
 		}
 	}
 
 	private static class CalendarDayHolder extends RecyclerView.ViewHolder {
-		public CalendarDayHolder(@NonNull final View view) {
+		public CalendarDayHolder(@NonNull final CalendarDay view) {
 			super(view);
-			view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-			view.setBackgroundColor(0xFFFF0000);
 		}
 	}
 
 	private static class CalendarLayout extends ViewGroup {
 		private final Context context;
 		private final ViewPager2 calendarView;
-		private final ScrollView dayView;
+		private final NestedScrollView dayView;
 		//private final LinearLayout dayView;
 
 		private float separatorY;
@@ -76,9 +125,9 @@ public class HomeworkFragment extends AbstractFragment {
 
 			this.context = context;
 			this.calendarView = new ViewPager2(this.context);
-			this.calendarView.setAdapter(new CalendarAdapter());
+			this.calendarView.setAdapter(new CalendarAdapter(this));
 			this.addView(this.calendarView);
-			this.dayView = new ScrollView(this.context);
+			this.dayView = new NestedScrollView(this.context);
 			final LinearLayout linearLayout = new LinearLayout(this.context);
 			linearLayout.setOrientation(LinearLayout.VERTICAL);
 
@@ -92,8 +141,9 @@ public class HomeworkFragment extends AbstractFragment {
 			/*this.dayView = new LinearLayout(this.context);
 			this.dayView.setOrientation(LinearLayout.VERTICAL);
 			this.dayView.setBackgroundColor(0xFF0000FF);*/
+			this.dayView.setNestedScrollingEnabled(true);
 			this.addView(this.dayView);
-			this.separatorY = 0.0f;
+			this.separatorY = 650.0f;
 			this.pressedX = 0.0f;
 			this.pressedY = 0.0f;
 		}
@@ -123,14 +173,14 @@ public class HomeworkFragment extends AbstractFragment {
 			case MotionEvent.ACTION_DOWN:
 				this.pressedX = event.getX();
 				this.pressedY = event.getY();
-				return false;
+				break;
 			case MotionEvent.ACTION_MOVE:
 				break;
 			}
 
 			Log.i("Homework", "onInterceptTouchEvent(" + this.action(event.getActionMasked()) + ", " + event.getX() + ", " + event.getY() + ")");
-			//return super.onInterceptTouchEvent(event);
-			return true;
+			return super.onInterceptTouchEvent(event);
+			//return true;
 		}
 
 		@Override
@@ -159,5 +209,36 @@ public class HomeworkFragment extends AbstractFragment {
 			//return super.onTouchEvent(event);
 			return true;
 		}
+
+		/*@Override
+		public void onNestedScroll(@NonNull View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed, int type, @NonNull int[] consumed) {
+			Log.i("Homework", "onNestedScroll()");
+		}
+
+		@Override
+		public boolean onStartNestedScroll(@NonNull View child, @NonNull View target, int axes, int type) {
+			Log.i("Homework", "onStartNestedScroll()");
+			return true;
+		}
+
+		@Override
+		public void onNestedScrollAccepted(@NonNull View child, @NonNull View target, int axes, int type) {
+			Log.i("Homework", "onNestedScrollAccepted()");
+		}
+
+		@Override
+		public void onStopNestedScroll(@NonNull View target, int type) {
+			Log.i("Homework", "onStopNestedScroll()");
+		}
+
+		@Override
+		public void onNestedScroll(@NonNull View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed, int type) {
+			Log.i("Homework", "onNestedScroll()");
+		}
+
+		@Override
+		public void onNestedPreScroll(@NonNull View target, int dx, int dy, @NonNull int[] consumed, int type) {
+			Log.i("Homework", "onNestedPreScroll()");
+		}*/
 	}
 }
