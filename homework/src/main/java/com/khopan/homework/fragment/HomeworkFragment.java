@@ -1,31 +1,16 @@
 package com.khopan.homework.fragment;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.view.NestedScrollingParent3;
-import androidx.core.widget.NestedScrollView;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
 import com.khopan.homework.AbstractFragment;
+import com.khopan.homework.calendar.EventCalendarView;
 import com.sec.sesl.khopan.homework.R;
-
-import java.util.Random;
 
 public class HomeworkFragment extends AbstractFragment {
 	public HomeworkFragment() {
@@ -35,10 +20,10 @@ public class HomeworkFragment extends AbstractFragment {
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle bundle) {
-		return new CalendarLayout(this.getContext());
+		return new EventCalendarView(this.getContext());
 	}
 
-	private static class CalendarAdapter extends RecyclerView.Adapter<CalendarHolder> {
+	/*private static class CalendarAdapter extends RecyclerView.Adapter<CalendarHolder> {
 		private final CalendarLayout layout;
 
 		private CalendarAdapter(final CalendarLayout layout) {
@@ -109,5 +94,5 @@ public class HomeworkFragment extends AbstractFragment {
 
 	private static class CalendarLayout extends ViewGroup {
 
-	}
+	}*/
 }

@@ -16,7 +16,7 @@ public class EventCalendarView extends ViewGroup {
 	private float pressedX;
 	private float pressedY;
 
-	private EventCalendarView(final Context context) {
+	public EventCalendarView(final Context context) {
 		super(context);
 
 		if(context == null) {
