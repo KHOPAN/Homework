@@ -3,12 +3,16 @@ package com.khopan.homework.calendar;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
+
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 class CalendarView extends View {
 	private final Context context;
@@ -30,6 +34,7 @@ class CalendarView extends View {
 	static @NonNull View create(@NonNull final Context context) {
 		final ViewPager2 pager = new ViewPager2(context);
 		pager.setAdapter(new Adapter(context));
+		pager.setCurrentItem((int) ChronoUnit.MONTHS.between(LocalDate.ofEpochDay(0L), LocalDate.now()));
 		return pager;
 	}
 
@@ -53,7 +58,8 @@ class CalendarView extends View {
 
 		@Override
 		public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-
+			//position - Integer.MAX_VALUE / 2;
+			Log.i("Homework", "Position: " + position);
 		}
 	}
 
