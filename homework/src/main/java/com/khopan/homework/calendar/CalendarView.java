@@ -12,8 +12,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.YearMonth;
+import java.time.chrono.IsoChronology;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.util.Random;
 
 class CalendarView extends View {
 	private static final YearMonth EPOCH = YearMonth.from(LocalDate.ofEpochDay(0L));
@@ -33,20 +37,26 @@ class CalendarView extends View {
 
 	@Override
 	protected void onDraw(final Canvas canvas) {
-		this.paint.setColor(0xFFFF0000);
-		canvas.drawRect(0.0f, 0.0f, 100.0f, 100.0f, this.paint);
-		/*final int height = this.getHeight();
+		final int width = this.getWidth();
+		final int height = this.getHeight();
+		final float cellWidth = ((float) width) / 7.0f;
 		final float cellHeight = ((float) height) / ((float) this.rows);
 
-		for(int i = 0; i < this.rows; i++) {
-			this.renderRow();
-		}*/
+		for(int y = 0; y < this.rows; y++) {
+			for(int x = 0; x < 7; x++) {
+				//this.paint.setColor(new Random(i + row * 7).nextInt(0xFFFFFF + 1) | 0xFF000000);
+				final LocalDate date = LocalDate.of(this.currentMonth.getYear(), this.currentMonth.getMonth(), 1).plusDays(y * 7L + x);
+				this.paint.setColor(0xFFFF0000);
+				this.paint.setStyle(Paint.Style.STROKE);
+				canvas.drawRoundRect(cellWidth * x, cellHeight * y, cellWidth * (x + 1), cellHeight * (y + 1), 10.0f, 10.0f, this.paint);
+				this.paint.setStyle(Paint.Style.FILL);
+				this.paint.setColor(0xFF00FF00);
+				final String text = String.valueOf(date.getDayOfMonth());
+				canvas.drawText(text, cellWidth * (((float) x) + 0.5f) - this.paint.measureText(text) / 2.0f, cellHeight * y + 10.0f, this.paint);
+			}
+		}
 
-		canvas.drawText(String.valueOf(this.currentMonth), 100.0f, 200.0f, this.paint);
-	}
-
-	private void renderRow() {
-
+		//canvas.drawText(String.valueOf(this.currentMonth), 100.0f, 200.0f, this.paint);
 	}
 
 	static @NonNull View create(@NonNull final Context context) {
@@ -77,6 +87,11 @@ class CalendarView extends View {
 		@Override
 		public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
 			holder.view.currentMonth = CalendarView.EPOCH.plusMonths(position);
+			holder.view.rows = this.getCalendarRows(holder.view.currentMonth.getYear(), holder.view.currentMonth.getMonthValue());
+		}
+
+		public int getCalendarRows(int year, int month) {
+			return (int) Math.ceil(((double) (Month.of(month).length(IsoChronology.INSTANCE.isLeapYear(year)) + LocalDate.of(year, month, 1).getDayOfWeek().getValue() % 7)) / 7.0d);
 		}
 	}
 
