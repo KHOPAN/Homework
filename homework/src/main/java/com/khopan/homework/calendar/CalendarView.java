@@ -15,8 +15,13 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 class CalendarView extends View {
+	private static final LocalDate EPOCH = LocalDate.ofEpochDay(0L);
+
 	private final Context context;
 	private final Paint paint;
+
+	private LocalDate currentDate;
+	private int rows;
 
 	private CalendarView(@NonNull final Context context) {
 		super(context);
@@ -29,12 +34,22 @@ class CalendarView extends View {
 	protected void onDraw(final Canvas canvas) {
 		this.paint.setColor(0xFFFF0000);
 		canvas.drawRect(0.0f, 0.0f, 100.0f, 100.0f, this.paint);
+		final int height = this.getHeight();
+		final float cellHeight = ((float) height) / ((float) this.rows);
+
+		for(int i = 0; i < this.rows; i++) {
+			this.renderRow();
+		}
+	}
+
+	private void renderRow() {
+
 	}
 
 	static @NonNull View create(@NonNull final Context context) {
 		final ViewPager2 pager = new ViewPager2(context);
 		pager.setAdapter(new Adapter(context));
-		pager.setCurrentItem((int) ChronoUnit.MONTHS.between(LocalDate.ofEpochDay(0L), LocalDate.now()));
+		pager.setCurrentItem((int) ChronoUnit.MONTHS.between(CalendarView.EPOCH, LocalDate.now()));
 		return pager;
 	}
 
@@ -58,14 +73,16 @@ class CalendarView extends View {
 
 		@Override
 		public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-			//position - Integer.MAX_VALUE / 2;
-			Log.i("Homework", "Position: " + position);
+			holder.view.currentDate = CalendarView.EPOCH.plusMonths(position);
 		}
 	}
 
 	private static class ViewHolder extends RecyclerView.ViewHolder {
+		private final CalendarView view;
+
 		private ViewHolder(@NonNull final CalendarView view) {
 			super(view);
+			this.view = view;
 		}
 	}
 }
