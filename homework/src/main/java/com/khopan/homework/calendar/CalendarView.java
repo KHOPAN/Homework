@@ -12,15 +12,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 
 class CalendarView extends View {
-	private static final LocalDate EPOCH = LocalDate.ofEpochDay(0L);
+	private static final YearMonth EPOCH = YearMonth.from(LocalDate.ofEpochDay(0L));
 
 	private final Context context;
 	private final Paint paint;
 
-	private LocalDate currentDate;
+	private YearMonth currentMonth;
 	private int rows;
 
 	private CalendarView(@NonNull final Context context) {
@@ -34,12 +35,14 @@ class CalendarView extends View {
 	protected void onDraw(final Canvas canvas) {
 		this.paint.setColor(0xFFFF0000);
 		canvas.drawRect(0.0f, 0.0f, 100.0f, 100.0f, this.paint);
-		final int height = this.getHeight();
+		/*final int height = this.getHeight();
 		final float cellHeight = ((float) height) / ((float) this.rows);
 
 		for(int i = 0; i < this.rows; i++) {
 			this.renderRow();
-		}
+		}*/
+
+		canvas.drawText(String.valueOf(this.currentMonth), 100.0f, 200.0f, this.paint);
 	}
 
 	private void renderRow() {
@@ -49,7 +52,7 @@ class CalendarView extends View {
 	static @NonNull View create(@NonNull final Context context) {
 		final ViewPager2 pager = new ViewPager2(context);
 		pager.setAdapter(new Adapter(context));
-		pager.setCurrentItem((int) ChronoUnit.MONTHS.between(CalendarView.EPOCH, LocalDate.now()));
+		pager.setCurrentItem((int) ChronoUnit.MONTHS.between(CalendarView.EPOCH, YearMonth.now()));
 		return pager;
 	}
 
@@ -73,7 +76,7 @@ class CalendarView extends View {
 
 		@Override
 		public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-			holder.view.currentDate = CalendarView.EPOCH.plusMonths(position);
+			holder.view.currentMonth = CalendarView.EPOCH.plusMonths(position);
 		}
 	}
 
