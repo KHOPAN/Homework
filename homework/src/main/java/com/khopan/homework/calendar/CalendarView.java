@@ -26,6 +26,7 @@ class CalendarView extends View {
 	private final Paint paint;
 
 	private YearMonth currentMonth;
+	private LocalDate currentDate;
 	private int rows;
 
 	private CalendarView(@NonNull final Context context) {
@@ -38,16 +39,15 @@ class CalendarView extends View {
 	@Override
 	protected void onDraw(final Canvas canvas) {
 		final int width = this.getWidth();
-		final int height = this.getHeight();
 		final float cellWidth = ((float) width) / 7.0f;
-		final float cellHeight = ((float) height) / ((float) this.rows);
+		final float cellHeight = ((float) this.getHeight()) / ((float) this.rows);
 
 		for(int y = 0; y < this.rows; y++) {
 			for(int x = 0; x < 7; x++) {
-				//this.paint.setColor(new Random(i + row * 7).nextInt(0xFFFFFF + 1) | 0xFF000000);
-				final LocalDate date = LocalDate.of(this.currentMonth.getYear(), this.currentMonth.getMonth(), 1).plusDays(y * 7L + x);
+				final LocalDate date = this.currentDate.plusDays(y * 7L + x);
 				this.paint.setColor(0xFFFF0000);
 				this.paint.setStyle(Paint.Style.STROKE);
+				this.paint.setStrokeWidth(5.0f);
 				canvas.drawRoundRect(cellWidth * x, cellHeight * y, cellWidth * (x + 1), cellHeight * (y + 1), 10.0f, 10.0f, this.paint);
 				this.paint.setStyle(Paint.Style.FILL);
 				this.paint.setColor(0xFF00FF00);
@@ -55,8 +55,6 @@ class CalendarView extends View {
 				canvas.drawText(text, cellWidth * (((float) x) + 0.5f) - this.paint.measureText(text) / 2.0f, cellHeight * y + 10.0f, this.paint);
 			}
 		}
-
-		//canvas.drawText(String.valueOf(this.currentMonth), 100.0f, 200.0f, this.paint);
 	}
 
 	static @NonNull View create(@NonNull final Context context) {
@@ -87,6 +85,7 @@ class CalendarView extends View {
 		@Override
 		public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
 			holder.view.currentMonth = CalendarView.EPOCH.plusMonths(position);
+			holder.view.currentDate = LocalDate.of(holder.view.currentMonth.getYear(), holder.view.currentMonth.getMonth(), 1);
 			holder.view.rows = this.getCalendarRows(holder.view.currentMonth.getYear(), holder.view.currentMonth.getMonthValue());
 		}
 

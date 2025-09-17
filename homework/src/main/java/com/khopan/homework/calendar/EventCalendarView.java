@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
 public class EventCalendarView extends ViewGroup {
@@ -16,6 +17,8 @@ public class EventCalendarView extends ViewGroup {
 	private float pressedX;
 	private float pressedY;
 
+	private final int touchSlop;
+
 	public EventCalendarView(final Context context) {
 		super(context);
 
@@ -26,6 +29,7 @@ public class EventCalendarView extends ViewGroup {
 		this.context = context;
 		this.addView(this.calendarView = CalendarView.create(this.context));
 		this.addView(this.eventView = EventView.create(this.context));
+		this.touchSlop = ViewConfiguration.get(this.context).getScaledTouchSlop();
 		this.separatorY = 650.0f;
 		this.pressedX = 0.0f;
 		this.pressedY = 0.0f;
@@ -50,20 +54,39 @@ public class EventCalendarView extends ViewGroup {
 		}
 	}
 
+	private boolean dragging;
+	private float pressedSeparatorY;
+
 	@Override
 	public boolean onInterceptTouchEvent(final MotionEvent event) {
+		//Log.i("Homework", "onInterceptTouchEvent(" + this.action(event.getActionMasked()) + ", " + event.getX() + ", " + event.getY() + ")");
+
 		switch(event.getActionMasked()) {
 		case MotionEvent.ACTION_DOWN:
 			this.pressedX = event.getX();
 			this.pressedY = event.getY();
+			this.pressedSeparatorY = this.separatorY;
+			this.dragging = false;
 			break;
-		case MotionEvent.ACTION_MOVE:
+		case MotionEvent.ACTION_MOVE: {
+			final float deltaX = event.getX() - this.pressedX;
+			final float deltaY = event.getY() - this.pressedY;
+			Log.i("Homework", "deltaX: " + deltaX + " deltaY: " + deltaY);
+
+			if(Math.abs(deltaX) >= Math.abs(deltaY) || Math.abs(deltaY) < this.touchSlop) {
+				this.dragging = false;
+				break;
+			}
+
+			Log.i("Homework", "Dragging");
+			this.dragging = true;
+			this.separatorY = this.pressedSeparatorY + deltaY + (deltaY > 0 ? -this.touchSlop : this.touchSlop);
+			this.requestLayout();
 			break;
 		}
+		}
 
-		Log.i("Homework", "onInterceptTouchEvent(" + this.action(event.getActionMasked()) + ", " + event.getX() + ", " + event.getY() + ")");
-		return super.onInterceptTouchEvent(event);
-		//return true;
+		return this.dragging;
 	}
 
 	@Override
@@ -88,7 +111,8 @@ public class EventCalendarView extends ViewGroup {
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	public boolean onTouchEvent(final MotionEvent event) {
-		Log.i("Homework", "onTouchEvent(" + event.getX() + ", " + event.getY() + ")");
+		//Log.i("Homework", "onTouchEvent(" + event.getX() + ", " + event.getY() + ")");
+		this.onInterceptTouchEvent(event);
 		//return super.onTouchEvent(event);
 		return true;
 	}
