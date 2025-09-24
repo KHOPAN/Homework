@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
 import java.time.chrono.IsoChronology;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 
 class CalendarView extends View {
@@ -43,7 +44,7 @@ class CalendarView extends View {
 
 		for(int y = 0; y < this.rows; y++) {
 			for(int x = 0; x < 7; x++) {
-				final LocalDate date = this.currentDate.plusDays(y * 7L + x);
+				final LocalDate date = this.currentDate.plusDays(y * 7L + x).minusDays(this.currentMonth.atDay(1).get(ChronoField.DAY_OF_WEEK) - 1);
 				this.paint.setColor(0xFFFF0000);
 				this.paint.setStyle(Paint.Style.STROKE);
 				this.paint.setStrokeWidth(5.0f);
