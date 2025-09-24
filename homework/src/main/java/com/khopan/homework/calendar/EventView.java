@@ -2,20 +2,26 @@ package com.khopan.homework.calendar;
 
 import android.content.Context;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
-class EventView {
-	static @NonNull View create(@NonNull final Context context) {
-		final ViewPager2 pager = new ViewPager2(context);
-		pager.setAdapter(new EventView.Adapter(context));
-		return pager;
+class EventView extends LinearLayout {
+	private final Context context;
+
+	private EventView(Context context) {
+		super(context);
+		this.context = context;
 	}
 
-	private static class Adapter extends RecyclerView.Adapter<EventView.ViewHolder> {
+	static @NonNull View create(@NonNull final Context context) {
+		//final ViewPager2 pager = new ViewPager2(context);
+		//pager.setAdapter(new EventView.Adapter(context));
+		//return pager;
+		return new EventView(context);
+	}
+
+	/*private static class Adapter extends RecyclerView.Adapter<EventView.ViewHolder> {
 		private final Context context;
 
 		private Adapter(@NonNull final Context context) {
@@ -43,5 +49,5 @@ class EventView {
 		private ViewHolder(@NonNull final View view) {
 			super(view);
 		}
-	}
+	}*/
 }
