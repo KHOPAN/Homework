@@ -1,5 +1,6 @@
 package com.khopan.homework.calendar;
 
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
@@ -7,6 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 
 public class EventCalendarView extends ViewGroup {
 	private final Context context;
@@ -18,6 +20,11 @@ public class EventCalendarView extends ViewGroup {
 	private float pressedY;
 
 	private final int touchSlop;
+
+	private Position position;
+	private double positionWeek;
+	private double positionSplit;
+	private double positionMonth;
 
 	public EventCalendarView(final Context context) {
 		super(context);
@@ -33,6 +40,7 @@ public class EventCalendarView extends ViewGroup {
 		this.separatorY = 650.0f;
 		this.pressedX = 0.0f;
 		this.pressedY = 0.0f;
+		this.position = Position.SPLIT;
 	}
 
 	private String action(final int action) {
@@ -84,6 +92,38 @@ public class EventCalendarView extends ViewGroup {
 			this.requestLayout();
 			break;
 		}
+		case MotionEvent.ACTION_UP: {
+			if(!this.dragging) {
+				break;
+			}
+
+			final float deltaY = this.pressedY - event.getY();
+
+			switch(this.position) {
+			case WEEK:
+				this.position = deltaY > 0 ? Position.WEEK : Position.SPLIT;
+				break;
+			case MONTH:
+				this.position = deltaY > 0 ? Position.SPLIT : Position.MONTH;
+				break;
+			default:
+				this.position = deltaY > 0 ? Position.WEEK : Position.MONTH;
+				break;
+			}
+
+			final ValueAnimator animator = ValueAnimator.ofFloat(this.separatorY, (float) (Position.WEEK.equals(this.position) ? this.positionWeek : Position.MONTH.equals(this.position) ? this.positionMonth : this.positionSplit));
+			animator.setDuration(250);
+			animator.setInterpolator(new DecelerateInterpolator());
+			animator.addUpdateListener(animation -> {
+				this.separatorY = (float) animation.getAnimatedValue();
+				this.requestLayout();
+			});
+
+			animator.start();
+			this.dragging = false;
+			this.postInvalidateOnAnimation();
+			return true;
+		}
 		}
 
 		return this.dragging;
@@ -91,10 +131,24 @@ public class EventCalendarView extends ViewGroup {
 
 	@Override
 	protected void onLayout(final boolean changed, final int left, final int top, final int right, final int bottom) {
-		final int width = this.getWidth();
+		/*final int width = this.getWidth();
 		final int separatorY = Math.round(this.separatorY);
 		this.calendarView.layout(0, 0, width, separatorY);
-		this.eventView.layout(0, separatorY, width, this.getHeight());
+		this.eventView.layout(0, separatorY, width, this.getHeight());*/
+
+		final int width = this.getWidth();
+		final int height = this.getHeight();
+		this.positionWeek = ((double) height) / 10.0d;
+		this.positionSplit = ((double) height) / 2.0d;
+		this.positionMonth = height;
+
+		if(this.separatorY < 0.0f) {
+			this.separatorY = (float) (Position.WEEK.equals(this.position) ? this.positionWeek : Position.MONTH.equals(this.position) ? this.positionMonth : this.positionSplit);
+		}
+
+		final int divider = Math.round(this.separatorY = (float) Math.min(Math.max(this.separatorY, this.positionWeek), this.positionMonth));
+		this.calendarView.layout(0, 0, width, divider);
+		this.eventView.layout(0, divider, width, height);
 	}
 
 	@Override
@@ -117,34 +171,9 @@ public class EventCalendarView extends ViewGroup {
 		return true;
 	}
 
-	/*@Override
-	public void onNestedScroll(@NonNull View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed, int type, @NonNull int[] consumed) {
-		Log.i("Homework", "onNestedScroll()");
+	private enum Position {
+		WEEK,
+		SPLIT,
+		MONTH
 	}
-
-	@Override
-	public boolean onStartNestedScroll(@NonNull View child, @NonNull View target, int axes, int type) {
-		Log.i("Homework", "onStartNestedScroll()");
-		return true;
-	}
-
-	@Override
-	public void onNestedScrollAccepted(@NonNull View child, @NonNull View target, int axes, int type) {
-		Log.i("Homework", "onNestedScrollAccepted()");
-	}
-
-	@Override
-	public void onStopNestedScroll(@NonNull View target, int type) {
-		Log.i("Homework", "onStopNestedScroll()");
-	}
-
-	@Override
-	public void onNestedScroll(@NonNull View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed, int type) {
-		Log.i("Homework", "onNestedScroll()");
-	}
-
-	@Override
-	public void onNestedPreScroll(@NonNull View target, int dx, int dy, @NonNull int[] consumed, int type) {
-		Log.i("Homework", "onNestedPreScroll()");
-	}*/
 }
