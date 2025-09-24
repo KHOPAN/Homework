@@ -11,19 +11,19 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 
 public class EventCalendarView extends ViewGroup {
-	private final Context context;
+	final Context context;
 	private final View calendarView;
 	private final View eventView;
 
-	private float separatorY;
+	float separatorY;
 	private float pressedX;
 	private float pressedY;
 
 	private final int touchSlop;
 
 	private Position position;
-	private double positionWeek;
-	private double positionSplit;
+	double positionWeek;
+	double positionSplit;
 	private double positionMonth;
 
 	public EventCalendarView(final Context context) {
@@ -34,7 +34,7 @@ public class EventCalendarView extends ViewGroup {
 		}
 
 		this.context = context;
-		this.addView(this.calendarView = CalendarView.create(this.context));
+		this.addView(this.calendarView = CalendarView.create(this));
 		this.addView(this.eventView = EventView.create(this.context));
 		this.touchSlop = ViewConfiguration.get(this.context).getScaledTouchSlop();
 		this.separatorY = 650.0f;

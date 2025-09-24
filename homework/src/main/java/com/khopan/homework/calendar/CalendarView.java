@@ -1,9 +1,7 @@
 package com.khopan.homework.calendar;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -15,32 +13,33 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
 import java.time.chrono.IsoChronology;
-import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.util.Random;
 
 class CalendarView extends View {
 	private static final YearMonth EPOCH = YearMonth.from(LocalDate.ofEpochDay(0L));
 
-	private final Context context;
+	private final EventCalendarView view;
 	private final Paint paint;
 
 	private YearMonth currentMonth;
 	private LocalDate currentDate;
 	private int rows;
 
-	private CalendarView(@NonNull final Context context) {
-		super(context);
-		this.context = context;
+	private CalendarView(@NonNull final EventCalendarView view) {
+		super(view.context);
+		this.view = view;
 		this.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		this.paint = new Paint();
 	}
 
 	@Override
 	protected void onDraw(final Canvas canvas) {
+		final double factor = Math.min(Math.max(1.0d - (this.view.separatorY - this.view.positionWeek) / (this.view.positionSplit - this.view.positionWeek), 0.0d), 1.0d);
+
 		final int width = this.getWidth();
 		final float cellWidth = ((float) width) / 7.0f;
-		final float cellHeight = ((float) this.getHeight()) / ((float) this.rows);
+		final float cellHeight = ((float) Math.max(this.getHeight(), this.view.positionSplit)) / ((float) this.rows);
+		final float offset = (float) (-cellHeight * factor);
 
 		for(int y = 0; y < this.rows; y++) {
 			for(int x = 0; x < 7; x++) {
@@ -48,27 +47,27 @@ class CalendarView extends View {
 				this.paint.setColor(0xFFFF0000);
 				this.paint.setStyle(Paint.Style.STROKE);
 				this.paint.setStrokeWidth(5.0f);
-				canvas.drawRoundRect(cellWidth * x, cellHeight * y, cellWidth * (x + 1), cellHeight * (y + 1), 10.0f, 10.0f, this.paint);
+				canvas.drawRoundRect(cellWidth * x, cellHeight * y + offset, cellWidth * (x + 1), cellHeight * (y + 1) + offset, 10.0f, 10.0f, this.paint);
 				this.paint.setStyle(Paint.Style.FILL);
 				this.paint.setColor(0xFF00FF00);
 				final String text = String.valueOf(date.getDayOfMonth());
-				canvas.drawText(text, cellWidth * (((float) x) + 0.5f) - this.paint.measureText(text) / 2.0f, cellHeight * y + 10.0f, this.paint);
+				canvas.drawText(text, cellWidth * (((float) x) + 0.5f) - this.paint.measureText(text) / 2.0f, cellHeight * y + 10.0f + offset, this.paint);
 			}
 		}
 	}
 
-	static @NonNull View create(@NonNull final Context context) {
-		final ViewPager2 pager = new ViewPager2(context);
-		pager.setAdapter(new Adapter(context));
+	static @NonNull View create(@NonNull final EventCalendarView view) {
+		final ViewPager2 pager = new ViewPager2(view.context);
+		pager.setAdapter(new Adapter(view));
 		pager.setCurrentItem((int) ChronoUnit.MONTHS.between(CalendarView.EPOCH, YearMonth.now()));
 		return pager;
 	}
 
 	private static class Adapter extends RecyclerView.Adapter<ViewHolder> {
-		private final Context context;
+		private final EventCalendarView view;
 
-		private Adapter(@NonNull final Context context) {
-			this.context = context;
+		private Adapter(@NonNull final EventCalendarView view) {
+			this.view = view;
 		}
 
 		@Override
@@ -79,7 +78,7 @@ class CalendarView extends View {
 		@NonNull
 		@Override
 		public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-			return new ViewHolder(new CalendarView(this.context));
+			return new ViewHolder(new CalendarView(view));
 		}
 
 		@Override
