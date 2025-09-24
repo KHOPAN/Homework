@@ -2,6 +2,7 @@ package com.khopan.homework.calendar;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -26,6 +27,8 @@ class CalendarView extends View {
 	private LocalDate currentDate;
 	private int rows;
 
+	private int selectedIndex;
+
 	private CalendarView(@NonNull final EventCalendarView view) {
 		super(view.context);
 		this.view = view;
@@ -48,13 +51,31 @@ class CalendarView extends View {
 				this.paint.setColor(0xFFFF0000);
 				this.paint.setStyle(Paint.Style.STROKE);
 				this.paint.setStrokeWidth(5.0f);
-				canvas.drawRoundRect(cellWidth * x, cellHeight * y + offset, cellWidth * (x + 1), cellHeight * (y + 1) + offset, 10.0f, 10.0f, this.paint);
+
+				if(y * 7 + x == this.selectedIndex) {
+					canvas.drawRoundRect(cellWidth * x, cellHeight * y + offset, cellWidth * (x + 1), cellHeight * (y + 1) + offset, 10.0f, 10.0f, this.paint);
+				}
+
 				this.paint.setStyle(Paint.Style.FILL);
 				this.paint.setColor(0xFF00FF00);
 				final String text = String.valueOf(date.getDayOfMonth());
 				canvas.drawText(text, cellWidth * (((float) x) + 0.5f) - this.paint.measureText(text) / 2.0f, cellHeight * y + 10.0f + offset, this.paint);
 			}
 		}
+	}
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		switch(event.getActionMasked()) {
+		case MotionEvent.ACTION_DOWN:
+			return true;
+		case MotionEvent.ACTION_UP:
+			this.selectedIndex = (int) (event.getX() * 7 / this.getWidth() + event.getY() * this.rows / this.getHeight() * 7 - 1);
+			this.invalidate();
+			return true;
+		}
+
+		return super.onTouchEvent(event);
 	}
 
 	static @NonNull View create(@NonNull final EventCalendarView view) {
