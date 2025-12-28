@@ -1,3 +1,5 @@
 <resources>
 	<string name="applicationName">Homework</string>
+	<string name="menuNewAssignment">New assignment</string>
+	<string name="menuSettings">Settings</string>
 </resources>
