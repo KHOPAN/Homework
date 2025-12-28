@@ -3,13 +3,13 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto">
 	<item android:id="@+id/menu_new_assignment"
 		android:icon="@drawable/ic_oui_add"
-		android:title="@string/menuNewAssignment"
+		android:title="@string/newAssignment"
 		app:iconTint="?actionMenuTextColor"
 		app:showAsAction="always" />
 
 	<item android:id="@+id/menu_settings"
 		android:icon="@drawable/ic_oui_settings_outline"
-		android:title="@string/menuSettings"
+		android:title="@string/settings"
 		app:iconTint="?actionMenuTextColor"
 		app:showAsAction="always" />
 
