@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="com.sec.sesl.khopan.homework">
-	<application android:icon="@mipmap/launcher_icon"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+	<application android:allowBackup="true"
+		android:icon="@mipmap/ic_launcher"
 		android:label="@string/applicationName"
-		android:roundIcon="@mipmap/launcher_icon"
+		android:roundIcon="@mipmap/ic_launcher_round"
 		android:supportsRtl="true"
 		android:theme="@style/OneUITheme">
 		<meta-data android:name="SamsungBasicInteraction"
@@ -17,14 +16,15 @@
 			android:value="ADAPTIVEICON_SHADOW" />
 
 		<meta-data android:name="theming-meta"
-			android:value="samsung_metadata" />
+			android:value="theme_metadata" />
 
 		<meta-data android:name="theming-meta-xml"
-			android:value="@xml/samsung_metadata" />
+			android:value="@xml/theme_metadata" />
 
-		<activity android:exported="true"
+		<activity android:name="com.khopan.homework.HomeworkApplication"
+			android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize"
 			android:launchMode="singleTop"
-			android:name="com.khopan.homework.HomeworkApplication">
+			android:exported="true">
 			<meta-data android:name="com.sec.android.app.launcher.icon_theme"
 				android:value="themeColor" />
 

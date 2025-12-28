@@ -1,24 +1,16 @@
 plugins {
-	alias(libs.plugins.android.application)
-}
-
-repositories {
-	google()
-	mavenCentral()
+	alias(libs.plugins.android.library)
 }
 
 android {
-	namespace "com.khopan.homework"
+	namespace "com.khopan.core"
 	compileSdk {
 		version = release(35)
 	}
 
 	defaultConfig {
-		applicationId "com.khopan.homework"
 		minSdk 26
 		targetSdk 35
-		versionCode 1
-		versionName "1.0.0"
 	}
 
 	buildTypes {
@@ -35,7 +27,5 @@ android {
 }
 
 dependencies {
-	implementation "io.github.oneuiproject:icons:1.1.0"
 	implementation "io.github.tribalfs:oneui-design:0.8.13+oneui8"
-	implementation project(path: ":core")
 }

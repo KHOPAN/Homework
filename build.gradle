@@ -1,53 +1,34 @@
-buildscript {
-	apply from: 'manifest.gradle'
-	repositories {
-		google()
-		mavenCentral()
-		maven {
-			url 'https://jitpack.io'
-		}
-	}
-
-	dependencies {
-		classpath 'com.android.tools.build:gradle:7.4.2'
-	}
+plugins {
+	alias(libs.plugins.android.application) apply false
+	alias(libs.plugins.android.library) apply false
 }
 
 allprojects {
 	repositories {
 		google()
-		mavenLocal()
 		mavenCentral()
 		maven {
-			url 'https://jitpack.io'
-		}
-	}
-
-	tasks.withType(Javadoc) {
-		options.addStringOption('Xdoclint:none', '-quiet')
-		options.addStringOption('encoding', 'UTF-8')
-		options.addStringOption('charSet', 'UTF-8')
-	}
-}
-
-subprojects {
-	afterEvaluate {
-		if(!plugins.hasPlugin('signing')) {
-			return
-		}
-
-		android {
-			publishing {
-				singleVariant("release") {
-					withSourcesJar()
-					withJavadocJar()
-				}
+			url = uri("https://maven.pkg.github.com/tribalfs/sesl-androidx")
+			credentials {
+				username = project.property("github.username")
+				password = project.property("github.token")
 			}
 		}
 
-		signing {
-			useInMemoryPgpKeys(System.getenv("SIGNING_KEYID"), System.getenv("SIGNING_PRIVATE_KEY"), System.getenv("SIGNING_PASSWORD"))
-			sign publishing.publications
+		maven {
+			url = uri("https://maven.pkg.github.com/tribalfs/sesl-material-components-android")
+			credentials {
+				username = project.property("github.username")
+				password = project.property("github.token")
+			}
+		}
+
+		maven {
+			url = uri("https://maven.pkg.github.com/tribalfs/oneui-design")
+			credentials {
+				username = project.property("github.username")
+				password = project.property("github.token")
+			}
 		}
 	}
 }

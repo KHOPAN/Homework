@@ -1,5 +1,3 @@
-<resources xmlns:tools="http://schemas.android.com/tools"
-	tools:ignore="MissingTranslation">
+<resources>
 	<string name="applicationName">Homework</string>
-	<string name="fragment_settings">Settings</string>
 </resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ThemeMetaData FormatVersion="1.3"
+	GuideVersion="1.4">
+	<AppMetaData Name="Homework"
+		TargetApi="35"
+		TargetPackageName="com.khopan.homework"
+		VersionCode="1"
+		VersionName="1.0.0">
+		<Include RefName="SESL" />
+	</AppMetaData>
+</ThemeMetaData>
