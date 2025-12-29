@@ -2,4 +2,6 @@
 	<string name="applicationName">Homework</string>
 	<string name="newAssignment">New assignment</string>
 	<string name="settings">Settings</string>
+	<string name="subject">Subject</string>
+	<string name="deadline">Deadline</string>
 </resources>
