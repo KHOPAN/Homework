@@ -3,13 +3,17 @@ package com.khopan.homework.activity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatSpinner;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.widget.NestedScrollView;
 import androidx.picker.app.SeslDatePickerDialog;
 
@@ -35,8 +39,36 @@ public class NewAssignmentActivity extends ToolbarActivity {
 		super.onCreate(bundle);
 		this.toolbarLayout.setShowNavigationButtonAsBack(true);
 		this.toolbarLayout.setTitle(this.getString(R.string.newAssignment));
+		LayoutInflater.from(this).inflate(R.layout.new_assignment_activity, this.toolbarLayout);
+		/*final LinearLayout root = new LinearLayout(this);
+		root.setLayoutParams(new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		root.setOrientation(LinearLayout.VERTICAL);
+		root.addView(this.that());
+
+		final TypedValue value = new TypedValue();
+		// R.style.OneUI_ContainedButton;
+		this.getTheme().resolveAttribute(androidx.appcompat.R.attr.buttonStyle, value, true);
+		final AppCompatButton button = new AppCompatButton(new ContextThemeWrapper(this, value.data));
+
+		button.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+		button.setText("text");
+		button.setFocusable(true);
+		button.setClickable(true);
+
+		root.addView(button);
+		this.toolbarLayout.addView(root);*/
+	}
+
+	private void updateDeadlineView() {
+		this.deadlineView.setSummary(this.deadline.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.getDefault())));
+	}
+
+	private View that() {
 		final NestedScrollView scrollView = new NestedScrollView(this);
-		scrollView.setLayoutParams(new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		//scrollView.setLayoutParams(new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		//scrollView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		scrollView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1.0f));
 		scrollView.setFillViewport(true);
 		scrollView.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
 		final LinearLayout linearLayout = new LinearLayout(this);
@@ -79,10 +111,6 @@ public class NewAssignmentActivity extends ToolbarActivity {
 		linearLayout.addView(deadlineLayout);
 
 		scrollView.addView(linearLayout);
-		this.toolbarLayout.addView(scrollView);
-	}
-
-	private void updateDeadlineView() {
-		this.deadlineView.setSummary(this.deadline.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.getDefault())));
+		return scrollView;
 	}
 }
