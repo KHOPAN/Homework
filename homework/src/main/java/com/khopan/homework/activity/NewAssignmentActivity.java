@@ -2,6 +2,7 @@ package com.khopan.homework.activity;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.widget.Button;
 
 import androidx.annotation.Nullable;
 import androidx.picker.app.SeslDatePickerDialog;
@@ -27,6 +28,8 @@ public class NewAssignmentActivity extends ToolbarActivity {
 		this.toolbarLayout.setTitle(this.getString(R.string.newAssignment));
 		LayoutInflater.from(this).inflate(R.layout.new_assignment_activity, this.toolbarLayout);
 		this.deadlineView = this.findViewById(R.id.deadlineView);
+		this.<Button>findViewById(R.id.cancelButton).setOnClickListener(view -> this.getOnBackPressedDispatcher().onBackPressed());
+		final Button addButton = this.findViewById(R.id.addButton);
 		this.deadline = LocalDate.now();
 		this.deadlineView.setOnClickListener(view -> new SeslDatePickerDialog(this, (picker, year, month, day) -> {
 			this.deadline = LocalDate.of(year, month + 1, day);
