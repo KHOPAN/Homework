@@ -14,11 +14,12 @@ import androidx.core.view.MenuProvider;
 import com.khopan.core.activity.NavigationDrawerActivity;
 import com.khopan.homework.activity.NewAssignmentActivity;
 import com.khopan.homework.activity.SettingsActivity;
+import com.khopan.homework.fragment.StudentFragment;
 
 public class HomeworkApplication extends NavigationDrawerActivity {
 	public HomeworkApplication() {
 		this.drawerItems.add(DrawerEntry.create(0, "Assignment", null));
-		this.drawerItems.add(DrawerEntry.create(0, "Student", null));
+		this.drawerItems.add(DrawerEntry.create(0, "Student", new StudentFragment()));
 		this.drawerItems.add(DrawerEntry.create(0, "Teacher", null));
 		this.drawerItems.add(DrawerEntry.create(0, "Subject", null));
 		this.drawerItems.add(DrawerEntry.create(0, "Group", null));
