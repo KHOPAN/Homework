@@ -16,6 +16,14 @@ import com.khopan.homework.activity.NewAssignmentActivity;
 import com.khopan.homework.activity.SettingsActivity;
 
 public class HomeworkApplication extends NavigationDrawerActivity {
+	public HomeworkApplication() {
+		this.drawerItems.add(DrawerEntry.create(0, "Assignment", null));
+		this.drawerItems.add(DrawerEntry.create(0, "Student", null));
+		this.drawerItems.add(DrawerEntry.create(0, "Teacher", null));
+		this.drawerItems.add(DrawerEntry.create(0, "Subject", null));
+		this.drawerItems.add(DrawerEntry.create(0, "Group", null));
+	}
+
 	@Override
 	public void onCreate(@Nullable final Bundle bundle) {
 		super.onCreate(bundle);
