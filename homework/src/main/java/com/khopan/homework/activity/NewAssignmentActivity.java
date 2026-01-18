@@ -26,7 +26,7 @@ public class NewAssignmentActivity extends ToolbarActivity {
 		super.onCreate(bundle);
 		this.toolbarLayout.setShowNavigationButtonAsBack(true);
 		this.toolbarLayout.setTitle(this.getString(R.string.newAssignment));
-		LayoutInflater.from(this).inflate(R.layout.new_assignment_activity, this.toolbarLayout);
+		LayoutInflater.from(this).inflate(R.layout.activity_new_assignment, this.toolbarLayout);
 		this.deadlineView = this.findViewById(R.id.deadlineView);
 		this.<Button>findViewById(R.id.cancelButton).setOnClickListener(view -> this.getOnBackPressedDispatcher().onBackPressed());
 		final Button addButton = this.findViewById(R.id.addButton);
