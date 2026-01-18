@@ -1,6 +1,7 @@
 package com.khopan.core.fragment;
 
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,8 @@ public abstract class FunctionalFragment extends ContextedFragment {
 		final NestedScrollView scrollView = (NestedScrollView) view;
 		scrollView.setFillViewport(true);
 		scrollView.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
+		final int padding = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10.0f, this.context.getResources().getDisplayMetrics()));
+		scrollView.setPadding(padding, 0, padding, 0);
 		scrollView.addView(this.initialize());
 	}
 

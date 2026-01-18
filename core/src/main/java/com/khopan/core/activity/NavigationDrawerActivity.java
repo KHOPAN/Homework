@@ -3,6 +3,7 @@ package com.khopan.core.activity;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,13 +18,17 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.slidingpanelayout.widget.SlidingPaneLayout;
 
+import com.khopan.core.CoreLayout;
 import com.khopan.core.R;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 import dev.oneuiproject.oneui.layout.DrawerLayout;
+import dev.oneuiproject.oneui.layout.NavDrawerLayout;
 import dev.oneuiproject.oneui.layout.ToolbarLayout;
 import dev.oneuiproject.oneui.utils.TypefaceUtilsKt;
 
@@ -40,8 +45,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 	@Override
 	public void onCreate(@Nullable final Bundle bundle) {
 		super.onCreate(bundle);
-		final DrawerLayout drawerLayout = (DrawerLayout) this.toolbarLayout;
-		drawerLayout.setNavigationButtonIcon(AppCompatResources.getDrawable(this, R.drawable.icon_drawer));
+		this.drawerLayout.setNavigationButtonIcon(AppCompatResources.getDrawable(this, R.drawable.icon_drawer));
 		final RecyclerView recyclerView = new RecyclerView(this);
 		final ToolbarLayout.ToolbarLayoutParams recyclerViewParams = new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 		recyclerViewParams.layoutLocation = DrawerLayout.DRAWER_PANEL;
@@ -50,7 +54,32 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		recyclerView.setHasFixedSize(true);
 		recyclerView.setItemAnimator(null);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
-		drawerLayout.addView(recyclerView);
+		CoreLayout.forceEnableScrollbars(recyclerView, false, true);
+
+		try {
+			final Method getContainerLayoutMethod = NavDrawerLayout.class.getDeclaredMethod("getContainerLayout$oneui_design_release");
+			getContainerLayoutMethod.setAccessible(true);
+			final Object containerLayout = getContainerLayoutMethod.invoke(NavigationDrawerActivity.this.drawerLayout);
+
+			if(containerLayout instanceof SlidingPaneLayout) {
+				((SlidingPaneLayout) containerLayout).addPanelSlideListener(new SlidingPaneLayout.PanelSlideListener() {
+					@Override
+					public void onPanelClosed(@NonNull final View view) {}
+
+					@Override
+					public void onPanelOpened(@NonNull final View view) {}
+
+					@Override
+					public void onPanelSlide(@NonNull final View view, final float time) {
+						final DisplayMetrics metrics = NavigationDrawerActivity.this.getResources().getDisplayMetrics();
+						final float iconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 44.0f, metrics);
+						NavigationDrawerActivity.this.adapter.notifyItemRangeChanged(0, NavigationDrawerActivity.this.drawerItems.size(), new Payload(time, (int) (time * (((SlidingPaneLayout) containerLayout).seslGetPreferredDrawerPixelSize() - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 85.0f / 3.0f, metrics) - iconSize) + iconSize)));
+					}
+				});
+			}
+		} catch(final Throwable ignored) {}
+
+		this.drawerLayout.addView(recyclerView);
 	}
 
 	protected void setSelectedItem(final int position) {
@@ -62,7 +91,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			this.setFragment(entry.fragment);
 		}
 
-		((DrawerLayout) this.toolbarLayout).setDrawerOpen(false, true);
+		this.drawerLayout.setDrawerOpen(false, true);
 	}
 
 	private int getPixelSize(final float size) {
@@ -94,6 +123,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		private Adapter() {
 			this.normal = TypefaceUtilsKt.getRegularFont();
 			this.selected = TypefaceUtilsKt.getSemiBoldFont();
+			this.selectedItem = -1;
 			this.setHasStableIds(true);
 		}
 
@@ -126,6 +156,42 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			holder.itemView.setSelected(selected);
 			holder.textView.setText(entry.text);
 			holder.textView.setTypeface(selected ? this.selected : this.normal);
+			final float time = NavigationDrawerActivity.this.drawerLayout.getDrawerOffset();
+			holder.textView.setAlpha(time);
+			final DisplayMetrics metrics = NavigationDrawerActivity.this.getResources().getDisplayMetrics();
+			final float iconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 44.0f, metrics);
+
+			try {
+				final Method getContainerLayoutMethod = NavDrawerLayout.class.getDeclaredMethod("getContainerLayout$oneui_design_release");
+				getContainerLayoutMethod.setAccessible(true);
+				final Object containerLayout = getContainerLayoutMethod.invoke(NavigationDrawerActivity.this.drawerLayout);
+
+				if(containerLayout instanceof SlidingPaneLayout) {
+					final ViewGroup.LayoutParams params = holder.itemView.getLayoutParams();
+					params.width = (int) (time * (((SlidingPaneLayout) containerLayout).seslGetPreferredDrawerPixelSize() - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 85.0f / 3.0f, metrics) - iconSize) + iconSize);
+					holder.itemView.setLayoutParams(params);
+				}
+			} catch(final Throwable ignored) {}
+		}
+
+		@Override
+		public void onBindViewHolder(@NonNull final ViewHolder holder, final int position, @NonNull final List<Object> payloads) {
+			if(payloads.isEmpty()) {
+				this.onBindViewHolder(holder, position);
+				return;
+			}
+
+			for(final Object payload : payloads) {
+				if(!(payload instanceof Payload)) {
+					continue;
+				}
+
+				final Payload value = (Payload) payload;
+				holder.textView.setAlpha(value.time);
+				final ViewGroup.LayoutParams params = holder.itemView.getLayoutParams();
+				params.width = value.width;
+				holder.itemView.setLayoutParams(params);
+			}
 		}
 
 		@NonNull
@@ -145,6 +211,16 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			this.notifyItemChanged(previousItem);
 			this.notifyItemChanged(this.selectedItem);
 			NavigationDrawerActivity.this.onDrawerSelected(entry, true);
+		}
+	}
+
+	private static class Payload {
+		private final float time;
+		private final int width;
+
+		private Payload(final float time, final int width) {
+			this.time = time;
+			this.width = width;
 		}
 	}
 
