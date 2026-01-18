@@ -1,6 +1,8 @@
 package com.khopan.homework;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -15,6 +17,9 @@ import com.khopan.core.activity.NavigationDrawerActivity;
 import com.khopan.homework.activity.NewAssignmentActivity;
 import com.khopan.homework.activity.SettingsActivity;
 import com.khopan.homework.fragment.StudentFragment;
+import com.khopan.homework.receiver.ReminderReceiver;
+
+import java.util.Calendar;
 
 public class HomeworkApplication extends NavigationDrawerActivity {
 	public HomeworkApplication() {
@@ -29,6 +34,12 @@ public class HomeworkApplication extends NavigationDrawerActivity {
 	public void onCreate(@Nullable final Bundle bundle) {
 		super.onCreate(bundle);
 		this.addMenuProvider(new Provider());
+		final Calendar calendar = Calendar.getInstance();
+		calendar.set(2026, Calendar.JANUARY, 19, 1, 1, 0);
+		final Intent intent = new Intent(this, ReminderReceiver.class);
+		final PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+		final AlarmManager manager = this.getSystemService(AlarmManager.class);
+		manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
 	}
 
 	private class Provider implements MenuProvider {
