@@ -6,16 +6,35 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.core.view.NestedScrollingChild3;
 import androidx.core.view.NestedScrollingChildHelper;
 import androidx.core.view.NestedScrollingParent3;
 import androidx.core.view.NestedScrollingParentHelper;
+import androidx.core.widget.NestedScrollView;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-public class EventCalendarView extends ViewGroup implements NestedScrollingParent3, NestedScrollingChild3 {
+public class EventCalendarView extends NestedScrollView {
+	public EventCalendarView(final Context context) {
+		this(context, null, 0);
+	}
+
+	public EventCalendarView(final Context context, final AttributeSet attributeSet) {
+		this(context, attributeSet, 0);
+	}
+
+	public EventCalendarView(final Context context, final AttributeSet attributeSet, final int defaultStyleAttribute) {
+		super(context, attributeSet, defaultStyleAttribute);
+		final LinearLayout linearLayout = new LinearLayout(context);
+		linearLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		linearLayout.setOrientation(LinearLayout.VERTICAL);
+		this.addView(linearLayout);
+	}
+
+/*public class EventCalendarView extends ViewGroup implements NestedScrollingParent3, NestedScrollingChild3 {
 	private final View calendarView;
 	private final View eventView;
 	private final NestedScrollingChildHelper childHelper;
@@ -128,5 +147,5 @@ public class EventCalendarView extends ViewGroup implements NestedScrollingParen
 		final int measuredWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
 		this.calendarView.measure(measuredWidth, MeasureSpec.makeMeasureSpec(this.divider, MeasureSpec.EXACTLY));
 		this.eventView.measure(measuredWidth, MeasureSpec.makeMeasureSpec(height - this.divider, MeasureSpec.EXACTLY));
-	}
+	}*/
 }
