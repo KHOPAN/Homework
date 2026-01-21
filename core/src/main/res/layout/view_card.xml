@@ -8,6 +8,7 @@
 	android:foreground="?attr/listChoiceBackgroundIndicator"
 	android:gravity="center_vertical|start"
 	android:minHeight="?attr/listPreferredItemHeightSmall"
+	android:paddingBottom="14dp"
 	android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
 	android:paddingStart="?android:attr/listPreferredItemPaddingStart">
 	<ViewStub
@@ -44,20 +45,12 @@
 		android:textAlignment="viewStart"
 		android:textAppearance="?android:attr/textAppearanceSmall"
 		app:layout_constrainedWidth="true"
-		app:layout_constraintBottom_toTopOf="@+id/spacer_view"
+		app:layout_constraintBottom_toTopOf="parent"
 		app:layout_constraintEnd_toStartOf="parent"
 		app:layout_constraintHorizontal_bias="0.0"
 		app:layout_constraintStart_toStartOf="@+id/title_view"
 		app:layout_constraintTop_toBottomOf="@+id/title_view"
 		android:visibility="gone"
 		tools:ignore="PrivateResource" />
-
-	<Space
-		android:id="@+id/spacer_view"
-		android:layout_width="0dp"
-		android:layout_height="14dp"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/summary_view" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
