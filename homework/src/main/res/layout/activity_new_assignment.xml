@@ -20,22 +20,28 @@
 				android:layout_height="wrap_content"
 				android:background="@color/oui_des_background_color"
 				android:orientation="vertical">
-				<dev.oneuiproject.oneui.widget.CardItemView
+				<com.khopan.core.view.selectionlist.SelectionListItemView
+					android:id="@+id/subject_view"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:clickable="true"
 					app:showTopDivider="false"
-					app:title="@string/subject">
+					app:title="@string/subject" />
 
-				</dev.oneuiproject.oneui.widget.CardItemView>
 				<dev.oneuiproject.oneui.widget.CardItemView
 					android:id="@+id/deadlineView"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:clickable="true"
-					app:summary="@string/deadline">
+					app:summary="@string/deadline" />
 
-				</dev.oneuiproject.oneui.widget.CardItemView>
+				<com.khopan.core.view.card.CardView
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					app:title="Title"
+					app:summary="Test summary"
+					app:cardLocation="bottom" />
+
 			</dev.oneuiproject.oneui.widget.RoundedLinearLayout>
 		</LinearLayout>
 	</androidx.core.widget.NestedScrollView>

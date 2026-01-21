@@ -62,6 +62,7 @@ public class CardView extends RoundedLinearLayout {
 
 	public CardView(@NonNull final Context context, @Nullable final AttributeSet attributeSet, final int defaultStyleAttribute) {
 		super(context, attributeSet, defaultStyleAttribute);
+		this.setClickable(true);
 		this.setOrientation(RoundedLinearLayout.VERTICAL);
 		this.inflater = LayoutInflater.from(context);
 		final View view = this.inflater.inflate(R.layout.view_card, this, true);
