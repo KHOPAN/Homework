@@ -69,11 +69,11 @@ public class CardView extends RoundedLinearLayout {
 		this.inflater = LayoutInflater.from(context);
 		final View view = this.inflater.inflate(R.layout.view_card, this, true);
 		this.constraintLayout = view.findViewById(R.id.constraint_layout);
-		this.titleView = view.findViewById(R.id.cardview_title);
-		this.summaryView = view.findViewById(R.id.cardview_summary);
+		this.titleView = view.findViewById(R.id.title_view);
+		this.summaryView = view.findViewById(R.id.summary_view);
 		this.animator = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? new TouchFeedbackAnimator(context, this, this.constraintLayout) : null;
 		this.parseAttributes(context, attributeSet, defaultStyleAttribute);
-		final View viewss = this.<ViewStub>findViewById(R.id.viewstub_icon_frame).inflate();
+		final View viewss = this.<ViewStub>findViewById(R.id.icon_view).inflate();
 		viewss.<ImageView>findViewById(dev.oneuiproject.oneui.design.R.id.cardview_icon).setImageDrawable(context.getDrawable(R.drawable.icon_drawer));
 		final ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) this.titleView.getLayoutParams();
 		params.startToEnd = viewss.getId();
