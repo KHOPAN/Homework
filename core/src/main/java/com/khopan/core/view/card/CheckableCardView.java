@@ -13,8 +13,6 @@ import androidx.appcompat.widget.AppCompatSeslCheckedTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 
-import com.khopan.core.R;
-
 public class CheckableCardView extends CardView {
 	public static final int CHECK_TYPE_SINGLE = 0;
 	public static final int CHECK_TYPE_MULTIPLE = 1;
@@ -41,14 +39,13 @@ public class CheckableCardView extends CardView {
 		this.checkmarkDrawableSingle = value.resourceId == 0 ? null : ContextCompat.getDrawable(context, value.resourceId);
 		theme.resolveAttribute(android.R.attr.listChoiceIndicatorMultiple, value, true);
 		this.checkmarkDrawableMultiple = value.resourceId == 0 ? null : ContextCompat.getDrawable(context, value.resourceId);
-		final ConstraintLayout constraintLayout = this.findViewById(R.id.constraint_layout);
 		this.checkbox = new AppCompatSeslCheckedTextView(context);
 		final ConstraintLayout.LayoutParams checkboxParams = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		final int constraintLayoutIdentifier = constraintLayout.getId();
+		final int constraintLayoutIdentifier = this.constraintLayout.getId();
 		checkboxParams.bottomToBottom = constraintLayoutIdentifier;
 		checkboxParams.startToStart = constraintLayoutIdentifier;
 		checkboxParams.topToTop = constraintLayoutIdentifier;
-		constraintLayout.addView(this.checkbox, checkboxParams);
+		this.constraintLayout.addView(this.checkbox, checkboxParams);
 		this.setCheckType(CheckableCardView.CHECK_TYPE_SINGLE);
 	}
 

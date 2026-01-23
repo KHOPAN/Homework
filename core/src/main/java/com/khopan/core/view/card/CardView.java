@@ -9,8 +9,8 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewStub;
-import android.widget.ImageView;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -46,8 +46,9 @@ public class CardView extends RoundedLinearLayout {
 		RECOIL_ANIMATOR_FIELD = field;
 	}
 
+	protected final ConstraintLayout constraintLayout;
+
 	private final LayoutInflater inflater;
-	private final ConstraintLayout constraintLayout;
 	private final TextView titleView;
 	private final TextView summaryView;
 	private final TouchFeedbackAnimator animator;
@@ -64,20 +65,14 @@ public class CardView extends RoundedLinearLayout {
 
 	public CardView(@NonNull final Context context, @Nullable final AttributeSet attributeSet, final int defaultStyleAttribute) {
 		super(context, attributeSet, defaultStyleAttribute);
-		this.setClickable(true);
 		this.setOrientation(RoundedLinearLayout.VERTICAL);
 		this.inflater = LayoutInflater.from(context);
 		final View view = this.inflater.inflate(R.layout.view_card, this, true);
 		this.constraintLayout = view.findViewById(R.id.constraint_layout);
 		this.titleView = view.findViewById(R.id.title_view);
 		this.summaryView = view.findViewById(R.id.summary_view);
-		this.animator = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? new TouchFeedbackAnimator(context, this, this.constraintLayout) : null;
+		this.animator = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? new TouchFeedbackAnimator(this.constraintLayout) : null;
 		this.parseAttributes(context, attributeSet, defaultStyleAttribute);
-		final View viewss = this.<ViewStub>findViewById(R.id.icon_view).inflate();
-		viewss.<ImageView>findViewById(dev.oneuiproject.oneui.design.R.id.cardview_icon).setImageDrawable(context.getDrawable(R.drawable.icon_drawer));
-		final ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) this.titleView.getLayoutParams();
-		params.startToEnd = viewss.getId();
-		this.titleView.setLayoutParams(params);
 	}
 
 	@Override
