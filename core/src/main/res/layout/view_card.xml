@@ -6,15 +6,17 @@
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:animateLayoutChanges="true"
+	android:clickable="true"
+	android:focusable="true"
 	android:foreground="?attr/listChoiceBackgroundIndicator"
 	android:gravity="center_vertical|start"
 	android:minHeight="?attr/listPreferredItemHeightSmall"
-	android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
 	android:paddingStart="?android:attr/listPreferredItemPaddingStart">
 	<ViewStub
 		android:id="@+id/icon_view"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
+		android:inflatedId="@+id/icon_view"
 		android:layout="@layout/oui_des_widget_card_item_icon"
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintStart_toStartOf="parent"

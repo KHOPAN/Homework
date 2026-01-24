@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<declare-styleable name="CardView">
-		<attr format="boolean" name="android:enabled" />
-		<attr format="boolean" name="bottomDividerEnabled" />
-		<attr format="boolean" name="fullWidthDivider" />
-		<attr format="boolean" name="topDividerEnabled" />
+		<attr format="boolean" name="anchorDividersToTitle" />
+		<attr format="boolean" name="bottomDividerVisible" />
+		<attr format="boolean" name="topDividerVisible" />
+		<attr format="color" name="endIconTint" />
 		<attr format="color" name="iconTint" />
 		<attr format="reference" name="endIcon" />
 		<attr format="reference" name="icon" />
 		<attr format="string" name="summary" />
 		<attr format="string" name="title" />
 		<attr name="cardLocation">
-			<enum name="top" value="0" />
-			<enum name="middle" value="1" />
-			<enum name="bottom" value="2" />
+			<flag name="top" value="0x01" />
+			<flag name="middle" value="0x00" />
+			<flag name="bottom" value="0x02" />
+			<flag name="bottomDividerPreferred" value="0x04" />
+			<flag name="topDividerPreferred" value="0x00" />
 		</attr>
 	</declare-styleable>
 </resources>

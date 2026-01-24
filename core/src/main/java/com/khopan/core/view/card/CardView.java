@@ -1,24 +1,34 @@
 package com.khopan.core.view.card;
 
+import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.graphics.drawable.SeslRecoilDrawable;
 import androidx.appcompat.util.SeslRoundedCorner;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.khopan.core.R;
 import com.khopan.core.animator.TouchFeedbackAnimator;
@@ -28,9 +38,12 @@ import java.lang.reflect.Field;
 import dev.oneuiproject.oneui.widget.RoundedLinearLayout;
 
 public class CardView extends RoundedLinearLayout {
-	public static final int CARD_LOCATION_TOP = 0;
-	public static final int CARD_LOCATION_MIDDLE = 1;
-	public static final int CARD_LOCATION_BOTTOM = 2;
+	public static final int CARD_LOCATION_TOP = 0x01;
+	public static final int CARD_LOCATION_MIDDLE = 0x00;
+	public static final int CARD_LOCATION_BOTTOM = 0x02;
+
+	public static final int CARD_PREFERRED_DIVIDER_BOTTOM = 0x04;
+	public static final int CARD_PREFERRED_DIVIDER_TOP = 0x00;
 
 	private static final Field RECOIL_ANIMATOR_FIELD;
 
@@ -48,13 +61,15 @@ public class CardView extends RoundedLinearLayout {
 	}
 
 	protected final ConstraintLayout constraintLayout;
+	protected final TextView titleView;
+	protected final TextView summaryView;
 
-	private final LayoutInflater inflater;
-	private final TextView titleView;
-	private final TextView summaryView;
-	private final TouchFeedbackAnimator animator;
-
-	private View topDividerView;
+	protected boolean anchorDividersToTitle;
+	protected ImageView endIconView;
+	protected ImageView iconView;
+	protected FrameLayout iconHolderView;
+	protected DividerView bottomDividerView;
+	protected DividerView topDividerView;
 
 	public CardView(@NonNull final Context context) {
 		this(context, null, 0);
@@ -68,33 +83,159 @@ public class CardView extends RoundedLinearLayout {
 	public CardView(@NonNull final Context context, @Nullable final AttributeSet attributeSet, final int defaultStyleAttribute) {
 		super(context, attributeSet, defaultStyleAttribute);
 		this.setOrientation(RoundedLinearLayout.VERTICAL);
-		this.inflater = LayoutInflater.from(context);
-		final View view = this.inflater.inflate(R.layout.view_card, this, true);
+		final View view = LayoutInflater.from(context).inflate(R.layout.view_card, this, true);
 		this.constraintLayout = view.findViewById(R.id.constraint_layout);
-		this.titleView = view.findViewById(R.id.title_view);
-		this.summaryView = view.findViewById(R.id.summary_view);
-		this.animator = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? new TouchFeedbackAnimator(this.constraintLayout) : null;
-		this.parseAttributes(context, attributeSet, defaultStyleAttribute);
-
+		final TouchFeedbackAnimator animator = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? new TouchFeedbackAnimator(this.constraintLayout) : null;
 		this.constraintLayout.setOnTouchListener((layout, event) -> {
-			if(this.isEnabled() && Build.VERSION.SDK_INT >= 29) {
-				this.animator.animate(event);
+			if(this.isEnabled() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+				animator.animate(event);
 			}
 
 			return false;
 		});
+
+		this.titleView = view.findViewById(R.id.title_view);
+		this.summaryView = view.findViewById(R.id.summary_view);
+		final ValueAnimator.AnimatorUpdateListener listener = (animation) -> {
+			if(this.bottomDividerView != null) {
+				this.bottomDividerView.invalidate();
+			}
+
+			if(this.topDividerView != null) {
+				this.topDividerView.invalidate();
+			}
+		};
+
+		for(int i = LayoutTransition.CHANGE_APPEARING; i <= LayoutTransition.CHANGING; i++) {
+			final ValueAnimator animation = (ValueAnimator) this.constraintLayout.getLayoutTransition().getAnimator(i);
+
+			if(animation != null) {
+				animation.addUpdateListener(listener);
+			}
+		}
+
+		final TypedArray array = context.obtainStyledAttributes(attributeSet, R.styleable.CardView, defaultStyleAttribute, 0);
+
+		try {
+			this.setAnchorDividersToTitle(array.getBoolean(R.styleable.CardView_anchorDividersToTitle, true));
+			int roundedCorners = 0;
+			boolean bottomDividerEnabled = false;
+			boolean topDividerEnabled = true;
+
+			if(array.hasValue(R.styleable.CardView_bottomDividerVisible)) {
+				bottomDividerEnabled = array.getBoolean(R.styleable.CardView_bottomDividerVisible, true);
+			}
+
+			if(array.hasValue(R.styleable.CardView_topDividerVisible)) {
+				topDividerEnabled = array.getBoolean(R.styleable.CardView_topDividerVisible, true);
+			}
+
+			if(array.hasValue(R.styleable.CardView_cardLocation)) {
+				final int location = array.getInt(R.styleable.CardView_cardLocation, CardView.CARD_LOCATION_MIDDLE);
+				final int locationFlag = location & 0b11;
+				final boolean bottomDivider = (location & CardView.CARD_PREFERRED_DIVIDER_BOTTOM) != 0;
+				roundedCorners = (locationFlag == CardView.CARD_LOCATION_TOP ? SeslRoundedCorner.ROUNDED_CORNER_TOP_LEFT | SeslRoundedCorner.ROUNDED_CORNER_TOP_RIGHT : 0) | (locationFlag == CardView.CARD_LOCATION_BOTTOM ? SeslRoundedCorner.ROUNDED_CORNER_BOTTOM_LEFT | SeslRoundedCorner.ROUNDED_CORNER_BOTTOM_RIGHT : 0);
+				bottomDividerEnabled = bottomDivider && locationFlag != CardView.CARD_LOCATION_BOTTOM;
+				topDividerEnabled = !bottomDivider && locationFlag != CardView.CARD_LOCATION_TOP;
+			}
+
+			this.setRoundedCorners(roundedCorners);
+			this.setBottomDividerVisible(bottomDividerEnabled);
+			this.setTopDividerVisible(topDividerEnabled);
+
+			if(array.hasValue(R.styleable.CardView_endIcon)) {
+				this.setEndIcon(array.getDrawable(R.styleable.CardView_endIcon));
+			}
+
+			if(array.hasValue(R.styleable.CardView_icon)) {
+				this.setIcon(array.getDrawable(R.styleable.CardView_icon));
+			}
+
+			if(array.hasValue(R.styleable.CardView_endIconTint)) {
+				this.setEndIconTint(array.getColor(R.styleable.CardView_endIconTint, 0));
+			}
+
+			if(array.hasValue(R.styleable.CardView_iconTint)) {
+				this.setIconTint(array.getColor(R.styleable.CardView_iconTint, 0));
+			}
+
+			if(array.hasValue(R.styleable.CardView_summary)) {
+				this.setSummary(array.getString(R.styleable.CardView_summary));
+			}
+
+			if(array.hasValue(R.styleable.CardView_title)) {
+				this.setTitle(array.getString(R.styleable.CardView_title));
+			}
+		} finally {
+			array.recycle();
+		}
+	}
+
+	public boolean areDividersAnchoredToTitle() {
+		return this.anchorDividersToTitle;
+	}
+
+	public Drawable getEndIcon() {
+		return this.endIconView == null ? null : this.endIconView.getDrawable();
+	}
+
+	public ImageView getEndIconView() {
+		return this.endIconView;
+	}
+
+	public Drawable getIcon() {
+		return this.iconView == null ? null : this.iconView.getDrawable();
+	}
+
+	public ImageView getIconView() {
+		return this.iconView;
 	}
 
 	public CharSequence getSummary() {
 		return this.summaryView.getText();
 	}
 
+	public TextView getSummaryView() {
+		return this.summaryView;
+	}
+
 	public CharSequence getTitle() {
 		return this.titleView.getText();
 	}
 
-	public boolean isTopDividerEnabled() {
+	public TextView getTitleView() {
+		return this.titleView;
+	}
+
+	public boolean isBottomDividerVisible() {
+		return this.bottomDividerView != null && this.bottomDividerView.getVisibility() == View.VISIBLE;
+	}
+
+	public boolean isTopDividerVisible() {
 		return this.topDividerView != null && this.topDividerView.getVisibility() == View.VISIBLE;
+	}
+
+	@Override
+	public boolean hasOnClickListeners() {
+		return this.constraintLayout.hasOnClickListeners();
+	}
+
+	@RequiresApi(Build.VERSION_CODES.R)
+	@Override
+	public boolean hasOnLongClickListeners() {
+		return this.constraintLayout.hasOnLongClickListeners();
+	}
+
+	public void setAnchorDividersToTitle(final boolean anchor) {
+		this.anchorDividersToTitle = anchor;
+
+		if(this.bottomDividerView != null && this.bottomDividerView.getVisibility() == View.VISIBLE) {
+			this.bottomDividerView.invalidate();
+		}
+
+		if(this.topDividerView != null && this.topDividerView.getVisibility() == View.VISIBLE) {
+			this.topDividerView.invalidate();
+		}
 	}
 
 	public void resetForegroundState() {
@@ -113,13 +254,73 @@ public class CardView extends RoundedLinearLayout {
 		}
 	}
 
+	public void setBottomDividerVisible(final boolean visible) {
+		if(this.bottomDividerView != null) {
+			this.bottomDividerView.setVisibility(visible ? View.VISIBLE : View.GONE);
+			return;
+		}
+
+		if(visible) {
+			this.addView(this.bottomDividerView = new DividerView(), this.getChildCount());
+		}
+	}
+
 	public void setCardLocation(final int location) {
-		this.setRoundedCorners((location == CardView.CARD_LOCATION_TOP ? SeslRoundedCorner.ROUNDED_CORNER_TOP_LEFT | SeslRoundedCorner.ROUNDED_CORNER_TOP_RIGHT : 0) | (location == CardView.CARD_LOCATION_BOTTOM ? SeslRoundedCorner.ROUNDED_CORNER_BOTTOM_LEFT | SeslRoundedCorner.ROUNDED_CORNER_BOTTOM_RIGHT : 0));
-		this.setTopDividerEnabled(location != CardView.CARD_LOCATION_TOP);
+		final int locationFlag = location & 0b11;
+		final boolean bottomDivider = (location & CardView.CARD_PREFERRED_DIVIDER_BOTTOM) != 0;
+		this.setRoundedCorners((locationFlag == CardView.CARD_LOCATION_TOP ? SeslRoundedCorner.ROUNDED_CORNER_TOP_LEFT | SeslRoundedCorner.ROUNDED_CORNER_TOP_RIGHT : 0) | (locationFlag == CardView.CARD_LOCATION_BOTTOM ? SeslRoundedCorner.ROUNDED_CORNER_BOTTOM_LEFT | SeslRoundedCorner.ROUNDED_CORNER_BOTTOM_RIGHT : 0));
+		this.setBottomDividerVisible(bottomDivider && locationFlag != CardView.CARD_LOCATION_BOTTOM);
+		this.setTopDividerVisible(!bottomDivider && locationFlag != CardView.CARD_LOCATION_TOP);
 	}
 
 	public void setCardLocation(final int index, final int size) {
-		this.setCardLocation(index == 0 ? CardView.CARD_LOCATION_TOP : index == size - 1 ? CardView.CARD_LOCATION_BOTTOM : CardView.CARD_LOCATION_MIDDLE);
+		this.setCardLocation(index, size, CardView.CARD_PREFERRED_DIVIDER_TOP);
+	}
+
+	public void setCardLocation(final int index, final int size, final int preferredDivider) {
+		this.setCardLocation((index == 0 ? CardView.CARD_LOCATION_TOP : index == size - 1 ? CardView.CARD_LOCATION_BOTTOM : CardView.CARD_LOCATION_MIDDLE) | preferredDivider);
+	}
+
+	public void setEndIcon(final Drawable icon) {
+		this.inflateEndIconView();
+		this.endIconView.setImageDrawable(icon);
+		this.endIconView.setVisibility(icon == null ? View.GONE : View.VISIBLE);
+	}
+
+	public void setEndIconTint(final int tint) {
+		this.inflateEndIconView();
+		final Drawable drawable = this.endIconView.getDrawable();
+
+		if(drawable != null) {
+			DrawableCompat.setTint(drawable, tint);
+		}
+	}
+
+	public void setIcon(final Drawable icon) {
+		this.inflateIconView();
+		this.iconView.setImageDrawable(icon);
+		final int visibility = icon == null ? View.GONE : View.VISIBLE;
+		this.iconView.setVisibility(visibility);
+		this.iconHolderView.setVisibility(visibility);
+	}
+
+	public void setIconTint(final int tint) {
+		this.inflateIconView();
+		final Drawable drawable = this.iconView.getDrawable();
+
+		if(drawable != null) {
+			DrawableCompat.setTint(drawable, tint);
+		}
+	}
+
+	@Override
+	public void setOnClickListener(@Nullable final OnClickListener listener) {
+		this.constraintLayout.setOnClickListener(listener);
+	}
+
+	@Override
+	public void setOnLongClickListener(@Nullable final OnLongClickListener listener) {
+		this.constraintLayout.setOnLongClickListener(listener);
 	}
 
 	public void setSummary(final CharSequence summary) {
@@ -131,41 +332,73 @@ public class CardView extends RoundedLinearLayout {
 		this.titleView.setText(title);
 	}
 
-	public void setTopDividerEnabled(final boolean enabled) {
+	public void setTopDividerVisible(final boolean visible) {
 		if(this.topDividerView != null) {
-			this.topDividerView.setVisibility(enabled ? View.VISIBLE : View.GONE);
+			this.topDividerView.setVisibility(visible ? View.VISIBLE : View.GONE);
 			return;
 		}
 
-		if(enabled) {
-			this.addView(this.topDividerView = this.inflater.inflate(dev.oneuiproject.oneui.design.R.layout.oui_des_widget_card_item_divider, this, false), 0);
-			this.topDividerView.setVisibility(View.VISIBLE);
+		if(visible) {
+			this.addView(this.topDividerView = new DividerView(), 0);
 		}
 	}
 
-	protected void parseAttributes(final Context context, final AttributeSet attributeSet, final int defaultStyleAttribute) {
-		final TypedArray array = context.obtainStyledAttributes(attributeSet, R.styleable.CardView, defaultStyleAttribute, 0);
+	private void inflateEndIconView() {
+		if(this.endIconView == null) {
+			this.endIconView = (ImageView) this.constraintLayout.<ViewStub>findViewById(R.id.end_view).inflate();
+			this.endIconView.setVisibility(View.GONE);
+		}
+	}
 
-		try {
-			int roundedCorners = 0;
-			boolean topDividerEnabled = true;
+	private void inflateIconView() {
+		if(this.iconView == null) {
+			this.iconHolderView = (FrameLayout) this.constraintLayout.<ViewStub>findViewById(R.id.icon_view).inflate();
+			this.iconHolderView.setVisibility(View.GONE);
+			this.iconView = this.iconHolderView.findViewById(dev.oneuiproject.oneui.design.R.id.cardview_icon);
+			this.iconView.setVisibility(View.GONE);
+		}
+	}
 
-			if(array.hasValue(R.styleable.CardView_topDividerEnabled)) {
-				topDividerEnabled = array.getBoolean(R.styleable.CardView_topDividerEnabled, true);
+	protected class DividerView extends View {
+		private final Paint paint;
+		private final int[] locations;
+
+		private DividerView() {
+			super(CardView.this.getContext());
+			final Context context = CardView.this.getContext();
+			final Resources resources = context.getResources();
+			@SuppressLint("PrivateResource")
+			final LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, resources.getDimensionPixelSize(androidx.appcompat.R.dimen.sesl_list_divider_height));
+			final Resources.Theme theme = context.getTheme();
+			final TypedValue value = new TypedValue();
+			theme.resolveAttribute(androidx.appcompat.R.attr.listPreferredItemPaddingEnd, value, true);
+			final DisplayMetrics metrics = resources.getDisplayMetrics();
+			params.setMarginEnd(Math.round(value.getDimension(metrics)));
+			theme.resolveAttribute(androidx.appcompat.R.attr.listPreferredItemPaddingStart, value, true);
+			params.setMarginStart(Math.round(value.getDimension(metrics)));
+			this.setLayoutParams(params);
+			this.paint = new Paint();
+			theme.resolveAttribute(androidx.appcompat.R.attr.listDividerColor, value, true);
+			this.paint.setColor(resources.getColor(value.resourceId, theme));
+			this.locations = new int[2];
+		}
+
+		@Override
+		protected void onDraw(@NonNull final Canvas canvas) {
+			final int left;
+
+			if(CardView.this.anchorDividersToTitle) {
+				CardView.this.titleView.getLocationOnScreen(this.locations);
+				final int titleView = this.locations[0];
+				this.getLocationOnScreen(this.locations);
+				left = titleView - this.locations[0];
+			} else {
+				left = 0;
 			}
 
-			if(array.hasValue(R.styleable.CardView_cardLocation)) {
-				final int location = array.getInt(R.styleable.CardView_cardLocation, CardView.CARD_LOCATION_MIDDLE);
-				roundedCorners = (location == CardView.CARD_LOCATION_TOP ? SeslRoundedCorner.ROUNDED_CORNER_TOP_LEFT | SeslRoundedCorner.ROUNDED_CORNER_TOP_RIGHT : 0) | (location == CardView.CARD_LOCATION_BOTTOM ? SeslRoundedCorner.ROUNDED_CORNER_BOTTOM_LEFT | SeslRoundedCorner.ROUNDED_CORNER_BOTTOM_RIGHT : 0);
-				topDividerEnabled = location != CardView.CARD_LOCATION_TOP;
-			}
-
-			this.setRoundedCorners(roundedCorners);
-			this.setSummary(array.getString(R.styleable.CardView_summary));
-			this.setTitle(array.getString(R.styleable.CardView_title));
-			this.setTopDividerEnabled(topDividerEnabled);
-		} finally {
-			array.recycle();
+			final int width = this.getWidth();
+			final int height = this.getHeight();
+			canvas.drawRect(left, 0.0f, width, height, this.paint);
 		}
 	}
 }
