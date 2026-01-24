@@ -30,6 +30,7 @@ import androidx.appcompat.util.SeslRoundedCorner;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.drawable.DrawableCompat;
 
+import com.khopan.core.CoreLayout;
 import com.khopan.core.R;
 import com.khopan.core.animator.TouchFeedbackAnimator;
 
@@ -352,10 +353,15 @@ public class CardView extends RoundedLinearLayout {
 
 	private void inflateIconView() {
 		if(this.iconView == null) {
-			this.iconHolderView = (FrameLayout) this.constraintLayout.<ViewStub>findViewById(R.id.icon_view).inflate();
-			this.iconHolderView.setVisibility(View.GONE);
-			this.iconView = this.iconHolderView.findViewById(dev.oneuiproject.oneui.design.R.id.cardview_icon);
-			this.iconView.setVisibility(View.GONE);
+			CoreLayout.forceRemeasure(this.constraintLayout, () -> {
+				this.iconHolderView = (FrameLayout) this.constraintLayout.<ViewStub>findViewById(R.id.icon_view).inflate();
+				this.iconHolderView.setVisibility(View.VISIBLE);
+				this.iconView = this.iconHolderView.findViewById(dev.oneuiproject.oneui.design.R.id.cardview_icon);
+				this.iconView.setVisibility(View.VISIBLE);
+			}, () -> {
+				this.iconHolderView.setVisibility(View.GONE);
+				this.iconView.setVisibility(View.GONE);
+			});
 		}
 	}
 

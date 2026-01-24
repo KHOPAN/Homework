@@ -45,6 +45,22 @@ public class CoreLayout {
 		view.setVerticalScrollBarEnabled(vertical);
 	}
 
+	public static void forceRemeasure(final View view) {
+		view.measure(View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(view.getHeight(), View.MeasureSpec.EXACTLY));
+		view.layout(view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
+		view.invalidate();
+	}
+
+	public static void forceRemeasure(final ViewGroup view, final Runnable visible, final Runnable invisible) {
+		final LayoutTransition transition = view.getLayoutTransition();
+		view.setLayoutTransition(null);
+		visible.run();
+		CoreLayout.forceRemeasure(view);
+		invisible.run();
+		CoreLayout.forceRemeasure(view);
+		view.setLayoutTransition(transition);
+	}
+
 	public static void setLayoutTransition(@NonNull final ViewGroup view) {
 		final LayoutTransition transition = new LayoutTransition();
 		transition.enableTransitionType(LayoutTransition.APPEARING);
