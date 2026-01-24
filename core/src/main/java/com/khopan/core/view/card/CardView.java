@@ -75,13 +75,14 @@ public class CardView extends RoundedLinearLayout {
 		this.parseAttributes(context, attributeSet, defaultStyleAttribute);
 	}
 
+	@SuppressLint("ClickableViewAccessibility")
 	@Override
-	public boolean dispatchTouchEvent(final MotionEvent event) {
+	public boolean onTouchEvent(MotionEvent event) {
 		if(this.isEnabled() && Build.VERSION.SDK_INT >= 29) {
 			this.animator.animate(event);
 		}
 
-		return super.dispatchTouchEvent(event);
+		return super.onTouchEvent(event);
 	}
 
 	public CharSequence getSummary() {
