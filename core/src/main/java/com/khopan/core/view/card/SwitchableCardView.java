@@ -14,20 +14,20 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-public class SwitchCardView extends CheckableCardView {
+public class SwitchableCardView extends CheckableCardView {
 	private SwitchStateListener listener;
 	private SwitchCompat switchView;
 	private View dividerView;
 
-	public SwitchCardView(@NonNull final Context context) {
+	public SwitchableCardView(@NonNull final Context context) {
 		this(context, null, 0);
 	}
 
-	public SwitchCardView(@NonNull final Context context, @Nullable final AttributeSet attributeSet) {
+	public SwitchableCardView(@NonNull final Context context, @Nullable final AttributeSet attributeSet) {
 		this(context, attributeSet, 0);
 	}
 
-	public SwitchCardView(@NonNull final Context context, @Nullable final AttributeSet attributeSet, final int defaultStyleAttribute) {
+	public SwitchableCardView(@NonNull final Context context, @Nullable final AttributeSet attributeSet, final int defaultStyleAttribute) {
 		super(context, attributeSet, defaultStyleAttribute);
 	}
 
@@ -126,6 +126,6 @@ public class SwitchCardView extends CheckableCardView {
 
 	@FunctionalInterface
 	public interface SwitchStateListener {
-		void switchStateChanged(final SwitchCardView view);
+		void switchStateChanged(final SwitchableCardView view);
 	}
 }
