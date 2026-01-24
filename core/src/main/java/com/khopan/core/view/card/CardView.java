@@ -385,20 +385,19 @@ public class CardView extends RoundedLinearLayout {
 
 		@Override
 		protected void onDraw(@NonNull final Canvas canvas) {
-			final int left;
+			final int offset;
 
 			if(CardView.this.anchorDividersToTitle) {
 				CardView.this.titleView.getLocationOnScreen(this.locations);
 				final int titleView = this.locations[0];
 				this.getLocationOnScreen(this.locations);
-				left = titleView - this.locations[0];
+				offset = titleView - this.locations[0];
 			} else {
-				left = 0;
+				offset = 0;
 			}
 
-			final int width = this.getWidth();
-			final int height = this.getHeight();
-			canvas.drawRect(left, 0.0f, width, height, this.paint);
+			final boolean rightToLeft = this.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+			canvas.drawRect(CardView.this.anchorDividersToTitle && !rightToLeft ? offset : 0.0f, 0.0f, CardView.this.anchorDividersToTitle && rightToLeft ? offset + CardView.this.titleView.getWidth() : this.getWidth(), this.getHeight(), this.paint);
 		}
 	}
 }
