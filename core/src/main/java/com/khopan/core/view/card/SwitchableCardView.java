@@ -3,6 +3,7 @@ package com.khopan.core.view.card;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -13,6 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
+
+import com.khopan.core.R;
 
 public class SwitchableCardView extends CheckableCardView {
 	private SwitchStateListener listener;
@@ -29,6 +32,23 @@ public class SwitchableCardView extends CheckableCardView {
 
 	public SwitchableCardView(@NonNull final Context context, @Nullable final AttributeSet attributeSet, final int defaultStyleAttribute) {
 		super(context, attributeSet, defaultStyleAttribute);
+		final TypedArray array = context.obtainStyledAttributes(attributeSet, R.styleable.SwitchableCardView, defaultStyleAttribute, 0);
+
+		try {
+			if(array.hasValue(R.styleable.SwitchableCardView_switchDividerVisible)) {
+				this.setSwitchDividerVisible(array.getBoolean(R.styleable.SwitchableCardView_switchDividerVisible, false));
+			}
+
+			if(array.hasValue(R.styleable.SwitchableCardView_switchState)) {
+				this.setSwitchState(array.getBoolean(R.styleable.SwitchableCardView_switchState, false));
+			}
+
+			if(array.hasValue(R.styleable.SwitchableCardView_switchVisible)) {
+				this.setSwitchVisible(array.getBoolean(R.styleable.SwitchableCardView_switchVisible, false));
+			}
+		} finally {
+			array.recycle();
+		}
 	}
 
 	public boolean getSwitchState() {
@@ -52,7 +72,7 @@ public class SwitchableCardView extends CheckableCardView {
 			return;
 		}
 
-		this.initializeSwitch();
+		this.inflateSwitch();
 		this.dividerView.setVisibility(visible ? View.VISIBLE : View.GONE);
 
 		if(visible) {
@@ -61,12 +81,12 @@ public class SwitchableCardView extends CheckableCardView {
 	}
 
 	public void setSwitchState(final boolean state) {
-		this.initializeSwitch();
+		this.inflateSwitch();
 		this.switchView.setChecked(state);
 	}
 
 	public void setSwitchStateInstant(final boolean state) {
-		this.initializeSwitch();
+		this.inflateSwitch();
 		this.switchView.setCheckedWithoutAnimation(state);
 	}
 
@@ -79,11 +99,11 @@ public class SwitchableCardView extends CheckableCardView {
 			return;
 		}
 
-		this.initializeSwitch();
+		this.inflateSwitch();
 		this.switchView.setVisibility(visible ? View.VISIBLE : View.GONE);
 	}
 
-	private void initializeSwitch() {
+	private void inflateSwitch() {
 		if(this.switchView != null) {
 			return;
 		}
@@ -100,9 +120,9 @@ public class SwitchableCardView extends CheckableCardView {
 		final Resources resources = context.getResources();
 		final DisplayMetrics metrics = resources.getDisplayMetrics();
 		this.switchView.setPaddingRelative(Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12.0f, metrics)), 0, Math.round(value.getDimension(metrics)), 0);
-		this.switchView.setOnCheckedChangeListener((view, checked) -> {
+		this.switchView.setOnCheckedChangeListener((switchView, state) -> {
 			if(this.listener != null) {
-				this.listener.switchStateChanged(this);
+				this.listener.switchStateChanged(this, state);
 			}
 		});
 
@@ -122,10 +142,16 @@ public class SwitchableCardView extends CheckableCardView {
 		dividerViewParams.endToStart = switchViewIdentifier;
 		dividerViewParams.topToTop = switchViewIdentifier;
 		this.constraintLayout.addView(this.dividerView, dividerViewParams);
+		final View endIconView = this.constraintLayout.findViewById(R.id.end_view);
+		final ConstraintLayout.LayoutParams endIconViewParams = (ConstraintLayout.LayoutParams) endIconView.getLayoutParams();
+		endIconViewParams.endToEnd = ConstraintLayout.LayoutParams.UNSET;
+		endIconViewParams.endToStart = switchViewIdentifier;
+		endIconView.setLayoutParams(endIconViewParams);
+		this.setOnClickListener(view -> this.switchView.toggle());
 	}
 
 	@FunctionalInterface
 	public interface SwitchStateListener {
-		void switchStateChanged(final SwitchableCardView view);
+		void switchStateChanged(final SwitchableCardView view, final boolean state);
 	}
 }

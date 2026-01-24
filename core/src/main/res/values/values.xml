@@ -26,4 +26,9 @@
 			<flag name="multiple" value="0x01" />
 		</attr>
 	</declare-styleable>
+	<declare-styleable name="SwitchableCardView">
+		<attr format="boolean" name="switchDividerVisible" />
+		<attr format="boolean" name="switchState" />
+		<attr format="boolean" name="switchVisible" />
+	</declare-styleable>
 </resources>
