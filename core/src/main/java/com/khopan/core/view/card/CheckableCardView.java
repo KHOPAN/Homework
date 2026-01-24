@@ -75,6 +75,18 @@ public class CheckableCardView extends CardView {
 		return this.checkboxType;
 	}
 
+	public AppCompatSeslCheckedTextView getCheckboxView() {
+		return this.checkbox;
+	}
+
+	public Drawable getCheckmarkDrawableMultiple() {
+		return this.checkmarkDrawableMultiple;
+	}
+
+	public Drawable getCheckmarkDrawableSingle() {
+		return this.checkmarkDrawableSingle;
+	}
+
 	public boolean isCheckboxVisible() {
 		return this.checkbox != null && this.checkbox.getVisibility() == View.VISIBLE;
 	}

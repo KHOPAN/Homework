@@ -18,9 +18,9 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.khopan.core.R;
 
 public class SwitchableCardView extends CheckableCardView {
-	private SwitchStateListener listener;
-	private SwitchCompat switchView;
-	private View dividerView;
+	protected SwitchStateListener listener;
+	protected SwitchCompat switchView;
+	protected View dividerView;
 
 	public SwitchableCardView(@NonNull final Context context) {
 		this(context, null, 0);
@@ -51,12 +51,20 @@ public class SwitchableCardView extends CheckableCardView {
 		}
 	}
 
+	public View getDividerView() {
+		return this.dividerView;
+	}
+
 	public boolean getSwitchState() {
 		return this.switchView != null && this.switchView.isChecked();
 	}
 
 	public SwitchStateListener getSwitchStateListener() {
 		return this.listener;
+	}
+
+	public SwitchCompat getSwitchView() {
+		return this.switchView;
 	}
 
 	public boolean isSwitchDividerVisible() {

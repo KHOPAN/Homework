@@ -176,6 +176,10 @@ public class CardView extends RoundedLinearLayout {
 		return this.anchorDividersToTitle;
 	}
 
+	public View getBottomDividerView() {
+		return this.bottomDividerView;
+	}
+
 	public Drawable getEndIcon() {
 		return this.endIconView == null ? null : this.endIconView.getDrawable();
 	}
@@ -186,6 +190,10 @@ public class CardView extends RoundedLinearLayout {
 
 	public Drawable getIcon() {
 		return this.iconView == null ? null : this.iconView.getDrawable();
+	}
+
+	public FrameLayout getIconHolderView() {
+		return this.iconHolderView;
 	}
 
 	public ImageView getIconView() {
@@ -206,6 +214,10 @@ public class CardView extends RoundedLinearLayout {
 
 	public TextView getTitleView() {
 		return this.titleView;
+	}
+
+	public View getTopDividerView() {
+		return this.topDividerView;
 	}
 
 	public boolean isBottomDividerVisible() {
