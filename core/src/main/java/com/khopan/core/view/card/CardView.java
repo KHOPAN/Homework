@@ -1,6 +1,7 @@
 package com.khopan.core.view.card;
 
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -63,6 +64,7 @@ public class CardView extends RoundedLinearLayout {
 		this(context, attributeSet, 0);
 	}
 
+	@SuppressLint("ClickableViewAccessibility")
 	public CardView(@NonNull final Context context, @Nullable final AttributeSet attributeSet, final int defaultStyleAttribute) {
 		super(context, attributeSet, defaultStyleAttribute);
 		this.setOrientation(RoundedLinearLayout.VERTICAL);
@@ -73,16 +75,14 @@ public class CardView extends RoundedLinearLayout {
 		this.summaryView = view.findViewById(R.id.summary_view);
 		this.animator = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? new TouchFeedbackAnimator(this.constraintLayout) : null;
 		this.parseAttributes(context, attributeSet, defaultStyleAttribute);
-	}
 
-	@SuppressLint("ClickableViewAccessibility")
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		if(this.isEnabled() && Build.VERSION.SDK_INT >= 29) {
-			this.animator.animate(event);
-		}
+		this.constraintLayout.setOnTouchListener((layout, event) -> {
+			if(this.isEnabled() && Build.VERSION.SDK_INT >= 29) {
+				this.animator.animate(event);
+			}
 
-		return super.onTouchEvent(event);
+			return false;
+		});
 	}
 
 	public CharSequence getSummary() {
