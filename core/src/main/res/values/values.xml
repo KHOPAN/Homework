@@ -18,4 +18,12 @@
 			<flag name="topDividerPreferred" value="0x00" />
 		</attr>
 	</declare-styleable>
+	<declare-styleable name="CheckableCardView">
+		<attr format="boolean" name="checkboxState" />
+		<attr format="boolean" name="checkboxVisible" />
+		<attr name="checkboxType">
+			<flag name="single" value="0x00" />
+			<flag name="multiple" value="0x01" />
+		</attr>
+	</declare-styleable>
 </resources>
