@@ -97,13 +97,6 @@ public class EventCalendarView extends ViewGroup {
 			this.dragging = false;
 			return true;
 		}
-		case MotionEvent.ACTION_DOWN:
-			this.pressedX = event.getX();
-			this.pressedY = event.getY();
-			this.pressedDivider = this.divider;
-			this.dragging = false;
-			this.animator.cancel();
-			return true;
 		case MotionEvent.ACTION_MOVE: {
 			final float deltaX = event.getX() - this.pressedX;
 			final float deltaY = event.getY() - this.pressedY;
