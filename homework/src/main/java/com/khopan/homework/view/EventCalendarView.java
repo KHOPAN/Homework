@@ -1,46 +1,41 @@
 package com.khopan.homework.view;
 
+import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import androidx.core.view.NestedScrollingChild3;
-import androidx.core.view.NestedScrollingChildHelper;
-import androidx.core.view.NestedScrollingParent3;
-import androidx.core.view.NestedScrollingParentHelper;
-import androidx.core.widget.NestedScrollView;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
+import com.google.android.material.chip.SeslChipGroup;
 
-public class EventCalendarView extends NestedScrollView {
-	public EventCalendarView(final Context context) {
-		this(context, null, 0);
-	}
+public class EventCalendarView extends ViewGroup {
+	private final ViewPager2 calendarView;
+	private final ValueAnimator animator;
+	private final ViewPager2 eventView;
 
-	public EventCalendarView(final Context context, final AttributeSet attributeSet) {
-		this(context, attributeSet, 0);
-	}
-
-	public EventCalendarView(final Context context, final AttributeSet attributeSet, final int defaultStyleAttribute) {
-		super(context, attributeSet, defaultStyleAttribute);
-		final LinearLayout linearLayout = new LinearLayout(context);
-		linearLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		linearLayout.setOrientation(LinearLayout.VERTICAL);
-		this.addView(linearLayout);
-	}
-
-/*public class EventCalendarView extends ViewGroup implements NestedScrollingParent3, NestedScrollingChild3 {
-	private final View calendarView;
-	private final View eventView;
-	private final NestedScrollingChildHelper childHelper;
-	private final NestedScrollingParentHelper parentHelper;
-
-	private int divider = 500;
+	private float pressedX;
+	private float pressedY;
+	private float pressedDivider;
+	private float touchSlop;
+	private boolean dragging;
+	private float positionWeek;
+	private float positionMonth;
+	private float positionSplit;
+	private float divider;
 
 	public EventCalendarView(final Context context) {
 		this(context, null, 0);
@@ -52,100 +47,146 @@ public class EventCalendarView extends NestedScrollView {
 
 	public EventCalendarView(final Context context, final AttributeSet attributeSet, final int defaultStyleAttribute) {
 		super(context, attributeSet, defaultStyleAttribute);
-		this.calendarView = new View(context);
-		this.calendarView.setBackgroundColor(Color.RED);
+		this.touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+		this.calendarView = new ViewPager2(context);
+		this.calendarView.setAdapter(new CalendarView.Adapter(this.calendarView));
+		this.calendarView.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
+		this.calendarView.requestDisallowInterceptTouchEvent(true);
 		this.addView(this.calendarView);
-		this.eventView = new View(context);
-		this.eventView.setBackgroundColor(Color.BLUE);
+		this.animator = new ValueAnimator();
+		this.animator.setInterpolator(new DecelerateInterpolator());
+		this.animator.addUpdateListener(animation -> {
+			this.divider = (float) this.animator.getAnimatedValue();
+			this.requestLayout();
+		});
+
+		this.eventView = new ViewPager2(context);
+		this.eventView.setAdapter(new EventView.Adapter(this.eventView, null));
+		this.eventView.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
+		this.eventView.requestDisallowInterceptTouchEvent(true);
 		this.addView(this.eventView);
-		this.childHelper = new NestedScrollingChildHelper(this);
-		this.parentHelper = new NestedScrollingParentHelper(this);
-		this.setNestedScrollingEnabled(true);
+		this.positionWeek = -1.0f;
+		this.positionSplit = -1.0f;
+		this.positionMonth = -1.0f;
+	}
+
+	@SuppressLint("ClickableViewAccessibility")
+	@Override
+	public boolean onTouchEvent(final MotionEvent event) {
+		//Log.d("EventCalendarView", "onTouchEvent(" + event.getActionMasked() + ", " + event.getX() + ", " + event.getY() + ")");
+
+		switch(event.getActionMasked()) {
+		case MotionEvent.ACTION_CANCEL:
+		case MotionEvent.ACTION_UP: {
+			if(!this.dragging && (this.divider == this.positionWeek || this.divider == this.positionSplit || this.divider == this.positionMonth)) {
+				break;
+			}
+
+			final boolean direction = event.getY() - this.pressedY > 0;
+			//Log.d("EventCalendarView", "Direction: " + direction);
+			final float target;
+
+			if(this.divider >= this.positionSplit && this.divider <= this.positionMonth) {
+				target = direction ? this.positionMonth : this.positionSplit;
+			} else if(this.divider >= this.positionWeek && this.divider <= this.positionSplit) {
+				target = direction ? this.positionSplit : this.positionWeek;
+			} else {
+				target = this.positionSplit;
+			}
+
+			this.animator.setFloatValues(this.divider, target);
+			this.animator.setDuration((int) (Math.abs(this.divider - target) / Math.abs(this.positionWeek - this.positionMonth) * 500));
+			this.animator.start();
+			this.dragging = false;
+			return true;
+		}
+		case MotionEvent.ACTION_DOWN:
+			this.pressedX = event.getX();
+			this.pressedY = event.getY();
+			this.pressedDivider = this.divider;
+			this.dragging = false;
+			this.animator.cancel();
+			return true;
+		case MotionEvent.ACTION_MOVE: {
+			final float deltaX = event.getX() - this.pressedX;
+			final float deltaY = event.getY() - this.pressedY;
+			this.dragging = Math.abs(deltaX) < Math.abs(deltaY) && Math.abs(deltaY) >= this.touchSlop;
+
+			if(!this.dragging) {
+				return false;
+			}
+
+			this.divider = Math.min(Math.max(this.pressedDivider + event.getY() - this.pressedY + (deltaY > 0 ? -this.touchSlop : this.touchSlop), this.positionWeek), this.positionMonth);
+			this.requestLayout();
+			return true;
+		}
+		}
+
+		return super.onTouchEvent(event);
 	}
 
 	@Override
-	public boolean dispatchNestedPreScroll(final int dx, final int dy, final int @Nullable [] consumed, final int @Nullable [] offsetInWindow, final int type) {
-		final boolean result = this.childHelper.dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow, type);
-		Log.d("EventCalendarView", String.format("dispatchNestedPreScroll(%d, %d, {}, {}, %d) -> %s", dx, dy, type, result));
-		return result;
-	}
+	public boolean onInterceptTouchEvent(final MotionEvent event) {
+		//Log.d("EventCalendarView", "onInterceptTouchEvent(" + event.getActionMasked() + ", " + event.getX() + ", " + event.getY() + ")");
+		/*switch(event.getActionMasked()) {
+		case MotionEvent.ACTION_DOWN:
+			//Log.d("EventCalendarView", (this.divider != this.positionWeek) + " " + (!((EventView) ((RecyclerView) this.eventView.getChildAt(0)).getLayoutManager().findViewByPosition(this.eventView.getCurrentItem())).getChildAt(2).canScrollVertically(-1)));
+			//((EventView) ((RecyclerView) this.eventView.getChildAt(0)).getLayoutManager().findViewByPosition(this.eventView.getCurrentItem())).getChildAt(2).scrollTo(0, 0);
 
-	@Override
-	public boolean dispatchNestedScroll(final int dxConsumed, final int dyConsumed, final int dxUnconsumed, final int dyUnconsumed, final int @Nullable [] offsetInWindow, final int type) {
-		final boolean result = this.childHelper.dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, offsetInWindow, type);
-		Log.d("EventCalendarView", String.format("dispatchNestedScroll(%d, %d, %d, %d, {}, %d) -> %s", dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, type, result));
-		return result;
-	}
+			/*if(this.divider != this.positionWeek || !((EventView) ((RecyclerView) this.eventView.getChildAt(0)).getLayoutManager().findViewByPosition(this.eventView.getCurrentItem())).getChildAt(2).canScrollVertically(-1)) {
+				return true;
+			}
 
-	@Override
-	public void dispatchNestedScroll(int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed, int @Nullable [] offsetInWindow, int type, int @NonNull [] consumed) {
-		Log.d("EventCalendarView", String.format("dispatchNestedScroll(%d, %d, %d, %d, {}, %d, {})", dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, type));
-		this.childHelper.dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, offsetInWindow, type, consumed);
-	}
+			//break;
+			this.pressedX = event.getX();
+			this.pressedY = event.getY();
+			this.pressedDivider = this.divider;
+			this.dragging = false;
+			this.animator.cancel();
+			return false;
+		case MotionEvent.ACTION_MOVE: {
+			final boolean direction = event.getY() - this.pressedY > 0;
 
-	@Override
-	public boolean hasNestedScrollingParent(final int type) {
-		final boolean result = this.childHelper.hasNestedScrollingParent(type);
-		Log.d("EventCalendarView", String.format("hasNestedScrollingParent(%d) -> %s", type, result));
-		return result;
-	}
+			if(this.divider == this.positionWeek && !(direction && !((EventView) ((RecyclerView) this.eventView.getChildAt(0)).getLayoutManager().findViewByPosition(this.eventView.getCurrentItem())).getChildAt(2).canScrollVertically(-1))) {
+				return false;
+			}
 
-	@Override
-	public void onNestedPreScroll(@NonNull final View target, final int dx, final int dy, final int @NonNull [] consumed, final int type) {
+			return true;
+		}
+		}
 
-	}
-
-	@Override
-	public void onNestedScroll(@NonNull final View target, final int dxConsumed, final int dyConsumed, final int dxUnconsumed, final int dyUnconsumed, final int type, final int @NonNull [] consumed) {
-		consumed[1] = 300;
-	}
-
-	@Override
-	public void onNestedScroll(@NonNull final View target, final int dxConsumed, final int dyConsumed, final int dxUnconsumed, final int dyUnconsumed, final int type) {
-
-	}
-
-	@Override
-	public void onNestedScrollAccepted(@NonNull final View child, @NonNull final View target, final int axes, final int type) {
-
-	}
-
-	@Override
-	public boolean onStartNestedScroll(@NonNull final View child, @NonNull final View target, final int axes, final int type) {
-		return (axes & View.SCROLL_AXIS_VERTICAL) != 0;
-	}
-
-	@Override
-	public void onStopNestedScroll(@NonNull final View target, final int type) {
-
-	}
-
-	@Override
-	public boolean startNestedScroll(final int axes, final int type) {
-		final boolean result = this.childHelper.startNestedScroll(axes, type);
-		Log.d("EventCalendarView", String.format("startNestedScroll(%d, %d) -> %s", axes, type, result));
-		return result;
-	}
-
-	@Override
-	public void stopNestedScroll(final int type) {
-		Log.d("EventCalendarView", String.format("stopNestedScroll(%d)", type));
-		this.childHelper.stopNestedScroll(type);
+		return super.onInterceptTouchEvent(event);*/
+		this.onTouchEvent(event);
+		return false;
 	}
 
 	@Override
 	protected void onLayout(final boolean changed, final int left, final int top, final int right, final int bottom) {
-		this.calendarView.layout(0, 0, right - left, this.divider);
-		this.eventView.layout(0, this.divider, right - left, bottom - top);
+		final int width = right - left;
+		final int height = bottom - top;
+
+		if(changed) {
+			final float previousWeek = this.positionWeek;
+			final float previousMonth = this.positionMonth;
+			this.positionWeek = height / 10.0f;
+			this.positionSplit = height / 2.0f;
+			this.positionMonth = height;
+			this.divider = this.divider == previousWeek ? this.positionWeek : this.divider == previousMonth ? this.positionMonth : this.positionSplit;
+		}
+
+		final int divider = Math.max(Math.round(this.divider), 0);
+		this.calendarView.layout(0, 0, width, divider);
+		this.eventView.layout(0, divider, width, height);
 	}
 
 	@Override
-	protected void onMeasure(final int measureWidth, final int measureHeight) {
-		final int width = MeasureSpec.getSize(measureWidth);
-		final int height = MeasureSpec.getSize(measureHeight);
+	protected void onMeasure(final int widthMeasure, final int heightMeasure) {
+		final int width = MeasureSpec.getSize(widthMeasure);
+		final int height = MeasureSpec.getSize(heightMeasure);
 		this.setMeasuredDimension(width, height);
-		final int measuredWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
-		this.calendarView.measure(measuredWidth, MeasureSpec.makeMeasureSpec(this.divider, MeasureSpec.EXACTLY));
-		this.eventView.measure(measuredWidth, MeasureSpec.makeMeasureSpec(height - this.divider, MeasureSpec.EXACTLY));
-	}*/
+		final int measureWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
+		final int divider = Math.round(this.divider);
+		this.calendarView.measure(measureWidth, MeasureSpec.makeMeasureSpec(Math.max(divider, 0), MeasureSpec.EXACTLY));
+		this.eventView.measure(measureWidth, MeasureSpec.makeMeasureSpec(Math.max(height - divider, 0), MeasureSpec.EXACTLY));
+	}
 }
