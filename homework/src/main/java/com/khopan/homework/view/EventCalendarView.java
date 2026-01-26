@@ -73,8 +73,6 @@ public class EventCalendarView extends ViewGroup {
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	public boolean onTouchEvent(final MotionEvent event) {
-		//Log.d("EventCalendarView", "onTouchEvent(" + event.getActionMasked() + ", " + event.getX() + ", " + event.getY() + ")");
-
 		switch(event.getActionMasked()) {
 		case MotionEvent.ACTION_CANCEL:
 		case MotionEvent.ACTION_UP: {
@@ -83,7 +81,6 @@ public class EventCalendarView extends ViewGroup {
 			}
 
 			final boolean direction = event.getY() - this.pressedY > 0;
-			//Log.d("EventCalendarView", "Direction: " + direction);
 			final float target;
 
 			if(this.divider >= this.positionSplit && this.divider <= this.positionMonth) {
@@ -127,17 +124,8 @@ public class EventCalendarView extends ViewGroup {
 
 	@Override
 	public boolean onInterceptTouchEvent(final MotionEvent event) {
-		//Log.d("EventCalendarView", "onInterceptTouchEvent(" + event.getActionMasked() + ", " + event.getX() + ", " + event.getY() + ")");
-		/*switch(event.getActionMasked()) {
+		switch(event.getActionMasked()) {
 		case MotionEvent.ACTION_DOWN:
-			//Log.d("EventCalendarView", (this.divider != this.positionWeek) + " " + (!((EventView) ((RecyclerView) this.eventView.getChildAt(0)).getLayoutManager().findViewByPosition(this.eventView.getCurrentItem())).getChildAt(2).canScrollVertically(-1)));
-			//((EventView) ((RecyclerView) this.eventView.getChildAt(0)).getLayoutManager().findViewByPosition(this.eventView.getCurrentItem())).getChildAt(2).scrollTo(0, 0);
-
-			/*if(this.divider != this.positionWeek || !((EventView) ((RecyclerView) this.eventView.getChildAt(0)).getLayoutManager().findViewByPosition(this.eventView.getCurrentItem())).getChildAt(2).canScrollVertically(-1)) {
-				return true;
-			}
-
-			//break;
 			this.pressedX = event.getX();
 			this.pressedY = event.getY();
 			this.pressedDivider = this.divider;
@@ -145,6 +133,13 @@ public class EventCalendarView extends ViewGroup {
 			this.animator.cancel();
 			return false;
 		case MotionEvent.ACTION_MOVE: {
+			final float deltaX = event.getX() - this.pressedX;
+			final float deltaY = event.getY() - this.pressedY;
+
+			if(Math.abs(deltaX) >= Math.abs(deltaY) || Math.abs(deltaY) < this.touchSlop) {
+				return false;
+			}
+
 			final boolean direction = event.getY() - this.pressedY > 0;
 
 			if(this.divider == this.positionWeek && !(direction && !((EventView) ((RecyclerView) this.eventView.getChildAt(0)).getLayoutManager().findViewByPosition(this.eventView.getCurrentItem())).getChildAt(2).canScrollVertically(-1))) {
@@ -155,9 +150,7 @@ public class EventCalendarView extends ViewGroup {
 		}
 		}
 
-		return super.onInterceptTouchEvent(event);*/
-		this.onTouchEvent(event);
-		return false;
+		return super.onInterceptTouchEvent(event);
 	}
 
 	@Override
