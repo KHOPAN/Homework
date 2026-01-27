@@ -23,14 +23,15 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.chip.SeslChipGroup;
 
 public class EventCalendarView extends ViewGroup {
+	//private final CalendarHeaderView headerView;
 	private final ViewPager2 calendarView;
-	private final ValueAnimator animator;
 	private final ViewPager2 eventView;
+	private final ValueAnimator animator;
+	private final float touchSlop;
 
 	private float pressedX;
 	private float pressedY;
 	private float pressedDivider;
-	private float touchSlop;
 	private boolean dragging;
 	private float positionWeek;
 	private float positionMonth;
@@ -47,28 +48,35 @@ public class EventCalendarView extends ViewGroup {
 
 	public EventCalendarView(final Context context, final AttributeSet attributeSet, final int defaultStyleAttribute) {
 		super(context, attributeSet, defaultStyleAttribute);
+		//this.setOrientation(LinearLayout.VERTICAL);
+		//this.headerView = new CalendarHeaderView(context);
+		//this.addView(this.headerView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300));
+		this.calendarView = CalendarView.create(context);
+		this.addView(this.calendarView/*, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0)*/);
+		this.eventView = EventView.create(context);
+		this.addView(this.eventView/*, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0)*/);
+		this.animator = new ValueAnimator();
+		this.animator.addUpdateListener(animation -> {
+			this.divider = (float) animation.getAnimatedValue();
+			this.update();
+		});
+
+		this.animator.setInterpolator(new DecelerateInterpolator());
 		this.touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-		this.calendarView = new ViewPager2(context);
+		/*this.calendarView = new ViewPager2(context);
 		this.calendarView.setAdapter(new CalendarView.Adapter(this.calendarView));
 		this.calendarView.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
 		this.calendarView.requestDisallowInterceptTouchEvent(true);
 		this.addView(this.calendarView);
-		this.animator = new ValueAnimator();
-		this.animator.setInterpolator(new DecelerateInterpolator());
-		this.animator.addUpdateListener(animation -> {
-			this.divider = (float) this.animator.getAnimatedValue();
-			this.requestLayout();
-		});
-
-		/*this.eventView = new ViewPager2(context);
+		this.eventView = new ViewPager2(context);
 		this.eventView.setAdapter(new EventView.Adapter(this.eventView, null));
 		this.eventView.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
 		this.eventView.requestDisallowInterceptTouchEvent(true);
-		this.addView(this.eventView);*/
+		this.addView(this.eventView);
 		this.addView(this.eventView = EventView.create(context));
 		this.positionWeek = -1.0f;
 		this.positionSplit = -1.0f;
-		this.positionMonth = -1.0f;
+		this.positionMonth = -1.0f;*/
 	}
 
 	@SuppressLint("ClickableViewAccessibility")
@@ -175,5 +183,9 @@ public class EventCalendarView extends ViewGroup {
 		final int divider = Math.round(this.divider);
 		this.calendarView.measure(measureWidth, MeasureSpec.makeMeasureSpec(Math.max(divider, 0), MeasureSpec.EXACTLY));
 		this.eventView.measure(measureWidth, MeasureSpec.makeMeasureSpec(Math.max(height - divider, 0), MeasureSpec.EXACTLY));
+	}
+
+	private void update() {
+		this.requestLayout();
 	}
 }
