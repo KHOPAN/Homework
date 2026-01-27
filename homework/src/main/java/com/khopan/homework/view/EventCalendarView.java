@@ -22,8 +22,8 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.chip.SeslChipGroup;
 
-public class EventCalendarView extends ViewGroup {
-	//private final CalendarHeaderView headerView;
+public class EventCalendarView extends LinearLayout {
+	private final CalendarHeaderView headerView;
 	private final ViewPager2 calendarView;
 	private final ViewPager2 eventView;
 	private final ValueAnimator animator;
@@ -48,13 +48,13 @@ public class EventCalendarView extends ViewGroup {
 
 	public EventCalendarView(final Context context, final AttributeSet attributeSet, final int defaultStyleAttribute) {
 		super(context, attributeSet, defaultStyleAttribute);
-		//this.setOrientation(LinearLayout.VERTICAL);
-		//this.headerView = new CalendarHeaderView(context);
-		//this.addView(this.headerView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300));
+		this.setOrientation(LinearLayout.VERTICAL);
+		this.headerView = new CalendarHeaderView(context);
+		this.addView(this.headerView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300));
 		this.calendarView = CalendarView.create(context);
-		this.addView(this.calendarView/*, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0)*/);
+		this.addView(this.calendarView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 100));
 		this.eventView = EventView.create(context);
-		this.addView(this.eventView/*, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0)*/);
+		this.addView(this.eventView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 100));
 		this.animator = new ValueAnimator();
 		this.animator.addUpdateListener(animation -> {
 			this.divider = (float) animation.getAnimatedValue();
@@ -116,7 +116,7 @@ public class EventCalendarView extends ViewGroup {
 			}
 
 			this.divider = Math.min(Math.max(this.pressedDivider + event.getY() - this.pressedY + (deltaY > 0 ? -this.touchSlop : this.touchSlop), this.positionWeek), this.positionMonth);
-			this.requestLayout();
+			this.update();
 			return true;
 		}
 		}
@@ -156,36 +156,20 @@ public class EventCalendarView extends ViewGroup {
 	}
 
 	@Override
-	protected void onLayout(final boolean changed, final int left, final int top, final int right, final int bottom) {
-		final int width = right - left;
-		final int height = bottom - top;
-
-		if(changed) {
-			final float previousWeek = this.positionWeek;
-			final float previousMonth = this.positionMonth;
-			this.positionWeek = height / 10.0f;
-			this.positionSplit = height / 2.0f;
-			this.positionMonth = height;
-			this.divider = this.divider == previousWeek ? this.positionWeek : this.divider == previousMonth ? this.positionMonth : this.positionSplit;
-		}
-
-		final int divider = Math.max(Math.round(this.divider), 0);
-		this.calendarView.layout(0, 0, width, divider);
-		this.eventView.layout(0, divider, width, height);
-	}
-
-	@Override
-	protected void onMeasure(final int widthMeasure, final int heightMeasure) {
-		final int width = MeasureSpec.getSize(widthMeasure);
-		final int height = MeasureSpec.getSize(heightMeasure);
-		this.setMeasuredDimension(width, height);
-		final int measureWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
-		final int divider = Math.round(this.divider);
-		this.calendarView.measure(measureWidth, MeasureSpec.makeMeasureSpec(Math.max(divider, 0), MeasureSpec.EXACTLY));
-		this.eventView.measure(measureWidth, MeasureSpec.makeMeasureSpec(Math.max(height - divider, 0), MeasureSpec.EXACTLY));
+	protected void onSizeChanged(final int width, final int height, final int oldWidth, final int oldHeight) {
+		final float previousWeek = this.positionWeek;
+		final float previousMonth = this.positionMonth;
+		this.positionWeek = height / 10.0f;
+		this.positionSplit = height / 2.0f;
+		this.positionMonth = height;
+		this.divider = this.divider == previousWeek ? this.positionWeek : this.divider == previousMonth ? this.positionMonth : this.positionSplit;
+		this.update();
 	}
 
 	private void update() {
-		this.requestLayout();
+		this.calendarView.getLayoutParams().height = (int) this.divider;
+		this.calendarView.requestLayout();
+		this.eventView.getLayoutParams().height = this.getHeight() - this.headerView.getHeight() - (int) this.divider;
+		this.eventView.requestLayout();
 	}
 }

@@ -9,9 +9,12 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SnapHelper;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.khopan.core.CoreLayout;
 import com.khopan.core.view.SimpleViewHolder;
 import com.khopan.core.view.card.CardView;
 
@@ -34,16 +37,19 @@ public class EventView extends LinearLayout {
 		final Separator dayView = new Separator(context);
 		dayView.setText("Sunday 25 Janury 2026");
 		this.addView(dayView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-		final RecyclerView eventListView = new RecyclerView(context);
+		/*final RecyclerView eventListView = new RecyclerView(context);
 		eventListView.setAdapter(new RecyclerAdapter());
-		eventListView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
-		this.addView(eventListView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		eventListView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));*/
+		this.addView(/*eventListView*/new TestRecyclerView(context), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 	}
 
 	public static ViewPager2 create(final Context context) {
 		final ViewPager2 pagerView = new ViewPager2(context);
-		pagerView.setAdapter(new EventView.PagerAdapter(pagerView, null));
-		pagerView.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
+		pagerView.setAdapter(new EventView.PagerAdapter(/*pagerView, */context, null));
+		//pagerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+		//final SnapHelper helper = new PagerSnapHelper();
+		//helper.attachToRecyclerView(pagerView);
+		//pagerView.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
 		return pagerView;
 	}
 
@@ -67,13 +73,13 @@ public class EventView extends LinearLayout {
 	}
 
 	private static class PagerAdapter extends RecyclerView.Adapter<SimpleViewHolder<EventView>> {
-		private final ViewPager2 pagerView;
+		//private final ViewPager2 pagerView;
 		private final Context context;
 		private final ViewPager2.OnPageChangeCallback callback;
 
-		private PagerAdapter(final ViewPager2 pagerView, final ViewPager2.OnPageChangeCallback callback) {
-			this.pagerView = pagerView;
-			this.context = this.pagerView.getContext();
+		private PagerAdapter(/*final ViewPager2 pagerView, */final Context context, final ViewPager2.OnPageChangeCallback callback) {
+			//this.pagerView = pagerView;
+			this.context = /*this.pagerView.getContext();*/context;
 			this.callback = callback;
 		}
 
@@ -85,7 +91,7 @@ public class EventView extends LinearLayout {
 		@Override
 		public void onAttachedToRecyclerView(@NonNull final RecyclerView recyclerView) {
 			if(this.callback != null) {
-				this.pagerView.registerOnPageChangeCallback(this.callback);
+				//this.pagerView.registerOnPageChangeCallback(this.callback);
 			}
 		}
 
@@ -103,7 +109,7 @@ public class EventView extends LinearLayout {
 		@Override
 		public void onDetachedFromRecyclerView(@NonNull final RecyclerView recyclerView) {
 			if(this.callback != null) {
-				this.pagerView.unregisterOnPageChangeCallback(this.callback);
+				//this.pagerView.unregisterOnPageChangeCallback(this.callback);
 			}
 		}
 	}
