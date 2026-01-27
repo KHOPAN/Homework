@@ -60,11 +60,12 @@ public class EventCalendarView extends ViewGroup {
 			this.requestLayout();
 		});
 
-		this.eventView = new ViewPager2(context);
+		/*this.eventView = new ViewPager2(context);
 		this.eventView.setAdapter(new EventView.Adapter(this.eventView, null));
 		this.eventView.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
 		this.eventView.requestDisallowInterceptTouchEvent(true);
-		this.addView(this.eventView);
+		this.addView(this.eventView);*/
+		this.addView(this.eventView = EventView.create(context));
 		this.positionWeek = -1.0f;
 		this.positionSplit = -1.0f;
 		this.positionMonth = -1.0f;
