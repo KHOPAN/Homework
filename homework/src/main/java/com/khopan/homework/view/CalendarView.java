@@ -1,6 +1,6 @@
 package com.khopan.homework.view;
 
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -10,51 +10,75 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
-import com.khopan.core.view.SimpleViewHolder;
-
+@SuppressLint("ViewConstructor")
 public class CalendarView extends View {
-	private final float strokeWidth;
-	private final float arcSize;
+	private final EventCalendarView view;
+	private final int rows;
+	private final int strokeSize;
+	private final int arcSize;
+	private final int dividerSize;
+	private final int dividerColor;
 	private final RectF outerBounds;
 	private final RectF innerBounds;
 	private final Paint paint;
 
 	private int width;
-	private int height;
 	private float cellWidth;
+	private float cellTop;
+	private float cellBottom;
+	private float dividerValue;
+	private int dividerColorValue;
 
-	public CalendarView(final Context context) {
-		super(context);
-		final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-		this.strokeWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.0f, metrics);
-		this.arcSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5.0f, metrics);
+	public CalendarView(final EventCalendarView view, final int rows) {
+		super(view.context);
+		this.view = view;
+		this.rows = rows;
+		final DisplayMetrics metrics = this.view.context.getResources().getDisplayMetrics();
+		this.strokeSize = Math.max(Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.0f, metrics)), 1);
+		this.arcSize = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5.0f, metrics));
+		this.dividerSize = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.5f, metrics));
+		final TypedValue value = new TypedValue();
+		this.view.context.getTheme().resolveAttribute(androidx.appcompat.R.attr.listDividerColor, value, true);
+		this.dividerColor = this.view.context.getColor(value.resourceId) & 0xFFFFFF;
 		this.outerBounds = new RectF();
 		this.innerBounds = new RectF();
 		this.paint = new Paint();
-		this.paint.setColor(Color.RED);
-		Log.d("CalendarView", "Stroke width: " + this.strokeWidth + " Arc size: " + this.arcSize + " Density: " + metrics.density);
+		this.paint.setTextSize(50.0f);
+		Log.d("CalendarView", "Stroke width: " + this.strokeSize + " Arc size: " + this.arcSize + " Divider size: " + this.dividerSize + " Density: " + metrics.density);
 	}
 
 	@Override
 	protected void onDraw(@NonNull final Canvas canvas) {
-		for(int x = 4; x < 5; x++) {
-			final float left = this.cellWidth * x;
-			final float right = left + this.cellWidth + this.strokeWidth;
-			this.drawCell(canvas, left, 100.0f, right, 200.0f);
+		for(int y = 0; y < this.rows; y++) {
+			final float rawTop = this.cellTop * y + this.dividerValue;
+			final int top = Math.round(rawTop);
+			final int bottom = Math.round(rawTop + this.cellBottom);
+
+			if(this.dividerValue > 0.0f) {
+				this.paint.setColor(this.dividerColorValue);
+				canvas.drawRect(0.0f, top - this.dividerValue, this.width, top, this.paint);
+			}
+
+			for(int x = 0; x < 7; x++) {
+				final float left = this.cellWidth * x;
+				this.drawCell(canvas, Math.round(left), top, Math.round(left + this.cellWidth + this.strokeSize), bottom);
+			}
 		}
 	}
 
 	@Override
 	protected void onSizeChanged(final int width, final int height, final int oldWidth, final int oldHeight) {
 		this.width = width;
-		this.height = height;
-		this.cellWidth = (this.width - this.strokeWidth * 8.0f) / 7.0f + this.strokeWidth;
+		this.cellWidth = (this.width - this.strokeSize * 8.0f) / 7.0f + this.strokeSize;
+		final float value = Math.min(Math.max((this.view.divider - this.view.dividerSplit) / (float) (this.view.dividerMonth - this.view.dividerSplit), 0.0f), 1.0f);
+		this.dividerValue = this.dividerSize * value;
+		this.dividerColorValue = this.dividerColor | (Math.round(0xFF * value) << 24);
+		final float cellHeight = (height - this.strokeSize * (this.rows + (this.rows - 1) * value + 1) - this.dividerValue * this.rows) / (float) this.rows + this.strokeSize;
+		this.cellTop = cellHeight + (this.strokeSize + this.dividerSize) * value;
+		this.cellBottom = cellHeight + this.strokeSize;
 	}
 
 	private void drawCell(final Canvas canvas, final float left, final float top, final float right, final float bottom) {
@@ -62,70 +86,19 @@ public class CalendarView extends View {
 		this.outerBounds.top = top;
 		this.outerBounds.right = right;
 		this.outerBounds.bottom = bottom;
-		this.innerBounds.left = left + this.strokeWidth;
-		this.innerBounds.top = top + this.strokeWidth;
-		this.innerBounds.right = right - this.strokeWidth;
-		this.innerBounds.bottom = bottom - this.strokeWidth;
+		this.innerBounds.left = left + this.strokeSize;
+		this.innerBounds.top = top + this.strokeSize;
+		this.innerBounds.right = right - this.strokeSize;
+		this.innerBounds.bottom = bottom - this.strokeSize;
 
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			final float innerArcSize = this.arcSize - this.strokeWidth * 2.0f;
+			final float innerArcSize = this.arcSize - this.strokeSize * 2.0f;
+			this.paint.setColor(Color.RED);
 			canvas.drawDoubleRoundRect(this.outerBounds, this.arcSize, this.arcSize, this.innerBounds, innerArcSize, innerArcSize, this.paint);
 		}
-	}
 
-	/*public static class Adapter extends RecyclerView.Adapter<ViewHolder> {
-		private final ViewPager2.OnPageChangeCallback callback;
-
-		public Adapter(final ViewPager2 viewPager) {
-			this.callback = new ViewPager2.OnPageChangeCallback() {
-				@Override
-				public void onPageScrolled(final int position, final float positionOffset, final int positionOffsetPixels) {
-
-				}
-			};
-		}
-
-		@Override
-		public void onAttachedToRecyclerView(@NonNull final RecyclerView recyclerView) {
-			this.viewPager.registerOnPageChangeCallback(this.callback);
-		}
-
-		@Override
-		public void onDetachedFromRecyclerView(@NonNull final RecyclerView recyclerView) {
-			this.viewPager.unregisterOnPageChangeCallback(this.callback);
-		}
-	}*/
-
-	public static ViewPager2 create(final Context context) {
-		final ViewPager2 pagerView = new ViewPager2(context);
-		pagerView.setAdapter(new CalendarViewPagerAdapter(context));
-		pagerView.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
-		return pagerView;
-	}
-
-	private static class CalendarViewPagerAdapter extends RecyclerView.Adapter<SimpleViewHolder<CalendarView>> {
-		private final Context context;
-
-		private CalendarViewPagerAdapter(final Context context) {
-			this.context = context;
-		}
-
-		@Override
-		public int getItemCount() {
-			return 13;
-		}
-
-		@Override
-		public void onBindViewHolder(@NonNull final SimpleViewHolder<CalendarView> holder, final int position) {
-
-		}
-
-		@NonNull
-		@Override
-		public SimpleViewHolder<CalendarView> onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-			final CalendarView calendarView = new CalendarView(this.context);
-			calendarView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-			return new SimpleViewHolder<>(calendarView);
-		}
+		final Paint.FontMetrics metrics = this.paint.getFontMetrics();
+		this.paint.setColor(Color.GREEN);
+		canvas.drawText("23", (left + right) / 2.0f - this.paint.measureText("23") / 2.0f, (top + bottom) / 2.0f - (metrics.ascent + metrics.descent) / 2.0f, this.paint);
 	}
 }

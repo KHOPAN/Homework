@@ -2,6 +2,7 @@ package com.khopan.homework.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,10 +19,14 @@ import com.khopan.core.CoreLayout;
 import com.khopan.core.view.SimpleViewHolder;
 import com.khopan.core.view.card.CardView;
 
+import java.util.Objects;
+import java.util.function.Consumer;
+
 import dev.oneuiproject.oneui.widget.Separator;
 
 public class EventView extends LinearLayout {
 	private final Context context;
+	private final RecyclerView recyclerView;
 
 	@SuppressLint("PrivateResource")
 	public EventView(final Context context) {
@@ -40,16 +45,22 @@ public class EventView extends LinearLayout {
 		/*final RecyclerView eventListView = new RecyclerView(context);
 		eventListView.setAdapter(new RecyclerAdapter());
 		eventListView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));*/
-		this.addView(/*eventListView*/new TestRecyclerView(context), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		this.addView(/*eventListView*/this.recyclerView = new TestRecyclerView(context), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 	}
 
-	public static ViewPager2 create(final Context context) {
+	public static ViewPager2 create(final Context context, final Consumer<RecyclerView> consumer) {
 		final ViewPager2 pagerView = new ViewPager2(context);
-		pagerView.setAdapter(new EventView.PagerAdapter(/*pagerView, */context, null));
-		//pagerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
-		//final SnapHelper helper = new PagerSnapHelper();
-		//helper.attachToRecyclerView(pagerView);
-		//pagerView.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
+		final RecyclerView.LayoutManager layoutManager = ((RecyclerView) pagerView.getChildAt(0)).getLayoutManager();
+		assert(layoutManager != null);
+		pagerView.setAdapter(new EventView.PagerAdapter(context, null));
+		pagerView.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+			@Override
+			public void onPageSelected(final int position) {
+				Log.d("EventView", "onPageSelected(" + position + ")");
+				consumer.accept(((EventView) Objects.requireNonNull(layoutManager.findViewByPosition(position))).recyclerView);
+			}
+		});
+
 		return pagerView;
 	}
 
