@@ -141,7 +141,7 @@ public class EventCalendarView extends LinearLayout {
 		this.eventViewParams.height = this.getHeight() - this.divider;
 		this.requestLayout();
 		final long time = System.nanoTime();
-		//Log.d("EventCalendarView", String.format("%d FPS", Math.round(1000000000.0d / (time - this.lastTime))));
+		Log.d("EventCalendarView", String.format("%d FPS", Math.round(1000000000.0d / (time - this.lastTime))));
 		this.lastTime = time;
 	}
 

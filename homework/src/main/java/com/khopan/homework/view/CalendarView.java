@@ -29,8 +29,10 @@ public class CalendarView extends View {
 	private float cellWidth;
 	private float cellTop;
 	private float cellBottom;
+	private float cellOffset;
 	private float dividerValue;
 	private int dividerColorValue;
+	private float offsetIndex;
 
 	public CalendarView(final EventCalendarView view, final int rows) {
 		super(view.context);
@@ -48,12 +50,13 @@ public class CalendarView extends View {
 		this.paint = new Paint();
 		this.paint.setTextSize(50.0f);
 		Log.d("CalendarView", "Stroke width: " + this.strokeSize + " Arc size: " + this.arcSize + " Divider size: " + this.dividerSize + " Density: " + metrics.density);
+		this.offsetIndex = 3.0f;
 	}
 
 	@Override
 	protected void onDraw(@NonNull final Canvas canvas) {
 		for(int y = 0; y < this.rows; y++) {
-			final float rawTop = this.cellTop * y + this.dividerValue;
+			final float rawTop = this.cellTop * y + this.cellOffset;
 			final int top = Math.round(rawTop);
 			final int bottom = Math.round(rawTop + this.cellBottom);
 
@@ -72,13 +75,16 @@ public class CalendarView extends View {
 	@Override
 	protected void onSizeChanged(final int width, final int height, final int oldWidth, final int oldHeight) {
 		this.width = width;
+		final float topProgress = Math.min(Math.max((this.view.divider - this.view.dividerWeek) / (float) (this.view.dividerSplit - this.view.dividerWeek), 0.0f), 1.0f);
+		final float bottomProgress = Math.min(Math.max((this.view.divider - this.view.dividerSplit) / (float) (this.view.dividerMonth - this.view.dividerSplit), 0.0f), 1.0f);
 		this.cellWidth = (this.width - this.strokeSize * 8.0f) / 7.0f + this.strokeSize;
-		final float value = Math.min(Math.max((this.view.divider - this.view.dividerSplit) / (float) (this.view.dividerMonth - this.view.dividerSplit), 0.0f), 1.0f);
-		this.dividerValue = this.dividerSize * value;
-		this.dividerColorValue = this.dividerColor | (Math.round(0xFF * value) << 24);
-		final float cellHeight = (height - this.strokeSize * (this.rows + (this.rows - 1) * value + 1) - this.dividerValue * this.rows) / (float) this.rows + this.strokeSize;
-		this.cellTop = cellHeight + (this.strokeSize + this.dividerSize) * value;
+		this.dividerValue = this.dividerSize * bottomProgress;
+		this.dividerColorValue = this.dividerColor | (Math.round(0xFF * bottomProgress) << 24);
+		float cellHeight = (Math.max(height, this.view.dividerSplit) - this.strokeSize * (this.rows + (this.rows - 1) * bottomProgress + 1) - this.dividerValue * this.rows) / (float) this.rows + this.strokeSize;
+		cellHeight = (cellHeight - this.view.dividerWeek + this.strokeSize) * topProgress + this.view.dividerWeek - this.strokeSize;
+		this.cellTop = cellHeight + (this.strokeSize + this.dividerSize) * bottomProgress;
 		this.cellBottom = cellHeight + this.strokeSize;
+		this.cellOffset = (this.dividerValue + cellHeight * this.offsetIndex) * topProgress - cellHeight * this.offsetIndex;
 	}
 
 	private void drawCell(final Canvas canvas, final float left, final float top, final float right, final float bottom) {
