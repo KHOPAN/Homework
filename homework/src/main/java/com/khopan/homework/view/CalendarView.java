@@ -50,7 +50,7 @@ public class CalendarView extends View {
 		this.paint = new Paint();
 		this.paint.setTextSize(50.0f);
 		Log.d("CalendarView", "Stroke width: " + this.strokeSize + " Arc size: " + this.arcSize + " Divider size: " + this.dividerSize + " Density: " + metrics.density);
-		this.offsetIndex = 3.0f;
+		this.offsetIndex = 5.0f;
 	}
 
 	@Override
@@ -81,10 +81,11 @@ public class CalendarView extends View {
 		this.dividerValue = this.dividerSize * bottomProgress;
 		this.dividerColorValue = this.dividerColor | (Math.round(0xFF * bottomProgress) << 24);
 		float cellHeight = (Math.max(height, this.view.dividerSplit) - this.strokeSize * (this.rows + (this.rows - 1) * bottomProgress + 1) - this.dividerValue * this.rows) / (float) this.rows + this.strokeSize;
-		cellHeight = (cellHeight - this.view.dividerWeek + this.strokeSize) * topProgress + this.view.dividerWeek - this.strokeSize;
+		final float weekHeight = this.view.dividerWeek - this.strokeSize;
+		cellHeight = (cellHeight - weekHeight) * topProgress + weekHeight;
 		this.cellTop = cellHeight + (this.strokeSize + this.dividerSize) * bottomProgress;
 		this.cellBottom = cellHeight + this.strokeSize;
-		this.cellOffset = (this.dividerValue + cellHeight * this.offsetIndex) * topProgress - cellHeight * this.offsetIndex;
+		this.cellOffset = (this.dividerValue + weekHeight * this.offsetIndex) * topProgress - weekHeight * this.offsetIndex;
 	}
 
 	private void drawCell(final Canvas canvas, final float left, final float top, final float right, final float bottom) {

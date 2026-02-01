@@ -35,7 +35,7 @@ public class CalendarPagerHolder {
 		@NonNull
 		@Override
 		public SimpleViewHolder<CalendarView> onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-			final CalendarView calendarView = new CalendarView(CalendarPagerHolder.this.view, 5);
+			final CalendarView calendarView = new CalendarView(CalendarPagerHolder.this.view, 6);
 			calendarView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 			return new SimpleViewHolder<>(calendarView);
 		}
