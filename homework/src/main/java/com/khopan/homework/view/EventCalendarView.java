@@ -4,7 +4,9 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -16,6 +18,10 @@ import androidx.viewpager2.widget.ViewPager2;
 
 public class EventCalendarView extends LinearLayout {
 	final Context context;
+	final int strokeSize;
+	final int arcSize;
+	final int dividerSize;
+	final int dividerColor;
 
 	int divider;
 	int dividerWeek;
@@ -46,6 +52,13 @@ public class EventCalendarView extends LinearLayout {
 	public EventCalendarView(final Context context, final AttributeSet attributeSet, final int defaultStyleAttribute) {
 		super(context, attributeSet, defaultStyleAttribute);
 		this.context = context;
+		final DisplayMetrics metrics = this.context.getResources().getDisplayMetrics();
+		this.strokeSize = Math.max(Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.0f, metrics)), 1);
+		this.arcSize = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5.0f, metrics));
+		this.dividerSize = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.5f, metrics));
+		final TypedValue value = new TypedValue();
+		this.context.getTheme().resolveAttribute(androidx.appcompat.R.attr.listDividerColor, value, true);
+		this.dividerColor = this.context.getColor(value.resourceId) & 0xFFFFFF;
 		this.setOrientation(LinearLayout.VERTICAL);
 		this.addView((this.calendarHolder = new CalendarPagerHolder(this)).viewPager, this.calendarParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
 		this.addView(this.eventView = EventView.create(context, view -> this.eventRecyclerView = view), this.eventViewParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
