@@ -5,15 +5,12 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
-
-import androidx.recyclerview.widget.RecyclerView;
 
 public class EventCalendarView extends LinearLayout {
 	final Context context;
@@ -80,39 +77,21 @@ public class EventCalendarView extends LinearLayout {
 		switch(event.getActionMasked()) {
 		case MotionEvent.ACTION_CANCEL:
 		case MotionEvent.ACTION_UP: {
-			if(!this.dragging && (this.divider == this.dividerWeek || this.divider == this.dividerSplit || this.divider == this.dividerMonth)) {
+			if(this.divider == this.dividerWeek || this.divider == this.dividerSplit || this.divider == this.dividerMonth) {
 				break;
 			}
 
 			final boolean direction = event.getY() - this.pressedY > 0;
-			final int target;
-
-			if(this.divider >= this.dividerSplit && this.divider <= this.dividerMonth) {
-				target = direction ? this.dividerMonth : this.dividerSplit;
-			} else if(this.divider >= this.dividerWeek && this.divider <= this.dividerSplit) {
-				target = direction ? this.dividerSplit : this.dividerWeek;
-			} else {
-				target = this.dividerSplit;
-			}
-
+			final int target = this.divider >= this.dividerSplit && this.divider <= this.dividerMonth ? direction ? this.dividerMonth : this.dividerSplit : this.divider >= this.dividerWeek && this.divider <= this.dividerSplit ? direction ? this.dividerSplit : this.dividerWeek : this.dividerSplit;
+			this.animator.setDuration(Math.round((Math.abs(this.divider - target) / (double) (this.dividerMonth - this.dividerWeek)) * 500.0d));
 			this.animator.setIntValues(this.divider, target);
-			this.animator.setDuration(Math.round((Math.abs(this.divider - target) / (double) Math.abs(this.dividerWeek - this.dividerMonth)) * 500.0d));
 			this.animator.start();
 			this.dragging = false;
 			return true;
 		}
 		case MotionEvent.ACTION_MOVE: {
-			final float deltaX = event.getX() - this.pressedX;
 			final float deltaY = event.getY() - this.pressedY;
-			this.dragging = Math.abs(deltaX) < Math.abs(deltaY) && Math.abs(deltaY) >= this.touchSlop;
-
-			if(!this.dragging) {
-				return false;
-			}
-
 			this.divider = Math.round(Math.min(Math.max(this.pressedDivider + event.getY() - this.pressedY + (deltaY > 0 ? -this.touchSlop : this.touchSlop), this.dividerWeek), this.dividerMonth));
-			//Log.d("EventCalendarView", "Divider: " + this.divider + " " + event.getY());
-
 			this.update(this.getHeight());
 			return true;
 		}
@@ -138,12 +117,7 @@ public class EventCalendarView extends LinearLayout {
 				this.dragging = true;
 			}
 
-			final RecyclerView eventRecyclerView = null;
-			final boolean notInterceptWhen = this.divider == this.dividerWeek;
-			final boolean result = this.dragging && !notInterceptWhen;
-			Log.d("EventCalendarView", "Result: " + result + " Not intercept when: " + notInterceptWhen);
-			return result;
-			//return this.dragging && /*this.divider != this.dividerWeek || deltaY > 0 || eventRecyclerView == null || eventRecyclerView.canScrollVertically(-1))*/!notInterceptWhen;
+			return this.dragging && (this.divider != this.dividerWeek || (deltaY > 0 && this.eventView.recyclerView != null && !this.eventView.recyclerView.canScrollVertically(-1)));
 		}
 		}
 

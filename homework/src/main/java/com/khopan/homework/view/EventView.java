@@ -17,7 +17,7 @@ import dev.oneuiproject.oneui.widget.Separator;
 
 public class EventView extends LinearLayout {
 	private final Context context;
-	private final RecyclerView recyclerView;
+	final RecyclerView recyclerView;
 
 	@SuppressLint("PrivateResource")
 	public EventView(final Context context) {

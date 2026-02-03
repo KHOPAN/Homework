@@ -11,11 +11,22 @@ import com.khopan.core.view.SimpleViewHolder;
 public class EventPagerHolder {
 	final ViewPager2 viewPager;
 
+	RecyclerView recyclerView;
+
 	private final EventCalendarView view;
 
 	public EventPagerHolder(final EventCalendarView view) {
 		this.view = view;
 		this.viewPager = new ViewPager2(this.view.context);
+		final RecyclerView.LayoutManager layoutManager = ((RecyclerView) this.viewPager.getChildAt(0)).getLayoutManager();
+		this.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+			@Override
+			public void onPageSelected(final int position) {
+				final EventView view;
+				EventPagerHolder.this.recyclerView = layoutManager == null ? null : (view = (EventView) layoutManager.findViewByPosition(position)) == null ? null : view.recyclerView;
+			}
+		});
+
 		this.viewPager.setAdapter(new Adapter());
 		this.viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
 	}
@@ -23,7 +34,7 @@ public class EventPagerHolder {
 	private class Adapter extends RecyclerView.Adapter<SimpleViewHolder<EventView>> {
 		@Override
 		public int getItemCount() {
-			return 32;
+			return Integer.MAX_VALUE;
 		}
 
 		@Override
