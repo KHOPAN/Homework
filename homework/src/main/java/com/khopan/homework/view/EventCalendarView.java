@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -33,7 +34,6 @@ public class EventCalendarView extends LinearLayout {
 	private final float touchSlop;
 	private final ValueAnimator animator;
 
-	private RecyclerView eventRecyclerView;
 	private float pressedX;
 	private float pressedY;
 	private int pressedDivider;
@@ -133,7 +133,17 @@ public class EventCalendarView extends LinearLayout {
 			return false;
 		case MotionEvent.ACTION_MOVE: {
 			final float deltaY = event.getY() - this.pressedY;
-			return Math.abs(event.getX() - this.pressedX) < Math.abs(deltaY) && Math.abs(deltaY) >= this.touchSlop && (this.divider != this.dividerWeek || deltaY > 0 || this.eventRecyclerView == null || this.eventRecyclerView.canScrollVertically(-1));
+
+			if(!this.dragging && Math.abs(deltaY) > Math.abs(event.getX() - this.pressedX) && Math.abs(deltaY) >= this.touchSlop) {
+				this.dragging = true;
+			}
+
+			final RecyclerView eventRecyclerView = null;
+			final boolean notInterceptWhen = this.divider == this.dividerWeek;
+			final boolean result = this.dragging && !notInterceptWhen;
+			Log.d("EventCalendarView", "Result: " + result + " Not intercept when: " + notInterceptWhen);
+			return result;
+			//return this.dragging && /*this.divider != this.dividerWeek || deltaY > 0 || eventRecyclerView == null || eventRecyclerView.canScrollVertically(-1))*/!notInterceptWhen;
 		}
 		}
 
