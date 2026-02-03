@@ -142,7 +142,7 @@ public class EventCalendarView extends LinearLayout {
 
 	@Override
 	protected void onSizeChanged(final int width, final int height, final int oldWidth, final int oldHeight) {
-		final float progress = this.divider <= this.dividerSplit ? (this.divider - this.dividerWeek) / (float) (this.dividerSplit - this.dividerWeek) : (this.divider - this.dividerSplit) / (float) (this.dividerMonth - this.dividerSplit) + 1.0f;
+		final float progress = this.dividerMonth <= 0 ? 1.0f : this.divider <= this.dividerSplit ? (this.divider - this.dividerWeek) / (float) (this.dividerSplit - this.dividerWeek) : (this.divider - this.dividerSplit) / (float) (this.dividerMonth - this.dividerSplit) + 1.0f;
 		this.dividerSplit = Math.round(height / 2.0f);
 		this.dividerWeek = Math.round((this.dividerSplit - this.strokeSize * 6.0f) / 5.0f + this.strokeSize * 2.0f);
 		this.dividerMonth = height;
