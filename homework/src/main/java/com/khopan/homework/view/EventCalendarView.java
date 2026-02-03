@@ -103,18 +103,23 @@ public class EventCalendarView extends LinearLayout {
 	@Override
 	public boolean onInterceptTouchEvent(final MotionEvent event) {
 		switch(event.getActionMasked()) {
+		case MotionEvent.ACTION_CANCEL:
+		case MotionEvent.ACTION_UP:
+			this.animator.resume();
+			break;
 		case MotionEvent.ACTION_DOWN:
 			this.pressedX = event.getX();
 			this.pressedY = event.getY();
 			this.pressedDivider = this.divider;
 			this.dragging = false;
-			this.animator.cancel();
+			this.animator.pause();
 			return false;
 		case MotionEvent.ACTION_MOVE: {
 			final float deltaY = event.getY() - this.pressedY;
 
 			if(!this.dragging && Math.abs(deltaY) > Math.abs(event.getX() - this.pressedX) && Math.abs(deltaY) >= this.touchSlop) {
 				this.dragging = true;
+				this.animator.cancel();
 			}
 
 			return this.dragging && (this.divider != this.dividerWeek || (deltaY > 0 && this.eventView.recyclerView != null && !this.eventView.recyclerView.canScrollVertically(-1)));
