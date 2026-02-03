@@ -5,7 +5,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -14,26 +13,25 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
 public class EventCalendarView extends LinearLayout {
 	final Context context;
-	final int strokeSize;
+	final CalendarPagerHolder calendarView;
+	final EventPagerHolder eventView;
 	final int arcSize;
-	final int dividerSize;
 	final int dividerColor;
+	final int dividerSize;
+	final int strokeSize;
 
 	int divider;
 	int dividerWeek;
 	int dividerSplit;
 	int dividerMonth;
 
-	private final CalendarPagerHolder calendarHolder;
-	private final LinearLayout.LayoutParams calendarParams;
-	private final ViewPager2 eventView;
+	private final LinearLayout.LayoutParams calendarViewParams;
 	private final LinearLayout.LayoutParams eventViewParams;
-	private final ValueAnimator animator;
 	private final float touchSlop;
+	private final ValueAnimator animator;
 
 	private RecyclerView eventRecyclerView;
 	private float pressedX;
@@ -52,24 +50,28 @@ public class EventCalendarView extends LinearLayout {
 	public EventCalendarView(final Context context, final AttributeSet attributeSet, final int defaultStyleAttribute) {
 		super(context, attributeSet, defaultStyleAttribute);
 		this.context = context;
+		this.setOrientation(LinearLayout.VERTICAL);
+		this.calendarView = new CalendarPagerHolder(this);
+		this.calendarViewParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
+		this.addView(this.calendarView.viewPager, this.calendarViewParams);
+		this.eventView = new EventPagerHolder(this);
+		this.eventViewParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
+		this.addView(this.eventView.viewPager, this.eventViewParams);
 		final DisplayMetrics metrics = this.context.getResources().getDisplayMetrics();
-		this.strokeSize = Math.max(Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.0f, metrics)), 1);
 		this.arcSize = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5.0f, metrics));
-		this.dividerSize = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.5f, metrics));
 		final TypedValue value = new TypedValue();
 		this.context.getTheme().resolveAttribute(androidx.appcompat.R.attr.listDividerColor, value, true);
 		this.dividerColor = this.context.getColor(value.resourceId) & 0xFFFFFF;
-		this.setOrientation(LinearLayout.VERTICAL);
-		this.addView((this.calendarHolder = new CalendarPagerHolder(this)).viewPager, this.calendarParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
-		this.addView(this.eventView = EventView.create(context, view -> this.eventRecyclerView = view), this.eventViewParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
+		this.dividerSize = Math.max(Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.5f, metrics)), 1);
+		this.strokeSize = Math.max(Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.0f, metrics)), 1);
+		this.touchSlop = ViewConfiguration.get(this.context).getScaledTouchSlop();
 		this.animator = new ValueAnimator();
-		this.animator.addUpdateListener(animation -> {
-			this.divider = (int) animation.getAnimatedValue();
-			this.update();
+		this.animator.addUpdateListener(animator -> {
+			this.divider = (int) animator.getAnimatedValue();
+			this.update(this.getHeight());
 		});
 
 		this.animator.setInterpolator(new DecelerateInterpolator());
-		this.touchSlop = ViewConfiguration.get(this.context).getScaledTouchSlop();
 	}
 
 	@SuppressLint("ClickableViewAccessibility")
@@ -111,7 +113,7 @@ public class EventCalendarView extends LinearLayout {
 			this.divider = Math.round(Math.min(Math.max(this.pressedDivider + event.getY() - this.pressedY + (deltaY > 0 ? -this.touchSlop : this.touchSlop), this.dividerWeek), this.dividerMonth));
 			//Log.d("EventCalendarView", "Divider: " + this.divider + " " + event.getY());
 
-			this.update();
+			this.update(this.getHeight());
 			return true;
 		}
 		}
@@ -140,23 +142,17 @@ public class EventCalendarView extends LinearLayout {
 
 	@Override
 	protected void onSizeChanged(final int width, final int height, final int oldWidth, final int oldHeight) {
-		final int previousWeek = this.dividerWeek;
-		final int previousMonth = this.dividerMonth;
-		this.dividerWeek = height / 10;
-		this.dividerSplit = height / 2;
+		final float progress = this.divider <= this.dividerSplit ? (this.divider - this.dividerWeek) / (float) (this.dividerSplit - this.dividerWeek) : (this.divider - this.dividerSplit) / (float) (this.dividerMonth - this.dividerSplit) + 1.0f;
+		this.dividerSplit = Math.round(height / 2.0f);
+		this.dividerWeek = Math.round((this.dividerSplit - this.strokeSize * 6.0f) / 5.0f + this.strokeSize * 2.0f);
 		this.dividerMonth = height;
-		this.divider = this.divider == previousWeek ? this.dividerWeek : this.divider == previousMonth ? this.dividerMonth : this.dividerSplit;
-		this.update();
+		this.divider = Math.round(progress <= 1.0f ? (this.dividerSplit - this.dividerWeek) * progress + this.dividerWeek : (this.dividerMonth - this.dividerSplit) * (progress - 1.0f) + this.dividerSplit);
+		this.update(height);
 	}
 
-	private void update() {
-		this.calendarParams.height = this.divider;
-		this.eventViewParams.height = this.getHeight() - this.divider;
+	private void update(final int height) {
+		this.calendarViewParams.height = this.divider;
+		this.eventViewParams.height = height - this.divider;
 		this.requestLayout();
-		final long time = System.nanoTime();
-		Log.d("EventCalendarView", String.format("%d FPS", Math.round(1000000000.0d / (time - this.lastTime))));
-		this.lastTime = time;
 	}
-
-	private long lastTime;
 }

@@ -1,6 +1,5 @@
 package com.khopan.homework.view;
 
-import android.content.Context;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
