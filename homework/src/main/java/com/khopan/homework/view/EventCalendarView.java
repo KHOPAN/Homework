@@ -35,6 +35,7 @@ public class EventCalendarView extends LinearLayout {
 	private float pressedY;
 	private int pressedDivider;
 	private boolean dragging;
+	private float draggedY;
 
 	public EventCalendarView(final Context context) {
 		this(context, null, 0);
@@ -90,8 +91,7 @@ public class EventCalendarView extends LinearLayout {
 			return true;
 		}
 		case MotionEvent.ACTION_MOVE: {
-			final float deltaY = event.getY() - this.pressedY;
-			this.divider = Math.round(Math.min(Math.max(this.pressedDivider + event.getY() - this.pressedY + (deltaY > 0 ? -this.touchSlop : this.touchSlop), this.dividerWeek), this.dividerMonth));
+			this.divider = Math.round(Math.min(Math.max(this.pressedDivider + event.getY() - this.draggedY, this.dividerWeek), this.dividerMonth));
 			this.update(this.getHeight());
 			return true;
 		}
@@ -119,6 +119,7 @@ public class EventCalendarView extends LinearLayout {
 
 			if(!this.dragging && Math.abs(deltaY) > Math.abs(event.getX() - this.pressedX) && Math.abs(deltaY) >= this.touchSlop) {
 				this.dragging = true;
+				this.draggedY = event.getY();
 				this.animator.cancel();
 			}
 
