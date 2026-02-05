@@ -19,6 +19,7 @@ public class EventCalendarView extends LinearLayout {
 	final int arcSize;
 	final int dividerColor;
 	final int dividerSize;
+	final int headerSize;
 	final int strokeSize;
 
 	int divider;
@@ -61,6 +62,7 @@ public class EventCalendarView extends LinearLayout {
 		this.context.getTheme().resolveAttribute(androidx.appcompat.R.attr.listDividerColor, value, true);
 		this.dividerColor = this.context.getColor(value.resourceId) & 0xFFFFFF;
 		this.dividerSize = Math.max(Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.5f, metrics)), 1);
+		this.headerSize = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 100.0f, metrics));
 		this.strokeSize = Math.max(Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.0f, metrics)), 1);
 		this.touchSlop = ViewConfiguration.get(this.context).getScaledTouchSlop();
 		this.animator = new ValueAnimator();
@@ -133,8 +135,8 @@ public class EventCalendarView extends LinearLayout {
 	@Override
 	protected void onSizeChanged(final int width, final int height, final int oldWidth, final int oldHeight) {
 		final float progress = this.dividerMonth <= 0 ? 1.0f : this.divider <= this.dividerSplit ? (this.divider - this.dividerWeek) / (float) (this.dividerSplit - this.dividerWeek) : (this.divider - this.dividerSplit) / (float) (this.dividerMonth - this.dividerSplit) + 1.0f;
-		this.dividerSplit = Math.round(height / 2.0f);
-		this.dividerWeek = Math.round((this.dividerSplit - this.strokeSize * 6.0f) / 5.0f + this.strokeSize * 2.0f);
+		this.dividerWeek = this.headerSize * 2;
+		this.dividerSplit = Math.round((this.dividerWeek - this.headerSize - this.strokeSize * 2.0f) * 5.0f + this.strokeSize * 6.0f + this.headerSize);
 		this.dividerMonth = height;
 		this.divider = Math.round(progress <= 1.0f ? (this.dividerSplit - this.dividerWeek) * progress + this.dividerWeek : (this.dividerMonth - this.dividerSplit) * (progress - 1.0f) + this.dividerSplit);
 		this.update(height);

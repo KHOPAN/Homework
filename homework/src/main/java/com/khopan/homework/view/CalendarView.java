@@ -65,8 +65,8 @@ public class CalendarView extends View {
 		this.cellWidth = (this.width - this.view.strokeSize * 8.0f) / 7.0f + this.view.strokeSize;
 		this.dividerValue = this.view.dividerSize * bottomProgress;
 		this.dividerColorValue = this.view.dividerColor | (Math.round(0xFF * bottomProgress) << 24);
-		float cellHeight = (Math.max(height, this.view.dividerSplit) - this.view.strokeSize * (this.rows + (this.rows - 1) * bottomProgress + 1) - this.dividerValue * this.rows) / (float) this.rows + this.view.strokeSize;
-		final float weekHeight = this.view.dividerWeek - this.view.strokeSize;
+		float cellHeight = (Math.max(height, this.view.dividerSplit - this.view.headerSize) - this.view.strokeSize * (this.rows + (this.rows - 1) * bottomProgress + 1) - this.dividerValue * this.rows) / (float) this.rows + this.view.strokeSize;
+		final float weekHeight = this.view.dividerWeek - this.view.headerSize - this.view.strokeSize;
 		cellHeight = (cellHeight - weekHeight) * topProgress + weekHeight;
 		this.cellTop = cellHeight + (this.view.strokeSize + this.view.dividerSize) * bottomProgress;
 		this.cellBottom = cellHeight + this.view.strokeSize;
