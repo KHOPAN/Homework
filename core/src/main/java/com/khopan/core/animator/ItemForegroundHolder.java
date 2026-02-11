@@ -9,6 +9,11 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.graphics.drawable.SeslRecoilDrawable;
 import androidx.appcompat.widget.SeslLinearLayoutCompat;
 
+/**
+ * An {@link androidx.appcompat.widget.SeslLinearLayoutCompat.ItemBackgroundHolder}
+ * that holds a foreground {@link android.graphics.drawable.Drawable} instead of
+ * a background.
+ */
 @RequiresApi(Build.VERSION_CODES.Q)
 public class ItemForegroundHolder extends SeslLinearLayoutCompat.ItemBackgroundHolder {
 	private Drawable foreground;
