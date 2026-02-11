@@ -39,13 +39,17 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 	protected NavigationDrawerActivity() {
 		this.drawerItems = new ArrayList<>();
-		this.useDrawerLayout = true;
+	}
+
+	@Override
+	protected ToolbarLayout createToolbarLayout() {
+		return new NavDrawerLayout(this);
 	}
 
 	@Override
 	public void onCreate(@Nullable final Bundle bundle) {
 		super.onCreate(bundle);
-		this.drawerLayout.setNavigationButtonIcon(AppCompatResources.getDrawable(this, R.drawable.icon_drawer));
+		this.toolbarLayout.setNavigationButtonIcon(AppCompatResources.getDrawable(this, R.drawable.icon_drawer));
 		final RecyclerView recyclerView = new RecyclerView(this);
 		final ToolbarLayout.ToolbarLayoutParams recyclerViewParams = new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 		recyclerViewParams.layoutLocation = DrawerLayout.DRAWER_PANEL;
@@ -59,7 +63,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		try {
 			final Method getContainerLayoutMethod = NavDrawerLayout.class.getDeclaredMethod("getContainerLayout$oneui_design_release");
 			getContainerLayoutMethod.setAccessible(true);
-			final Object containerLayout = getContainerLayoutMethod.invoke(NavigationDrawerActivity.this.drawerLayout);
+			final Object containerLayout = getContainerLayoutMethod.invoke(NavigationDrawerActivity.this.toolbarLayout);
 
 			if(containerLayout instanceof SlidingPaneLayout) {
 				((SlidingPaneLayout) containerLayout).addPanelSlideListener(new SlidingPaneLayout.PanelSlideListener() {
@@ -79,7 +83,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			}
 		} catch(final Throwable ignored) {}
 
-		this.drawerLayout.addView(recyclerView);
+		this.toolbarLayout.addView(recyclerView);
 	}
 
 	protected void setSelectedItem(final int position) {
@@ -91,7 +95,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			this.setFragment(entry.fragment);
 		}
 
-		this.drawerLayout.setDrawerOpen(false, true);
+		((NavDrawerLayout) this.toolbarLayout).setDrawerOpen(false, true);
 	}
 
 	private int getPixelSize(final float size) {
@@ -156,7 +160,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			holder.itemView.setSelected(selected);
 			holder.textView.setText(entry.text);
 			holder.textView.setTypeface(selected ? this.selected : this.normal);
-			final float time = NavigationDrawerActivity.this.drawerLayout.getDrawerOffset();
+			final float time = ((NavDrawerLayout) NavigationDrawerActivity.this.toolbarLayout).getDrawerOffset();
 			holder.textView.setAlpha(time);
 			final DisplayMetrics metrics = NavigationDrawerActivity.this.getResources().getDisplayMetrics();
 			final float iconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 44.0f, metrics);
@@ -164,7 +168,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			try {
 				final Method getContainerLayoutMethod = NavDrawerLayout.class.getDeclaredMethod("getContainerLayout$oneui_design_release");
 				getContainerLayoutMethod.setAccessible(true);
-				final Object containerLayout = getContainerLayoutMethod.invoke(NavigationDrawerActivity.this.drawerLayout);
+				final Object containerLayout = getContainerLayoutMethod.invoke(NavigationDrawerActivity.this.toolbarLayout);
 
 				if(containerLayout instanceof SlidingPaneLayout) {
 					final ViewGroup.LayoutParams params = holder.itemView.getLayoutParams();
