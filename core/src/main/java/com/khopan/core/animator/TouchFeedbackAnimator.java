@@ -24,7 +24,7 @@ public class TouchFeedbackAnimator {
 	private final View recoilView;
 
 	/**
-	 * Constructs a {@link com.khopan.core.animator.TouchFeedbackAnimator} instance.
+	 * Constructs a new {@link com.khopan.core.animator.TouchFeedbackAnimator} instance.
 	 *
 	 * @param view the target {@link android.view.View}.
 	 */
@@ -33,7 +33,7 @@ public class TouchFeedbackAnimator {
 	}
 
 	/**
-	 * Constructs a {@link com.khopan.core.animator.TouchFeedbackAnimator} instance.
+	 * Constructs a new {@link com.khopan.core.animator.TouchFeedbackAnimator} instance.
 	 *
 	 * @param context the {@link android.content.Context}
 	 * @param holderView the {@link android.view.View} used for animating the foreground/background.
@@ -44,7 +44,7 @@ public class TouchFeedbackAnimator {
 	}
 
 	/**
-	 * Constructs a {@link com.khopan.core.animator.TouchFeedbackAnimator} instance.
+	 * Constructs a new {@link com.khopan.core.animator.TouchFeedbackAnimator} instance.
 	 *
 	 * @param holder the {@link androidx.appcompat.widget.SeslLinearLayoutCompat.ItemBackgroundHolder}
 	 *        instance. Can be an {@link com.khopan.core.animator.ItemForegroundHolder}, for example.
