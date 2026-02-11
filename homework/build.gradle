@@ -10,13 +10,13 @@ repositories {
 android {
 	namespace "com.khopan.homework"
 	compileSdk {
-		version = release(35)
+		version = release(36)
 	}
 
 	defaultConfig {
 		applicationId "com.khopan.homework"
 		minSdk 26
-		targetSdk 35
+		targetSdk 36
 		versionCode 1
 		versionName "1.0.0"
 	}
@@ -36,6 +36,6 @@ android {
 
 dependencies {
 	implementation "io.github.oneuiproject:icons:1.1.0"
-	implementation "io.github.tribalfs:oneui-design:0.8.13+oneui8"
+	implementation "io.github.tribalfs:oneui-design:0.9.1+oneui8"
 	implementation project(path: ":core")
 }

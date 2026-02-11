@@ -5,12 +5,12 @@ plugins {
 android {
 	namespace "com.khopan.core"
 	compileSdk {
-		version = release(35)
+		version = release(36)
 	}
 
 	defaultConfig {
 		minSdk 26
-		targetSdk 35
+		targetSdk 36
 	}
 
 	buildTypes {
@@ -27,5 +27,5 @@ android {
 }
 
 dependencies {
-	implementation "io.github.tribalfs:oneui-design:0.8.13+oneui8"
+	implementation "io.github.tribalfs:oneui-design:0.9.1+oneui8"
 }
