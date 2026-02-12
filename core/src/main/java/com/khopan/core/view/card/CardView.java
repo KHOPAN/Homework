@@ -358,25 +358,24 @@ public class CardView extends RoundedLinearLayout {
 
 	private void inflateEndIconView() {
 		if(this.endIconView == null) {
-			this.endIconView = (ImageView) this.constraintLayout.<ViewStub>findViewById(R.id.end_view).inflate();
+			this.endIconView = this.constraintLayout.findViewById(R.id.end_view);
 			this.endIconView.setVisibility(View.GONE);
 		}
 	}
 
 	private void inflateIconView() {
 		if(this.iconView == null) {
-			CoreLayout.forceRemeasure(this.constraintLayout, () -> {
-				this.iconHolderView = (FrameLayout) this.constraintLayout.<ViewStub>findViewById(R.id.icon_view).inflate();
-				this.iconHolderView.setVisibility(View.VISIBLE);
-				this.iconView = this.iconHolderView.findViewById(dev.oneuiproject.oneui.design.R.id.cardview_icon);
-				this.iconView.setVisibility(View.VISIBLE);
-			}, () -> {
-				this.iconHolderView.setVisibility(View.GONE);
-				this.iconView.setVisibility(View.GONE);
-			});
+			this.iconHolderView = this.constraintLayout.findViewById(R.id.icon_view);
+			this.iconHolderView.setVisibility(View.GONE);
+			this.iconView = this.constraintLayout.findViewById(R.id.image_view);
+			this.iconView.setVisibility(View.GONE);
 		}
 	}
 
+	/**
+	 * A custom {@link android.view.View} used for rendering
+	 * the dividers.
+	 */
 	protected class DividerView extends View {
 		private final Paint paint;
 		private final int[] locations;
