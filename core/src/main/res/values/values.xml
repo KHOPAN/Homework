@@ -31,4 +31,6 @@
 		<attr format="boolean" name="switchState" />
 		<attr format="boolean" name="switchVisible" />
 	</declare-styleable>
+	<string name="dialog_button_negative">Cancel</string>
+	<string name="dialog_button_positive">Done</string>
 </resources>
