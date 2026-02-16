@@ -126,6 +126,15 @@ public class SwitchableCardView extends CheckableCardView {
 		return this.switchView != null && this.switchView.getVisibility() == View.VISIBLE;
 	}
 
+	@Override
+	public void setEnabled(final boolean enabled) {
+		super.setEnabled(enabled);
+
+		if(this.switchView != null) {
+			this.switchView.setEnabled(enabled);
+		}
+	}
+
 	/**
 	 * Sets the visibility of the switch divider,
 	 * or creates a new one if one doesn't exist.
@@ -202,6 +211,7 @@ public class SwitchableCardView extends CheckableCardView {
 		final int switchViewIdentifier = View.generateViewId();
 		this.switchView.setId(switchViewIdentifier);
 		this.switchView.setClickable(true);
+		this.switchView.setEnabled(this.isEnabled());
 		this.switchView.setFocusable(true);
 		this.switchView.setOnCheckedChangeListener((switchView, state) -> {
 			if(this.listener != null) {

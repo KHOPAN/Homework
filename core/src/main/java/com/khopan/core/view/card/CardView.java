@@ -504,6 +504,13 @@ public class CardView extends RoundedLinearLayout {
 		this.setCardLocation((index == 0 ? CardView.CARD_LOCATION_TOP : index == size - 1 ? CardView.CARD_LOCATION_BOTTOM : CardView.CARD_LOCATION_MIDDLE) | preferredDivider);
 	}
 
+	@Override
+	public void setEnabled(final boolean enabled) {
+		super.setEnabled(enabled);
+		this.constraintLayout.setEnabled(enabled);
+		this.constraintLayout.setAlpha(enabled ? 1.0f : 0.4f);
+	}
+
 	/**
 	 * Sets the end icon.
 	 *
