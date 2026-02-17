@@ -35,10 +35,9 @@ public abstract class Dialog {
 	public Dialog(final Context context) {
 		this.context = context;
 		this.dialogListener = (dialog, button) -> this.buttonClicked(button);
-		this.dialog = new AlertDialog.Builder(this.context)
-				.setNegativeButton(R.string.dialog_button_negative, this.dialogListener)
-				.setPositiveButton(R.string.dialog_button_positive, this.dialogListener)
-				.create();
+		final AlertDialog.Builder builder = new AlertDialog.Builder(this.context);
+		this.buildDialog(builder);
+		this.dialog = builder.create();
 	}
 
 	/**
@@ -62,6 +61,16 @@ public abstract class Dialog {
 	 */
 	public void show() {
 		this.dialog.show();
+	}
+
+	/**
+	 * Builds the {@link androidx.appcompat.app.AlertDialog}.
+	 *
+	 * @param builder the {@link androidx.appcompat.app.AlertDialog.Builder}.
+	 */
+	protected void buildDialog(final AlertDialog.Builder builder) {
+		builder.setNegativeButton(R.string.dialog_button_negative, this.dialogListener);
+		builder.setPositiveButton(R.string.dialog_button_positive, this.dialogListener);
 	}
 
 	/**
