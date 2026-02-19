@@ -133,6 +133,29 @@ public class EventCalendarView extends LinearLayout {
 	}
 
 	@Override
+	public void requestLayout() {
+		if(this.calendarViewParams == null) {
+			super.requestLayout();
+			return;
+		}
+
+		final int height = this.calendarViewParams.height;
+		this.calendarViewParams.height = height + 1;
+		super.requestLayout();
+		// F*** you, if it works, it works.
+		new Thread(() -> {
+			try {
+				Thread.sleep(10);
+			} catch(final Throwable ignored) {}
+
+			this.post(() -> {
+				this.calendarViewParams.height = height;
+				super.requestLayout();
+			});
+		}).start();
+	}
+
+	@Override
 	protected void onSizeChanged(final int width, final int height, final int oldWidth, final int oldHeight) {
 		final float progress = this.dividerMonth <= 0 ? 1.0f : this.divider <= this.dividerSplit ? (this.divider - this.dividerWeek) / (float) (this.dividerSplit - this.dividerWeek) : (this.divider - this.dividerSplit) / (float) (this.dividerMonth - this.dividerSplit) + 1.0f;
 		this.dividerWeek = this.headerSize * 2;
