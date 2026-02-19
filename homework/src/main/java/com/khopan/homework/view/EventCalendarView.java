@@ -28,7 +28,6 @@ public class EventCalendarView extends LinearLayout {
 	int dividerMonth;
 
 	private final LinearLayout.LayoutParams calendarViewParams;
-	private final LinearLayout.LayoutParams eventViewParams;
 	private final float touchSlop;
 	private final ValueAnimator animator;
 
@@ -54,21 +53,20 @@ public class EventCalendarView extends LinearLayout {
 		this.calendarViewParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
 		this.addView(this.calendarView.viewPager, this.calendarViewParams);
 		this.eventView = new EventPagerHolder(this);
-		this.eventViewParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
-		this.addView(this.eventView.viewPager, this.eventViewParams);
+		this.addView(this.eventView.viewPager, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		final DisplayMetrics metrics = this.context.getResources().getDisplayMetrics();
 		this.arcSize = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5.0f, metrics));
 		final TypedValue value = new TypedValue();
 		this.context.getTheme().resolveAttribute(androidx.appcompat.R.attr.listDividerColor, value, true);
 		this.dividerColor = this.context.getColor(value.resourceId) & 0xFFFFFF;
 		this.dividerSize = Math.max(Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.5f, metrics)), 1);
-		this.headerSize = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 100.0f, metrics));
+		this.headerSize = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50.0f, metrics));
 		this.strokeSize = Math.max(Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.0f, metrics)), 1);
 		this.touchSlop = ViewConfiguration.get(this.context).getScaledTouchSlop();
 		this.animator = new ValueAnimator();
 		this.animator.addUpdateListener(animator -> {
 			this.divider = (int) animator.getAnimatedValue();
-			this.update(this.getHeight());
+			this.update();
 		});
 
 		this.animator.setInterpolator(new DecelerateInterpolator());
@@ -94,7 +92,7 @@ public class EventCalendarView extends LinearLayout {
 		}
 		case MotionEvent.ACTION_MOVE: {
 			this.divider = Math.round(Math.min(Math.max(this.pressedDivider + event.getY() - this.draggedY, this.dividerWeek), this.dividerMonth));
-			this.update(this.getHeight());
+			this.update();
 			return true;
 		}
 		}
@@ -162,12 +160,11 @@ public class EventCalendarView extends LinearLayout {
 		this.dividerSplit = Math.round((this.dividerWeek - this.headerSize - this.strokeSize * 2.0f) * 5.0f + this.strokeSize * 6.0f + this.headerSize);
 		this.dividerMonth = height;
 		this.divider = Math.round(progress <= 1.0f ? (this.dividerSplit - this.dividerWeek) * progress + this.dividerWeek : (this.dividerMonth - this.dividerSplit) * (progress - 1.0f) + this.dividerSplit);
-		this.update(height);
+		this.update();
 	}
 
-	private void update(final int height) {
+	private void update() {
 		this.calendarViewParams.height = this.divider;
-		this.eventViewParams.height = height - this.divider;
 		this.requestLayout();
 	}
 }
