@@ -8,7 +8,22 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.khopan.core.view.SimpleViewHolder;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
+
 public class EventPagerHolder {
+	private static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
+			.appendText(ChronoField.DAY_OF_WEEK)
+			.appendLiteral(' ')
+			.appendText(ChronoField.DAY_OF_MONTH)
+			.appendLiteral(' ')
+			.appendText(ChronoField.MONTH_OF_YEAR)
+			.appendLiteral(' ')
+			.appendText(ChronoField.YEAR)
+			.toFormatter();
+
 	final ViewPager2 viewPager;
 
 	RecyclerView recyclerView;
@@ -18,6 +33,9 @@ public class EventPagerHolder {
 	public EventPagerHolder(final EventCalendarView view) {
 		this.view = view;
 		this.viewPager = new ViewPager2(this.view.context);
+		this.viewPager.setAdapter(new Adapter());
+		this.viewPager.setCurrentItem((int) LocalDate.now().toEpochDay());
+		this.viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
 		final RecyclerView.LayoutManager layoutManager = ((RecyclerView) this.viewPager.getChildAt(0)).getLayoutManager();
 		this.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
 			@Override
@@ -26,9 +44,6 @@ public class EventPagerHolder {
 				EventPagerHolder.this.recyclerView = layoutManager == null ? null : (view = (EventView) layoutManager.findViewByPosition(position)) == null ? null : view.recyclerView;
 			}
 		});
-
-		this.viewPager.setAdapter(new Adapter());
-		this.viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
 	}
 
 	private class Adapter extends RecyclerView.Adapter<SimpleViewHolder<EventView>> {
@@ -39,7 +54,7 @@ public class EventPagerHolder {
 
 		@Override
 		public void onBindViewHolder(@NonNull final SimpleViewHolder<EventView> holder, final int position) {
-
+			holder.itemView.dayView.setText(EventPagerHolder.FORMATTER.format(LocalDate.ofEpochDay(position)));
 		}
 
 		@NonNull
