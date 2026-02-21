@@ -35,6 +35,9 @@ android {
 }
 
 dependencies {
+	def room_version = "2.8.4"
+	implementation "androidx.room:room-runtime:$room_version"
+	annotationProcessor "androidx.room:room-compiler:$room_version"
 	implementation "io.github.oneuiproject:icons:1.1.0"
 	implementation "io.github.tribalfs:oneui-design:0.9.1+oneui8"
 	implementation project(path: ":core")

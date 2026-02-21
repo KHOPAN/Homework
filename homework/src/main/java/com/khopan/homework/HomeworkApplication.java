@@ -2,6 +2,7 @@ package com.khopan.homework;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -9,10 +10,14 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.MenuProvider;
+import androidx.room.Room;
 
 import com.khopan.core.activity.NavigationDrawerActivity;
 import com.khopan.homework.activity.NewAssignmentActivity;
 import com.khopan.homework.activity.SettingsActivity;
+import com.khopan.homework.database.HomeworkDatabase;
+import com.khopan.homework.database.dao.AssignmentDao;
+import com.khopan.homework.database.entity.Assignment;
 import com.khopan.homework.fragment.CalendarFragment;
 import com.khopan.homework.fragment.StudentFragment;
 import com.khopan.homework.fragment.SubjectFragment;
@@ -31,6 +36,19 @@ public class HomeworkApplication extends NavigationDrawerActivity {
 	public void onCreate(@Nullable final Bundle bundle) {
 		super.onCreate(bundle);
 		this.toolbarLayout.setExpandable(false);
+		final HomeworkDatabase database = Room.databaseBuilder(this.getApplicationContext(), HomeworkDatabase.class, "homework")
+				.enableMultiInstanceInvalidation()
+				.build();
+
+		final AssignmentDao assignments = database.getAssignment();
+
+		for(final Assignment assignment : assignments.getAll()) {
+			Log.d("Homework", assignment.title + " " + assignment.deadline);
+		}
+
+		final Assignment test = new Assignment();
+		test.title = "Hello, world!";
+		assignments.insert(test);
 		this.addMenuProvider(new MenuProvider() {
 			@Override
 			public void onCreateMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
