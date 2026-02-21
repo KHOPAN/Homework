@@ -3,8 +3,12 @@ package com.khopan.homework.view;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -12,7 +16,13 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
+
+import java.time.YearMonth;
+
 public class EventCalendarView extends LinearLayout {
+	static final YearMonth EPOCH_MONTH = YearMonth.of(1970, 1);
+
 	final Context context;
 	final CalendarPagerHolder calendarView;
 	final EventPagerHolder eventView;
@@ -36,6 +46,7 @@ public class EventCalendarView extends LinearLayout {
 	private int pressedDivider;
 	private boolean dragging;
 	private float draggedY;
+	private float cellWidth;
 
 	public EventCalendarView(final Context context) {
 		this(context, null, 0);
@@ -154,7 +165,25 @@ public class EventCalendarView extends LinearLayout {
 	}
 
 	@Override
+	protected void dispatchDraw(@NonNull final Canvas canvas) {
+		super.dispatchDraw(canvas);
+		final Paint paint = new Paint();
+		paint.setColor(Color.BLUE);
+		paint.setTextSize(30.0f);
+
+		for(int x = 0; x < 7; x++) {
+			final String text = new String[] {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}[x];
+			final float center = this.cellWidth * x + (this.cellWidth + this.strokeSize - paint.measureText(text)) / 2.0f + 35;
+			//canvas.drawCircle(center, this.headerSize, 10.0f, paint);
+			canvas.drawText(text, center, this.headerSize, paint);
+		}
+	}
+
+	@Override
 	protected void onSizeChanged(final int width, final int height, final int oldWidth, final int oldHeight) {
+		this.cellWidth = (width - 70 - this.strokeSize * 8.0f) / 7.0f + this.strokeSize;
+		Log.d("EventCalendarView", "EventCalendarView: " + width);
+
 		final float progress = this.dividerMonth <= 0 ? 1.0f : this.divider <= this.dividerSplit ? (this.divider - this.dividerWeek) / (float) (this.dividerSplit - this.dividerWeek) : (this.divider - this.dividerSplit) / (float) (this.dividerMonth - this.dividerSplit) + 1.0f;
 		this.dividerWeek = this.headerSize * 2;
 		this.dividerSplit = Math.round((this.dividerWeek - this.headerSize - this.strokeSize * 2.0f) * 5.0f + this.strokeSize * 6.0f + this.headerSize);
