@@ -10,11 +10,13 @@ import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 
 import androidx.annotation.NonNull;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 
 @SuppressLint("ViewConstructor")
 public class CalendarView extends View {
@@ -42,6 +44,9 @@ public class CalendarView extends View {
 
 	private LocalDate date;
 
+	private boolean pressed;
+	private int pressedLocation;
+
 	public CalendarView(final EventCalendarView view, final int rows) {
 		super(view.context);
 		this.view = view;
@@ -55,6 +60,7 @@ public class CalendarView extends View {
 		this.setFocusable(true);
 		this.setBackground(null);
 		this.animator = new ValueAnimator();
+		this.animator.setInterpolator(new DecelerateInterpolator());
 		this.animator.addUpdateListener(animator -> {
 			final float time = (float) animator.getAnimatedValue();
 			this.selectorX = (this.targetSelectorX - this.startSelectorX) * time + this.startSelectorX;
@@ -101,8 +107,11 @@ public class CalendarView extends View {
 		this.cellOffset = (this.dividerValue + weekHeight * this.selectorY) * topProgress - weekHeight * this.selectorY;
 	}
 
+	private YearMonth month;
+
 	void setMonth(final YearMonth month) {
-		final LocalDate start = month.atDay(1);
+		this.month = month;
+		final LocalDate start = this.month.atDay(1);
 		this.date = start.minusDays(start.getDayOfWeek().getValue() % 7);
 	}
 
@@ -153,15 +162,45 @@ public class CalendarView extends View {
 
 	@Override
 	public boolean dispatchTouchEvent(final MotionEvent event) {
+		final float touchX = event.getX();
+		final float touchY = event.getY();
+
 		switch(event.getActionMasked()) {
 		case MotionEvent.ACTION_DOWN:
+			for(int y = 0; y < this.rows; y++) {
+				final float rawTop = this.cellTop * y + this.cellOffset;
+				final int top = Math.round(rawTop);
+				final int bottom = Math.round(rawTop + this.cellBottom);
+
+				for(int x = 0; x < 7; x++) {
+					final float left = this.cellWidth * x;
+
+					if(touchX >= Math.round(left) && touchY >= top && touchX <= Math.round(left + this.cellWidth + this.view.strokeSize) && touchY <= bottom) {
+						this.pressed = true;
+						this.pressedLocation = y * 7 + x;
+						return true;
+					}
+				}
+			}
+
 			break;
 		case MotionEvent.ACTION_UP:
+			if(!this.pressed) {
+				break;
+			}
+
+			this.pressed = false;
+			final LocalDate date = this.date.plusDays(this.pressedLocation);
+
+			if(this.month.getMonthValue() != date.getMonthValue() || this.month.getYear() != date.getYear()) {
+				this.view.calendarView.viewPager.setCurrentItem((int) ChronoUnit.MONTHS.between(EventCalendarView.EPOCH_MONTH, date));
+			}
+
 			this.startSelectorY = this.selectorY;
-			this.targetSelectorY = Math.round(event.getY() / this.cellTop);
+			this.targetSelectorY = this.pressedLocation / 7;
 			this.animator.setFloatValues(0.0f, 1.0f);
 			this.animator.start();
-			break;
+			return true;
 		}
 
 		return super.dispatchTouchEvent(event);
