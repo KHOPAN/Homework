@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.khopan.homework.view.EventCalendarView;
+import com.khopan.homework.calendar.EventCalendarView;
 
 public class CalendarFragment extends Fragment {
 	@Nullable

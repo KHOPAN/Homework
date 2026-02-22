@@ -3,436 +3,76 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:orientation="vertical">
-	<androidx.core.widget.NestedScrollView
+	android:orientation="vertical"
+	android:paddingHorizontal="10dp">
+	<dev.oneuiproject.oneui.widget.RoundedFrameLayout
 		android:layout_width="match_parent"
 		android:layout_height="0dp"
-		android:layout_weight="1.0"
-		android:fillViewport="true"
-		android:overScrollMode="always"
-		android:paddingHorizontal="10dp">
-		<LinearLayout
+		android:layout_weight="1.0">
+		<androidx.core.widget.NestedScrollView
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:orientation="vertical">
+			android:layout_height="match_parent"
+			android:fillViewport="true"
+			android:overScrollMode="always">
 			<dev.oneuiproject.oneui.widget.RoundedLinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:background="@color/oui_des_background_color"
 				android:orientation="vertical">
-				<com.khopan.core.view.selectionlist.SelectionListItemView
-					android:id="@+id/subject_view"
+				<dev.oneuiproject.oneui.widget.RoundedLinearLayout
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:clickable="true"
-					app:showTopDivider="false"
-					app:title="@string/subject" />
+					android:background="@color/oui_des_background_color"
+					android:orientation="vertical">
+					<com.khopan.core.view.card.CardView
+						android:id="@+id/title_view"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						app:title="@string/new_assignment_title"
+						app:topDividerVisible="false" />
 
-				<dev.oneuiproject.oneui.widget.CardItemView
-					android:id="@+id/deadlineView"
+				</dev.oneuiproject.oneui.widget.RoundedLinearLayout>
+				<dev.oneuiproject.oneui.widget.Separator
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content" />
+
+				<dev.oneuiproject.oneui.widget.RoundedLinearLayout
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:clickable="true"
-					app:summary="@string/deadline" />
+					android:background="@color/oui_des_background_color"
+					android:orientation="vertical">
+					<com.khopan.core.view.card.CardView
+						android:id="@+id/deadline_date_view"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						app:title="@string/new_assignment_deadline_date"
+						app:topDividerVisible="false" />
 
-				<com.khopan.core.view.card.CardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:title="Normal" />
+					<com.khopan.core.view.card.CardView
+						android:id="@+id/deadline_time_view"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						app:title="@string/new_assignment_deadline_time" />
 
-				<com.khopan.core.view.card.CardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:summary="com.khopan.core.view.card.CardView"
-					app:title="Summary" />
+					<com.khopan.core.view.selectionlist.SelectionListItemView
+						android:id="@+id/subject_view"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:clickable="true"
+						app:title="@string/subject" />
 
-				<com.khopan.core.view.card.CardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:title="Icon" />
-
-				<com.khopan.core.view.card.CardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:summary="com.khopan.core.view.card.CardView"
-					app:title="Summary, Icon" />
-
-				<com.khopan.core.view.card.CardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:title="End Icon" />
-
-				<com.khopan.core.view.card.CardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:summary="com.khopan.core.view.card.CardView"
-					app:title="Summary, End Icon" />
-
-				<com.khopan.core.view.card.CardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:title="Icon, End Icon" />
-
-				<com.khopan.core.view.card.CardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:summary="com.khopan.core.view.card.CardView"
-					app:title="Summary, Icon, End Icon" />
-
-				<com.khopan.core.view.card.CheckableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:title="Checkbox" />
-
-				<com.khopan.core.view.card.CheckableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:summary="com.khopan.core.view.card.CheckableCardView"
-					app:title="Summary, Checkbox" />
-
-				<com.khopan.core.view.card.CheckableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:title="Icon, Checkbox" />
-
-				<com.khopan.core.view.card.CheckableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:summary="com.khopan.core.view.card.CheckableCardView"
-					app:title="Summary, Icon, Checkbox" />
-
-				<com.khopan.core.view.card.CheckableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:title="End Icon, Checkbox" />
-
-				<com.khopan.core.view.card.CheckableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:summary="com.khopan.core.view.card.CheckableCardView"
-					app:title="Summary, End Icon, Checkbox" />
-
-				<com.khopan.core.view.card.CheckableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:title="Icon, End Icon, Checkbox" />
-
-				<com.khopan.core.view.card.CheckableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:summary="com.khopan.core.view.card.CheckableCardView"
-					app:title="Summary, Icon, End Icon, Checkbox" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:switchVisible="true"
-					app:title="Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchVisible="true"
-					app:title="Summary, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:switchVisible="true"
-					app:title="Icon, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchVisible="true"
-					app:title="Summary, Icon, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:switchVisible="true"
-					app:title="End Icon, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchVisible="true"
-					app:title="Summary, End Icon, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:switchVisible="true"
-					app:title="Icon, End Icon, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchVisible="true"
-					app:title="Summary, Icon, End Icon, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:switchVisible="true"
-					app:title="Checkbox, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchVisible="true"
-					app:title="Summary, Checkbox, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:switchVisible="true"
-					app:title="Icon, Checkbox, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchVisible="true"
-					app:title="Summary, Icon, Checkbox, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:switchVisible="true"
-					app:title="End Icon, Checkbox, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchVisible="true"
-					app:title="Summary, End Icon, Checkbox, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:switchVisible="true"
-					app:title="Icon, End Icon, Checkbox, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchVisible="true"
-					app:title="Summary, Icon, End Icon, Checkbox, Switch" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Summary, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Icon, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Summary, Icon, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="End Icon, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Summary, End Icon, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Icon, End Icon, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Summary, Icon, End Icon, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Checkbox, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Summary, Checkbox, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Icon, Checkbox, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Summary, Icon, Checkbox, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="End Icon, Checkbox, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Summary, End Icon, Checkbox, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:checkboxVisible="true"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Icon, End Icon, Checkbox, Switch Screen" />
-
-				<com.khopan.core.view.card.SwitchableCardView
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					app:cardLocation="bottom"
-					app:checkboxVisible="true"
-					app:endIcon="@drawable/ic_oui_compose"
-					app:icon="@drawable/ic_oui_camera_outline"
-					app:summary="com.khopan.core.view.card.SwitchableCardView"
-					app:switchDividerVisible="true"
-					app:switchVisible="true"
-					app:title="Summary, Icon, End Icon, Checkbox, Switch Screen" />
-
+				</dev.oneuiproject.oneui.widget.RoundedLinearLayout>
 			</dev.oneuiproject.oneui.widget.RoundedLinearLayout>
-		</LinearLayout>
-	</androidx.core.widget.NestedScrollView>
+		</androidx.core.widget.NestedScrollView>
+	</dev.oneuiproject.oneui.widget.RoundedFrameLayout>
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="horizontal">
-		<Button
-			android:id="@+id/cancelButton"
+		<Button android:id="@+id/cancel_button"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
-			android:layout_weight="1.0"
 			android:layout_marginVertical="8dp"
+			android:layout_weight="1.0"
 			android:clickable="true"
 			android:focusable="true"
 			android:text="@string/cancel"
@@ -440,8 +80,7 @@
 			android:theme="@style/OneUI.ContainedTransparentButtonTheme"
 			style="@style/OneUI.ContainedButton" />
 
-		<Button
-			android:id="@+id/addButton"
+		<Button android:id="@+id/add_button"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_marginVertical="8dp"

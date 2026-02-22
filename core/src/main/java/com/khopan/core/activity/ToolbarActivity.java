@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.khopan.core.R;
+
 import dev.oneuiproject.oneui.layout.ToolbarLayout;
 
 /**
@@ -46,7 +48,7 @@ public abstract class ToolbarActivity extends AppCompatActivity {
 	 * @return an instance of {@link dev.oneuiproject.oneui.layout.ToolbarLayout}.
 	 */
 	protected ToolbarLayout createToolbarLayout() {
-		return new ToolbarLayout(this);
+		return (ToolbarLayout) this.getLayoutInflater().inflate(R.layout.layout_toolbar, this.findViewById(android.R.id.content), false);
 	}
 
 	@Override

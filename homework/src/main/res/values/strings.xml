@@ -1,6 +1,11 @@
 <resources>
 	<string name="homework">Homework</string>
 	<string name="new_assignment">New assignment</string>
+	<string name="new_assignment_title">Title</string>
+	<string name="new_assignment_deadline_date">Deadline date</string>
+	<string name="new_assignment_deadline_time">Deadline time</string>
+
+
 	<string name="settings">Settings</string>
 	<string name="subject">Subject</string>
 	<string name="deadline">Deadline</string>
