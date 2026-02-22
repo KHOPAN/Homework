@@ -5,20 +5,21 @@
 	<uses-permission android:name="android.permission.USE_EXACT_ALARM"
 		tools:ignore="ExactAlarmPolicy" />
 
-	<application android:allowBackup="true"
+	<application
+		android:allowBackup="true"
 		android:icon="@mipmap/launcher_icon"
 		android:label="@string/applicationName"
 		android:roundIcon="@mipmap/launcher_icon"
 		android:supportsRtl="true"
 		android:theme="@style/OneUITheme">
-		<meta-data android:name="SamsungBasicInteraction"
-			android:value="SEP10" />
+		<meta-data android:name="com.samsung.android.icon_container.feature_appicon"
+			android:value="ADAPTIVEICON_SHADOW" />
 
 		<meta-data android:name="com.samsung.android.icon_container.has_icon_container"
 			android:value="true" />
 
-		<meta-data android:name="com.samsung.android.icon_container.feature_appicon"
-			android:value="ADAPTIVEICON_SHADOW" />
+		<meta-data android:name="SamsungBasicInteraction"
+			android:value="SEP10" />
 
 		<meta-data android:name="theming-meta"
 			android:value="theme_metadata" />
@@ -28,8 +29,8 @@
 
 		<activity android:name="com.khopan.homework.HomeworkApplication"
 			android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize"
-			android:launchMode="singleTop"
-			android:exported="true">
+			android:exported="true"
+			android:launchMode="singleTop">
 			<meta-data android:name="com.sec.android.app.launcher.icon_theme"
 				android:value="themeColor" />
 
@@ -41,15 +42,19 @@
 		</activity>
 		<activity android:name="com.khopan.homework.activity.NewAssignmentActivity"
 			android:exported="true"
-			android:showWhenLocked="true" />
+			android:showWhenLocked="true"
+			tools:targetApi="27" />
 
 		<activity android:name="com.khopan.homework.activity.SettingsActivity"
 			android:exported="false" />
 
+		<receiver android:name="com.khopan.homework.receiver.ReminderReceiver"
+			android:exported="false" />
+
 		<service android:name="com.khopan.homework.tile.NewAssignmentTileService"
-			android:label="@string/newAssignment"
-			android:icon="@drawable/ic_oui_add"
 			android:exported="true"
+			android:icon="@drawable/ic_oui_add"
+			android:label="@string/newAssignment"
 			android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
 			<meta-data android:name="android.service.quicksettings.ACTIVE_TILE"
 				android:value="true" />
@@ -58,8 +63,5 @@
 				<action android:name="android.service.quicksettings.action.QS_TILE" />
 			</intent-filter>
 		</service>
-		<receiver android:name="com.khopan.homework.receiver.ReminderReceiver"
-			android:exported="false" />
-
 	</application>
 </manifest>
