@@ -1,5 +1,8 @@
 <resources>
 	<string name="homework">Homework</string>
+	<string name="calendar">Calendar</string>
+	<string name="assignment">Assignment</string>
+
 	<string name="new_assignment">New assignment</string>
 	<string name="new_assignment_title">Title</string>
 	<string name="new_assignment_title_cancel">Cancel</string>
