@@ -8,7 +8,7 @@
 	<application
 		android:allowBackup="true"
 		android:icon="@mipmap/launcher_icon"
-		android:label="@string/applicationName"
+		android:label="@string/homework"
 		android:roundIcon="@mipmap/launcher_icon"
 		android:supportsRtl="true"
 		android:theme="@style/OneUITheme">
@@ -54,7 +54,7 @@
 		<service android:name="com.khopan.homework.tile.NewAssignmentTileService"
 			android:exported="true"
 			android:icon="@drawable/ic_oui_add"
-			android:label="@string/newAssignment"
+			android:label="@string/new_assignment"
 			android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
 			<meta-data android:name="android.service.quicksettings.ACTIVE_TILE"
 				android:value="true" />
