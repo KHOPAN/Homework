@@ -53,13 +53,6 @@
 						android:layout_height="wrap_content"
 						app:title="@string/new_assignment_deadline_time" />
 
-					<com.khopan.core.view.selectionlist.SelectionListItemView
-						android:id="@+id/subject_view"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:clickable="true"
-						app:title="@string/subject" />
-
 				</dev.oneuiproject.oneui.widget.RoundedLinearLayout>
 			</dev.oneuiproject.oneui.widget.RoundedLinearLayout>
 		</androidx.core.widget.NestedScrollView>

@@ -38,6 +38,14 @@ dependencies {
 	def room_version = "2.8.4"
 	implementation "androidx.room:room-runtime:$room_version"
 	annotationProcessor "androidx.room:room-compiler:$room_version"
+	def paging_version = "3.4.1"
+	implementation ("androidx.paging:paging-runtime:$paging_version") {
+		exclude group: "androidx.core", module: "core"
+		exclude group: "androidx.core", module: "core-ktx"
+		exclude group: "androidx.recyclerview", module: "recyclerview"
+	}
+
+	implementation "androidx.room:room-paging:$room_version"
 	implementation "io.github.oneuiproject:icons:1.1.0"
 	implementation "io.github.tribalfs:oneui-design:0.9.1+oneui8"
 	implementation project(path: ":core")
