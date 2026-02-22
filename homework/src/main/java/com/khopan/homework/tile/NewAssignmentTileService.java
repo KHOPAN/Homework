@@ -1,5 +1,6 @@
 package com.khopan.homework.tile;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Build;
@@ -8,6 +9,7 @@ import android.service.quicksettings.TileService;
 import com.khopan.homework.activity.NewAssignmentActivity;
 
 public class NewAssignmentTileService extends TileService {
+	@SuppressLint("StartActivityAndCollapseDeprecated")
 	@Override
 	public void onClick() {
 		final Intent intent = new Intent(this, NewAssignmentActivity.class);
