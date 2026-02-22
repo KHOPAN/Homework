@@ -1,4 +1,4 @@
-package com.khopan.homework.view;
+package com.khopan.homework.calendar;
 
 import android.view.ViewGroup;
 
@@ -54,7 +54,9 @@ public class EventPagerHolder {
 
 		@Override
 		public void onBindViewHolder(@NonNull final SimpleViewHolder<EventView> holder, final int position) {
-			holder.itemView.dayView.setText(EventPagerHolder.FORMATTER.format(LocalDate.ofEpochDay(position)));
+			final LocalDate date = LocalDate.ofEpochDay(position);
+			holder.itemView.dayView.setText(EventPagerHolder.FORMATTER.format(date));
+			holder.itemView.setDate(date);
 		}
 
 		@NonNull

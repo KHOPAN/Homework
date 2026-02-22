@@ -1,4 +1,4 @@
-package com.khopan.homework.view;
+package com.khopan.homework.calendar;
 
 import android.util.TypedValue;
 import android.view.Gravity;

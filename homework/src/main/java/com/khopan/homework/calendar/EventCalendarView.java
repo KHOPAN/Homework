@@ -1,4 +1,4 @@
-package com.khopan.homework.view;
+package com.khopan.homework.calendar;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
@@ -18,10 +18,14 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 
 public class EventCalendarView extends LinearLayout {
+	static final LocalDate EPOCH_DAY = LocalDate.of(1970, 1, 1);
 	static final YearMonth EPOCH_MONTH = YearMonth.of(1970, 1);
+	static final LocalDateTime EPOCH_TIME = LocalDateTime.of(1970, 1, 1, 0, 0);
 
 	final Context context;
 	final CalendarPagerHolder calendarView;

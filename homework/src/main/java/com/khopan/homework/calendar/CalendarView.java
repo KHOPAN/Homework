@@ -1,4 +1,4 @@
-package com.khopan.homework.view;
+package com.khopan.homework.calendar;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
@@ -71,6 +71,10 @@ public class CalendarView extends View {
 
 	@Override
 	protected void onDraw(@NonNull final Canvas canvas) {
+		if(this.date == null) {
+			return;
+		}
+
 		for(int y = 0; y < this.rows; y++) {
 			final float rawTop = this.cellTop * y + this.cellOffset;
 			final int top = Math.round(rawTop);
@@ -83,7 +87,14 @@ public class CalendarView extends View {
 
 			for(int x = 0; x < 7; x++) {
 				final float left = this.cellWidth * x;
-				this.drawCell(canvas, this.date == null ? 0 : this.date.plusDays(y * 7L + x).getDayOfMonth(), Math.round(left), top, Math.round(left + this.cellWidth + this.view.strokeSize), bottom);
+				this.paint.setColor(x == 0 ? 0xFFDB332A : 0xFFFAFAFF);
+				final LocalDate date = this.date.plusDays(y * 7L + x);
+
+				if(this.month.getMonthValue() != date.getMonthValue() || this.month.getYear() != date.getYear()) {
+					this.paint.setAlpha(64);
+				}
+
+				this.drawCell(canvas, date.getDayOfMonth(), Math.round(left), top, Math.round(left + this.cellWidth + this.view.strokeSize), bottom);
 			}
 		}
 
@@ -132,7 +143,6 @@ public class CalendarView extends View {
 		}*/
 
 		final Paint.FontMetrics metrics = this.paint.getFontMetrics();
-		this.paint.setColor(Color.GREEN);
 		final String text = Integer.toString(day);
 		canvas.drawText(text, (left + right) / 2.0f - this.paint.measureText(text) / 2.0f, (top + bottom) / 2.0f - (metrics.ascent + metrics.descent) / 2.0f, this.paint);
 	}
@@ -155,7 +165,7 @@ public class CalendarView extends View {
 
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			final float innerArcSize = this.view.arcSize - this.view.strokeSize * 2.0f;
-			this.paint.setColor(Color.GREEN);
+			this.paint.setColor(0xFF545454);
 			canvas.drawDoubleRoundRect(this.outerBounds, this.view.arcSize, this.view.arcSize, this.innerBounds, innerArcSize, innerArcSize, this.paint);
 		}
 	}
