@@ -13,24 +13,21 @@ import java.util.List;
 
 @Dao
 public interface AssignmentDao {
-	@Query("SELECT * FROM assignment")
-	List<Assignment> getAll();
-
 	@Query("SELECT * FROM assignment ORDER BY deadline ASC")
-	PagingSource<Integer, Assignment> getAllPaged();
+	PagingSource<Integer, Assignment> allPaged();
 
-	@Query("SELECT * FROM assignment WHERE deadline >= :start AND deadline < :end ORDER BY deadline ASC")
-	List<Assignment> getRange(final long start, final long end);
-
-	@Query("SELECT * FROM assignment WHERE deadline >= :start ORDER BY deadline ASC LIMIT 1")
-	Assignment getNext(final long start);
+	@Delete
+	void delete(final Assignment assignment);
 
 	@Insert
 	void insert(final Assignment assignment);
 
+	@Query("SELECT * FROM assignment WHERE deadline >= :start ORDER BY deadline ASC LIMIT 1")
+	Assignment next(final long start);
+
+	@Query("SELECT * FROM assignment WHERE deadline >= :start AND deadline < :end ORDER BY deadline ASC")
+	List<Assignment> range(final long start, final long end);
+
 	@Update
 	void update(final Assignment assignment);
-
-	@Delete
-	void delete(final Assignment assignment);
 }

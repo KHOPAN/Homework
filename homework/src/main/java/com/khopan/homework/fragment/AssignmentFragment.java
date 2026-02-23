@@ -127,7 +127,7 @@ public class AssignmentFragment extends Fragment {
 		private final LiveData<PagingData<Assignment>> data;
 
 		private AssignmentViewModel(final AssignmentDao accessor) {
-			PagingLiveData.cachedIn(this.data = PagingLiveData.getLiveData(new Pager<>(new PagingConfig(20, 5, true), accessor::getAllPaged)), ViewModelKt.getViewModelScope(this));
+			PagingLiveData.cachedIn(this.data = PagingLiveData.getLiveData(new Pager<>(new PagingConfig(20, 5, true), accessor::allPaged)), ViewModelKt.getViewModelScope(this));
 		}
 	}
 
