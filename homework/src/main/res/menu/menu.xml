@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:tools="http://schemas.android.com/tools">
+	xmlns:app="http://schemas.android.com/apk/res-auto">
 	<item android:id="@+id/menu_new_assignment"
 		android:icon="@drawable/ic_oui_add"
 		android:title="@string/new_assignment"
 		app:iconTint="?actionMenuTextColor"
-		app:showAsAction="always"
-		tools:ignore="AppCompatResource" />
-
-	<item android:id="@+id/menu_settings"
-		android:icon="@drawable/ic_oui_settings_outline"
-		android:title="@string/settings"
-		app:iconTint="?actionMenuTextColor"
-		app:showAsAction="ifRoom"
-		tools:ignore="AppCompatResource" />
+		app:showAsAction="always" />
 
 </menu>

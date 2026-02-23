@@ -68,7 +68,7 @@
 			android:layout_weight="1.0"
 			android:clickable="true"
 			android:focusable="true"
-			android:text="@string/cancel"
+			android:text="@string/new_assignment_cancel"
 			android:textColor="?attr/colorPrimary"
 			android:theme="@style/OneUI.ContainedTransparentButtonTheme"
 			style="@style/OneUI.ContainedButton" />
@@ -80,7 +80,7 @@
 			android:layout_weight="1.0"
 			android:clickable="true"
 			android:focusable="true"
-			android:text="@string/add"
+			android:text="@string/new_assignment_add"
 			android:textColor="?attr/colorPrimary"
 			android:theme="@style/OneUI.ContainedTransparentButtonTheme"
 			style="@style/OneUI.ContainedButton" />

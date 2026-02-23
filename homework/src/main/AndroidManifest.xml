@@ -45,9 +45,6 @@
 			android:showWhenLocked="true"
 			tools:targetApi="27" />
 
-		<activity android:name="com.khopan.homework.activity.SettingsActivity"
-			android:exported="false" />
-
 		<receiver android:name="com.khopan.homework.receiver.ReminderReceiver"
 			android:exported="false" />
 

@@ -12,7 +12,6 @@ import androidx.core.view.MenuProvider;
 
 import com.khopan.core.activity.NavigationDrawerActivity;
 import com.khopan.homework.activity.NewAssignmentActivity;
-import com.khopan.homework.activity.SettingsActivity;
 import com.khopan.homework.database.HomeworkDatabase;
 import com.khopan.homework.fragment.AssignmentFragment;
 import com.khopan.homework.fragment.CalendarFragment;
@@ -43,8 +42,6 @@ public class HomeworkApplication extends NavigationDrawerActivity {
 
 			if(identifier == R.id.menu_new_assignment) {
 				activity = NewAssignmentActivity.class;
-			} else if(identifier == R.id.menu_settings) {
-				activity = SettingsActivity.class;
 			} else {
 				return false;
 			}
