@@ -12,12 +12,9 @@ public class Assignment {
 	@ColumnInfo(name="title")
 	public String title;
 
-	@ColumnInfo(name="subject")
-	public int subject;
+	@ColumnInfo(name="deadline")
+	public long deadline;
 
 	@ColumnInfo(name="done")
 	public boolean done;
-
-	@ColumnInfo(name="deadline")
-	public long deadline;
 }
