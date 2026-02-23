@@ -2,8 +2,10 @@ package com.khopan.homework.database.dao;
 
 import androidx.paging.PagingSource;
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.khopan.homework.database.entity.Assignment;
 
@@ -24,5 +26,11 @@ public interface AssignmentDao {
 	Assignment getNext(final long start);
 
 	@Insert
-	void insert(final Assignment... assignments);
+	void insert(final Assignment assignment);
+
+	@Update
+	void update(final Assignment assignment);
+
+	@Delete
+	void delete(final Assignment assignment);
 }
