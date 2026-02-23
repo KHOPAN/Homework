@@ -18,9 +18,13 @@ import androidx.picker.app.SeslTimePickerDialog;
 import com.khopan.core.activity.ToolbarActivity;
 import com.khopan.core.view.card.CardView;
 import com.khopan.homework.R;
+import com.khopan.homework.database.HomeworkDatabase;
+import com.khopan.homework.database.dao.AssignmentDao;
+import com.khopan.homework.database.entity.Assignment;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
@@ -41,6 +45,7 @@ public class NewAssignmentActivity extends ToolbarActivity {
 	@Override
 	public void onCreate(@Nullable final Bundle bundle) {
 		super.onCreate(bundle);
+		final AssignmentDao accessor = HomeworkDatabase.getInstance(this.getApplicationContext()).getAssignment();
 		this.formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.getDefault());
 		this.toolbarLayout.setShowNavigationButtonAsBack(true);
 		this.toolbarLayout.setTitle(this.getString(R.string.new_assignment));
@@ -109,6 +114,16 @@ public class NewAssignmentActivity extends ToolbarActivity {
 		this.updateDeadlineTimeView();
 		this.toolbarLayout.<Button>findViewById(R.id.cancel_button).setOnClickListener(view -> this.getOnBackPressedDispatcher().onBackPressed());
 		this.addButton = this.toolbarLayout.findViewById(R.id.add_button);
+		this.addButton.setOnClickListener(view -> {
+			final Assignment assignment = new Assignment();
+			assignment.title = this.title;
+			assignment.deadline = this.deadlineDate.toEpochSecond(this.deadlineTime, ZoneOffset.UTC);
+			new Thread(() -> {
+				accessor.insert(assignment);
+				this.runOnUiThread(this::finish);
+			}).start();
+		});
+
 		this.updateTitleView();
 	}
 
