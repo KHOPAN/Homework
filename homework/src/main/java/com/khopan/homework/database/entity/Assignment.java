@@ -17,4 +17,7 @@ public class Assignment {
 
 	@ColumnInfo(name="done")
 	public boolean done;
+
+	@ColumnInfo(name="notified")
+	public boolean notified;
 }

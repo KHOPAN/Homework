@@ -1,5 +1,7 @@
 package com.khopan.homework;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -15,6 +17,7 @@ import com.khopan.homework.activity.NewAssignmentActivity;
 import com.khopan.homework.database.HomeworkDatabase;
 import com.khopan.homework.fragment.AssignmentFragment;
 import com.khopan.homework.fragment.CalendarFragment;
+import com.khopan.homework.receiver.ReminderReceiver;
 
 public class HomeworkApplication extends NavigationDrawerActivity {
 	@Override
@@ -27,6 +30,10 @@ public class HomeworkApplication extends NavigationDrawerActivity {
 		this.drawerItems.add(DrawerEntry.create(dev.oneuiproject.oneui.R.drawable.ic_oui_document_outline, this.getString(R.string.assignment), new AssignmentFragment()));
 		this.setSelectedItem(0);
 		HomeworkDatabase.getInstance(this.getApplicationContext());
+		final NotificationChannel channel = new NotificationChannel(ReminderReceiver.NOTIFICATION_CHANNEL_IDENTIFIER, this.getString(R.string.notification_name), NotificationManager.IMPORTANCE_DEFAULT);
+		channel.setDescription(this.getString(R.string.notification_description));
+		this.getSystemService(NotificationManager.class).createNotificationChannel(channel);
+		ReminderReceiver.schedule(this.getApplicationContext());
 	}
 
 	private class Provider implements MenuProvider {

@@ -21,6 +21,7 @@ import com.khopan.homework.R;
 import com.khopan.homework.database.HomeworkDatabase;
 import com.khopan.homework.database.dao.AssignmentDao;
 import com.khopan.homework.database.entity.Assignment;
+import com.khopan.homework.receiver.ReminderReceiver;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -120,7 +121,10 @@ public class NewAssignmentActivity extends ToolbarActivity {
 			assignment.deadline = this.deadlineDate.toEpochSecond(this.deadlineTime, ZoneOffset.UTC);
 			new Thread(() -> {
 				accessor.insert(assignment);
-				this.runOnUiThread(this::finish);
+				this.runOnUiThread(() -> {
+					ReminderReceiver.schedule(this.getApplicationContext());
+					this.finish();
+				});
 			}).start();
 		});
 

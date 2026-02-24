@@ -15,4 +15,7 @@
 	<string name="new_assignment_deadline_time">Deadline time</string>
 	<string name="new_assignment_cancel">Cancel</string>
 	<string name="new_assignment_add">Add</string>
+	<string name="notification_name">Assignment</string>
+	<string name="notification_description">Notify about assignment reminders</string>
+	<string name="notification_content">in the next 24 hours!</string>
 </resources>

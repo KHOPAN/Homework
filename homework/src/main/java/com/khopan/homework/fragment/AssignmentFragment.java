@@ -98,6 +98,12 @@ public class AssignmentFragment extends Fragment {
 			final Assignment assignment = this.getItem(position);
 			final Context context = holder.itemView.getContext();
 			holder.itemView.setOnClickListener(assignment == null ? null : view -> new AlertDialog.Builder(context).setTitle(assignment.title).setMessage(R.string.assignment_delete).setNegativeButton(R.string.assignment_delete_cancel, null).setPositiveButton(R.string.assignment_delete_ok, (dialog, which) -> new Thread(() -> this.accessor.delete(assignment)).start()).create().show());
+			holder.itemView.setOnLongClickListener(assignment == null ? null : (view) -> {
+				assignment.notified = false;
+				new Thread(() -> this.accessor.update(assignment)).start();
+				return false;
+			});
+
 			holder.itemView.setRoundedCorners((position == 0 ? SeslRoundedCorner.ROUNDED_CORNER_TOP_LEFT | SeslRoundedCorner.ROUNDED_CORNER_TOP_RIGHT : 0) | (position == this.getItemCount() - 1 ? SeslRoundedCorner.ROUNDED_CORNER_BOTTOM_LEFT | SeslRoundedCorner.ROUNDED_CORNER_BOTTOM_RIGHT : 0));
 			final String text = context.getString(R.string.assignment_loading);
 			holder.itemView.setSummary(assignment == null ? text : this.formatter.format(LocalDateTime.ofEpochSecond(assignment.deadline, 0, ZoneOffset.UTC)));
