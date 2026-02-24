@@ -101,6 +101,7 @@ public class AssignmentFragment extends Fragment {
 			holder.itemView.setRoundedCorners((position == 0 ? SeslRoundedCorner.ROUNDED_CORNER_TOP_LEFT | SeslRoundedCorner.ROUNDED_CORNER_TOP_RIGHT : 0) | (position == this.getItemCount() - 1 ? SeslRoundedCorner.ROUNDED_CORNER_BOTTOM_LEFT | SeslRoundedCorner.ROUNDED_CORNER_BOTTOM_RIGHT : 0));
 			final String text = context.getString(R.string.assignment_loading);
 			holder.itemView.setSummary(assignment == null ? text : this.formatter.format(LocalDateTime.ofEpochSecond(assignment.deadline, 0, ZoneOffset.UTC)));
+			holder.itemView.setSwitchStateListener(null);
 			holder.itemView.setSwitchState(assignment != null && assignment.done);
 			holder.itemView.setSwitchStateListener(assignment == null ? null : (view, state) -> {
 				assignment.done = state;

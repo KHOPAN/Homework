@@ -34,7 +34,6 @@ public class EventPagerHolder {
 		this.view = view;
 		this.viewPager = new ViewPager2(this.view.context);
 		this.viewPager.setAdapter(new Adapter());
-		this.viewPager.setCurrentItem((int) LocalDate.now().toEpochDay(), false);
 		this.viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
 		final RecyclerView.LayoutManager layoutManager = ((RecyclerView) this.viewPager.getChildAt(0)).getLayoutManager();
 		this.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -44,6 +43,8 @@ public class EventPagerHolder {
 				EventPagerHolder.this.recyclerView = layoutManager == null ? null : (view = (EventView) layoutManager.findViewByPosition(position)) == null ? null : view.recyclerView;
 			}
 		});
+
+		this.viewPager.setCurrentItem((int) LocalDate.now().toEpochDay(), false);
 	}
 
 	private class Adapter extends RecyclerView.Adapter<SimpleViewHolder<EventView>> {

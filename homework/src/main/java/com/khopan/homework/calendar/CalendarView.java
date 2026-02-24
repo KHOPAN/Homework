@@ -3,20 +3,30 @@ package com.khopan.homework.calendar;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Build;
-import android.util.Log;
+import android.text.StaticLayout;
+import android.text.TextPaint;
+import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
 import androidx.annotation.NonNull;
 
+import com.khopan.homework.database.HomeworkDatabase;
+import com.khopan.homework.database.entity.Assignment;
+
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.YearMonth;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressLint("ViewConstructor")
 public class CalendarView extends View {
@@ -34,7 +44,6 @@ public class CalendarView extends View {
 	private float cellOffset;
 	private float dividerValue;
 	private int dividerColorValue;
-	//private float offsetIndex;
 	private float selectorX;
 	private float selectorY;
 	private float startSelectorX;
@@ -55,10 +64,7 @@ public class CalendarView extends View {
 		this.innerBounds = new RectF();
 		this.paint = new Paint();
 		this.paint.setTextSize(50.0f);
-		//this.offsetIndex = 2.0f;
 		this.setClickable(true);
-		this.setFocusable(true);
-		this.setBackground(null);
 		this.animator = new ValueAnimator();
 		this.animator.setInterpolator(new DecelerateInterpolator());
 		this.animator.addUpdateListener(animator -> {
@@ -67,6 +73,8 @@ public class CalendarView extends View {
 			this.selectorY = (this.targetSelectorY - this.startSelectorY) * time + this.startSelectorY;
 			this.invalidate();
 		});
+
+		this.map = new HashMap<>();
 	}
 
 	@Override
@@ -94,17 +102,16 @@ public class CalendarView extends View {
 					this.paint.setAlpha(64);
 				}
 
-				this.drawCell(canvas, date.getDayOfMonth(), Math.round(left), top, Math.round(left + this.cellWidth + this.view.strokeSize), bottom);
+				this.drawCell(canvas, y * 7 + x, date, date.getDayOfMonth(), Math.round(left), top, Math.round(left + this.cellWidth + this.view.strokeSize), bottom);
 			}
 		}
 
-		this.drawSelector(canvas, 2, this.selectorY);
+		this.drawSelector(canvas, this.selectorX, this.selectorY);
 	}
 
 	@Override
 	protected void onSizeChanged(final int width, final int height, final int oldWidth, final int oldHeight) {
 		this.width = width;
-		Log.d("CalendarView", "CalendarView: " + width);
 		final float topProgress = Math.min(Math.max((this.view.divider - this.view.dividerWeek) / (float) (this.view.dividerSplit - this.view.dividerWeek), 0.0f), 1.0f);
 		final float bottomProgress = Math.min(Math.max((this.view.divider - this.view.dividerSplit) / (float) (this.view.dividerMonth - this.view.dividerSplit), 0.0f), 1.0f);
 		this.cellWidth = (this.width - this.view.strokeSize * 8.0f) / 7.0f + this.view.strokeSize;
@@ -118,33 +125,72 @@ public class CalendarView extends View {
 		this.cellOffset = (this.dividerValue + weekHeight * this.selectorY) * topProgress - weekHeight * this.selectorY;
 	}
 
+	private final Map<Integer, List<String>> map;
 	private YearMonth month;
 
 	void setMonth(final YearMonth month) {
 		this.month = month;
 		final LocalDate start = this.month.atDay(1);
-		this.date = start.minusDays(start.getDayOfWeek().getValue() % 7);
+		this.date = start.minusDays(this.pressedLocation = start.getDayOfWeek().getValue() % 7);
+		this.setSelector(this.pressedLocation);
+		new Thread(() -> {
+			final Map<Integer, List<String>> map = new HashMap<>();
+
+			for(int y = 0; y < this.rows; y++) {
+				for(int x = 0; x < 7; x++) {
+					final int index = y * 7 + x;
+					final long time = this.date.plusDays(index).toEpochSecond(LocalTime.MIDNIGHT, ZoneOffset.UTC);
+					final List<Assignment> list = HomeworkDatabase.getInstance(this.view.context.getApplicationContext()).getAssignment().range(time, time + 86400);
+
+					if(list == null || list.isEmpty()) {
+						continue;
+					}
+
+					final List<String> strings = new ArrayList<>();
+
+					for(final Assignment assignment : list) {
+						strings.add(assignment.title);
+					}
+
+					map.put(index, strings);
+				}
+			}
+
+			this.post(() -> {
+				this.map.clear();
+				this.map.putAll(map);
+				this.invalidate();
+			});
+		}).start();
 	}
 
-	private void drawCell(final Canvas canvas, final int day, final float left, final float top, final float right, final float bottom) {
-		/*this.outerBounds.left = left;
-		this.outerBounds.top = top;
-		this.outerBounds.right = right;
-		this.outerBounds.bottom = bottom;
-		this.innerBounds.left = left + this.view.strokeSize;
-		this.innerBounds.top = top + this.view.strokeSize;
-		this.innerBounds.right = right - this.view.strokeSize;
-		this.innerBounds.bottom = bottom - this.view.strokeSize;
-
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			final float innerArcSize = this.view.arcSize - this.view.strokeSize * 2.0f;
-			this.paint.setColor(Color.RED);
-			canvas.drawDoubleRoundRect(this.outerBounds, this.view.arcSize, this.view.arcSize, this.innerBounds, innerArcSize, innerArcSize, this.paint);
-		}*/
-
+	private void drawCell(final Canvas canvas, final int index, final LocalDate date, final int day, final float left, final float top, final float right, final float bottom) {
 		final Paint.FontMetrics metrics = this.paint.getFontMetrics();
 		final String text = Integer.toString(day);
-		canvas.drawText(text, (left + right) / 2.0f - this.paint.measureText(text) / 2.0f, (top + bottom) / 2.0f - (metrics.ascent + metrics.descent) / 2.0f, this.paint);
+		float y = top - metrics.ascent;
+		canvas.drawText(text, (left + right) / 2.0f - this.paint.measureText(text) / 2.0f, y, this.paint);
+		final List<String> list = this.map.get(index);
+
+		if(list == null) {
+			return;
+		}
+
+		for(final String line : list) {
+			final TextPaint paint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+			paint.setTextSize(this.paint.getTextSize());
+			paint.setColor(0xFFFFFFFF);
+			final StaticLayout layout = StaticLayout.Builder.obtain(line, 0, line.length(), paint, Math.round(right - left))
+					.setEllipsize(TextUtils.TruncateAt.END)
+					.setMaxLines(2)
+					.build();
+
+			canvas.save();
+			canvas.clipRect(left, top, right, bottom);
+			canvas.translate(left, y);
+			layout.draw(canvas);
+			y += layout.getHeight();
+			canvas.restore();
+		}
 	}
 
 	private void drawSelector(final Canvas canvas, final float x, final float y) {
@@ -200,19 +246,30 @@ public class CalendarView extends View {
 			}
 
 			this.pressed = false;
-			final LocalDate date = this.date.plusDays(this.pressedLocation);
-
-			if(this.month.getMonthValue() != date.getMonthValue() || this.month.getYear() != date.getYear()) {
-				this.view.calendarView.viewPager.setCurrentItem((int) ChronoUnit.MONTHS.between(EventCalendarView.EPOCH_MONTH, date));
-			}
-
-			this.startSelectorY = this.selectorY;
-			this.targetSelectorY = this.pressedLocation / 7;
-			this.animator.setFloatValues(0.0f, 1.0f);
-			this.animator.start();
+			this.select(this.pressedLocation);
 			return true;
 		}
 
 		return super.dispatchTouchEvent(event);
+	}
+
+	void select(final int position) {
+		final LocalDate date = this.date.plusDays(position);
+
+		if(this.month.getMonthValue() != date.getMonthValue() || this.month.getYear() != date.getYear()) {
+			this.view.calendarView.viewPager.setCurrentItem((int) ChronoUnit.MONTHS.between(EventCalendarView.EPOCH_MONTH, date));
+		}
+
+		this.view.eventView.viewPager.setCurrentItem((int) date.toEpochDay());
+		this.setSelector(position);
+	}
+
+	private void setSelector(final int position) {
+		this.startSelectorX = this.selectorX;
+		this.startSelectorY = this.selectorY;
+		this.targetSelectorX = position % 7;
+		this.targetSelectorY = position / 7;
+		this.animator.setFloatValues(0.0f, 1.0f);
+		this.animator.start();
 	}
 }

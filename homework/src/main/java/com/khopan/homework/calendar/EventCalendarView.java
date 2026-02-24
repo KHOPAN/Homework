@@ -3,7 +3,6 @@ package com.khopan.homework.calendar;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.MotionEvent;
@@ -46,15 +45,7 @@ public class EventCalendarView extends LinearLayout {
 	private float draggedY;
 
 	public EventCalendarView(final Context context) {
-		this(context, null, 0);
-	}
-
-	public EventCalendarView(final Context context, final AttributeSet attributeSet) {
-		this(context, attributeSet, 0);
-	}
-
-	public EventCalendarView(final Context context, final AttributeSet attributeSet, final int defaultStyleAttribute) {
-		super(context, attributeSet, defaultStyleAttribute);
+		super(context);
 		this.context = context;
 		this.setOrientation(LinearLayout.VERTICAL);
 		this.calendarView = new CalendarPagerHolder(this);
@@ -136,29 +127,6 @@ public class EventCalendarView extends LinearLayout {
 		}
 
 		return super.onInterceptTouchEvent(event);
-	}
-
-	@Override
-	public void requestLayout() {
-		if(this.calendarViewParams == null) {
-			super.requestLayout();
-			return;
-		}
-
-		final int height = this.calendarViewParams.height;
-		this.calendarViewParams.height = height + 1;
-		super.requestLayout();
-		// F*** you, if it works, it works.
-		new Thread(() -> {
-			try {
-				Thread.sleep(10);
-			} catch(final Throwable ignored) {}
-
-			this.post(() -> {
-				this.calendarViewParams.height = height;
-				super.requestLayout();
-			});
-		}).start();
 	}
 
 	@Override

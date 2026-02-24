@@ -2,7 +2,6 @@ package com.khopan.homework.calendar;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,16 +14,24 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.khopan.core.CoreLayout;
 import com.khopan.core.view.SimpleViewHolder;
 import com.khopan.core.view.card.CardView;
-import com.khopan.homework.HomeworkApplication;
+import com.khopan.homework.database.HomeworkDatabase;
 import com.khopan.homework.database.entity.Assignment;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.List;
 
 import dev.oneuiproject.oneui.widget.Separator;
 
 public class EventView extends LinearLayout {
+	private static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
+			.appendValue(ChronoField.HOUR_OF_DAY, 2)
+			.appendLiteral(':')
+			.appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+			.toFormatter();
+
 	final Separator dayView;
 	final RecyclerView recyclerView;
 
@@ -53,10 +60,9 @@ public class EventView extends LinearLayout {
 	}
 
 	void setDate(final LocalDate date) {
-		final long start = (date.toEpochDay() - EventCalendarView.EPOCH_DAY.toEpochDay()) * 1440;
+		final long start = (date.toEpochDay() - EventCalendarView.EPOCH_DAY.toEpochDay()) * 1440 * 60;
 		new Thread(() -> {
-			final List<Assignment> list = HomeworkApplication.Database.getAssignment().getRange(start, start + 1440);
-			Log.d("EventView", "Query done: " + list.size());
+			final List<Assignment> list = HomeworkDatabase.getInstance(this.context).getAssignment().range(start, start + 1440 * 60);
 			this.post(() -> {
 				this.list = list;
 				this.adapter.notifyDataSetChanged();
@@ -74,7 +80,7 @@ public class EventView extends LinearLayout {
 		public void onBindViewHolder(@NonNull final SimpleViewHolder<CardView> holder, final int position) {
 			final Assignment assignment = EventView.this.list.get(position);
 			holder.itemView.resetForegroundState();
-			holder.itemView.setSummary(String.valueOf(EventCalendarView.EPOCH_TIME.plusMinutes(assignment.deadline).getHour()));
+			holder.itemView.setSummary(EventView.FORMATTER.format(EventCalendarView.EPOCH_TIME.plusSeconds(assignment.deadline)));
 			holder.itemView.setTitle(assignment.title);
 			holder.itemView.setTopDividerVisible(position != 0);
 		}
