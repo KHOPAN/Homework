@@ -20,6 +20,9 @@ import com.khopan.homework.fragment.CalendarFragment;
 import com.khopan.homework.receiver.ReminderReceiver;
 
 public class HomeworkApplication extends NavigationDrawerActivity {
+	public static final String HOMEWORK_VERSION = "0.0.1";
+	public static final int HOMEWORK_VERSION_CODE = 1;
+
 	@Override
 	public void onCreate(@Nullable final Bundle bundle) {
 		super.onCreate(bundle);

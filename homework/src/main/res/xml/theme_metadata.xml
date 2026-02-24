@@ -3,10 +3,10 @@
 	FormatVersion="1.3"
 	GuideVersion="1.4">
 	<AppMetaData Name="Homework"
-		TargetApi="35"
+		TargetApi="36"
 		TargetPackageName="com.khopan.homework"
 		VersionCode="1"
-		VersionName="1.0.0">
+		VersionName="0.0.1">
 		<Include RefName="SESL" />
 	</AppMetaData>
 </ThemeMetaData>
