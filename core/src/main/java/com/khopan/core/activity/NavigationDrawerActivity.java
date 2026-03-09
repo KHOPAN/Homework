@@ -10,9 +10,11 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
@@ -21,6 +23,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.graphics.drawable.SeslRecoilDrawable;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,11 +47,10 @@ import dev.oneuiproject.oneui.utils.TypefaceUtilsKt;
 public abstract class NavigationDrawerActivity extends FragmentedActivity {
 	protected final List<DrawerEntry> drawerItems;
 
-	private final Adapter adapter;
+	private Adapter adapter;
 
 	public NavigationDrawerActivity() {
 		this.drawerItems = new ArrayList<>();
-		this.adapter = new Adapter();
 	}
 
 	@Override
@@ -59,7 +61,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		final ToolbarLayout.ToolbarLayoutParams recyclerViewParams = new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 		recyclerViewParams.layoutLocation = DrawerLayout.DRAWER_PANEL;
 		recyclerView.setLayoutParams(recyclerViewParams);
-		recyclerView.setAdapter(this.adapter);
+		recyclerView.setAdapter(this.adapter = new Adapter());
 		recyclerView.setHasFixedSize(true);
 		recyclerView.setItemAnimator(null);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this ,LinearLayoutManager.VERTICAL, false));
@@ -125,10 +127,12 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 	}
 
 	private class Adapter extends RecyclerView.Adapter<SimpleViewHolder<CardView>> implements SlidingPaneLayout.PanelSlideListener {
+		private final float iconSize;
+
 		private float time;
 
 		private Adapter() {
-
+			this.iconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 44.0f, NavigationDrawerActivity.this.metrics);
 		}
 
 		@Override
@@ -164,8 +168,8 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 				final Payload payload = (Payload) value;
 				this.applyTime(holder, payload.time);
-				((ResizableDrawable) holder.itemView.getBackground()).setWidth(payload.width);
-				((ResizableDrawable) holder.itemView.constraintLayout.getForeground()).setWidth(payload.width);
+				//((ResizableDrawable) holder.itemView.getBackground()).setWidth(payload.width);
+				//((ResizableDrawable) holder.itemView.constraintLayout.getForeground()).setWidth(payload.width);
 			}
 		}
 
@@ -181,6 +185,13 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			cardViewParams.rightMargin = horizontal;
 			cardViewParams.topMargin = vertical;
 			cardView.setLayoutParams(cardViewParams);
+			final ConstraintLayout.LayoutParams iconViewParams = (ConstraintLayout.LayoutParams) cardView.iconView.getLayoutParams();
+			iconViewParams.width = Math.round(this.iconSize);
+			iconViewParams.height = Math.round(this.iconSize);
+			cardView.constraintLayout.setPadding(0, 0, 0, 0);
+			cardView.iconView.setScaleType(ImageView.ScaleType.FIT_XY);
+			final int padding = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10.0f, NavigationDrawerActivity.this.metrics));
+			cardView.iconView.setPadding(padding, padding, padding, padding);
 			return new SimpleViewHolder<>(cardView);
 		}
 
@@ -199,6 +210,10 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 		private void applyTime(final SimpleViewHolder<CardView> holder, final float time) {
 			holder.itemView.titleView.setAlpha(time);
+			final int width = Math.round(this.iconSize);
+			final int targetWidth = holder.itemView.getWidth();
+			((ResizableDrawable) holder.itemView.getBackground()).setWidth(Math.round(time * (targetWidth - width) + width));
+			((ResizableDrawable) holder.itemView.constraintLayout.getForeground()).setWidth(Math.round(time * (targetWidth - width) + width));
 		}
 	}
 
