@@ -110,16 +110,6 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		}
 	}
 
-	private static class Payload {
-		private final float time;
-		private final int width;
-
-		private Payload(final float time, final int width) {
-			this.time = time;
-			this.width = width;
-		}
-	}
-
 	private static class ViewHolder extends RecyclerView.ViewHolder {
 		private ViewHolder(@NonNull final View itemView) {
 			super(itemView);
@@ -162,17 +152,13 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			}
 
 			for(final Object value : payloads) {
-				if(!(value instanceof Payload)) {
-					continue;
+				if(value instanceof Float) {
+					this.applyTime(holder, (float) value);
 				}
-
-				final Payload payload = (Payload) value;
-				this.applyTime(holder, payload.time);
-				//((ResizableDrawable) holder.itemView.getBackground()).setWidth(payload.width);
-				//((ResizableDrawable) holder.itemView.constraintLayout.getForeground()).setWidth(payload.width);
 			}
 		}
 
+		// TODO: This function.
 		@NonNull
 		@Override
 		public SimpleViewHolder<CardView> onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
@@ -203,17 +189,14 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 		@Override
 		public void onPanelSlide(@NonNull final View view, final float time) {
-			this.time = time;
-			//final float iconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 44.0f, metrics);
-			this.notifyItemRangeChanged(0, this.getItemCount(), /*new Payload(time, (int) (time * (((SlidingPaneLayout) containerLayout).seslGetPreferredDrawerPixelSize() - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 85.0f / 3.0f, metrics) - iconSize) + iconSize))*/new Payload(time, 100));
+			this.notifyItemRangeChanged(0, this.getItemCount(), this.time = time);
 		}
 
 		private void applyTime(final SimpleViewHolder<CardView> holder, final float time) {
 			holder.itemView.titleView.setAlpha(time);
-			final int width = Math.round(this.iconSize);
-			final int targetWidth = holder.itemView.getWidth();
-			((ResizableDrawable) holder.itemView.getBackground()).setWidth(Math.round(time * (targetWidth - width) + width));
-			((ResizableDrawable) holder.itemView.constraintLayout.getForeground()).setWidth(Math.round(time * (targetWidth - width) + width));
+			final int width = Math.round(time * (holder.itemView.getWidth() - this.iconSize) + this.iconSize);
+			((ResizableDrawable) holder.itemView.getBackground()).setWidth(width);
+			((ResizableDrawable) holder.itemView.constraintLayout.getForeground()).setWidth(width);
 		}
 	}
 
