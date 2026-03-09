@@ -46,14 +46,9 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 	private final Adapter adapter;
 
-	protected NavigationDrawerActivity() {
+	public NavigationDrawerActivity() {
 		this.drawerItems = new ArrayList<>();
 		this.adapter = new Adapter();
-	}
-
-	@Override
-	protected ToolbarLayout createToolbarLayout() {
-		return (ToolbarLayout) this.getLayoutInflater().inflate(R.layout.layout_navigation_drawer, this.findViewById(android.R.id.content), false);
 	}
 
 	@Override
@@ -67,8 +62,9 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		recyclerView.setAdapter(this.adapter);
 		recyclerView.setHasFixedSize(true);
 		recyclerView.setItemAnimator(null);
-		recyclerView.setLayoutManager(new LinearLayoutManager(this));
+		recyclerView.setLayoutManager(new LinearLayoutManager(this ,LinearLayoutManager.VERTICAL, false));
 		CoreLayout.forceEnableScrollbars(recyclerView, false, true);
+		this.toolbarLayout.addView(recyclerView);
 
 		try {
 			final Method getContainerLayoutMethod = NavDrawerLayout.class.getDeclaredMethod("getContainerLayout$oneui_design_release");
@@ -76,40 +72,24 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			final Object containerLayout = getContainerLayoutMethod.invoke(NavigationDrawerActivity.this.toolbarLayout);
 
 			if(containerLayout instanceof SlidingPaneLayout) {
-				((SlidingPaneLayout) containerLayout).addPanelSlideListener(new SlidingPaneLayout.PanelSlideListener() {
-					@Override
-					public void onPanelClosed(@NonNull final View view) {}
-
-					@Override
-					public void onPanelOpened(@NonNull final View view) {}
-
-					@Override
-					public void onPanelSlide(@NonNull final View view, final float time) {
-						final DisplayMetrics metrics = NavigationDrawerActivity.this.getResources().getDisplayMetrics();
-						final float iconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 44.0f, metrics);
-						NavigationDrawerActivity.this.adapter.notifyItemRangeChanged(0, NavigationDrawerActivity.this.adapter.getItemCount(), new Payload(time, (int) (time * (((SlidingPaneLayout) containerLayout).seslGetPreferredDrawerPixelSize() - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 85.0f / 3.0f, metrics) - iconSize) + iconSize)));
-					}
-				});
+				((SlidingPaneLayout) containerLayout).addPanelSlideListener(this.adapter);
 			}
 		} catch(final Throwable ignored) {}
+	}
 
-		this.toolbarLayout.addView(recyclerView);
+	@Override
+	protected ToolbarLayout createToolbarLayout() {
+		return (ToolbarLayout) this.getLayoutInflater().inflate(R.layout.layout_navigation_drawer, this.findViewById(android.R.id.content), false);
+	}
+
+	protected void onDrawerSelected(@NonNull final DrawerEntry entry, final boolean changed) {
+		if(changed) {
+			this.setFragment(entry.fragment);
+		}
 	}
 
 	protected void setSelectedItem(final int position) {
 		//this.adapter.selectItem(this.drawerItems.get(position), position);
-	}
-
-	protected void onDrawerSelected(@NonNull final DrawerEntry entry, final boolean changed) {
-		if(changed && entry.fragment != null) {
-			this.setFragment(entry.fragment);
-		}
-
-		((NavDrawerLayout) this.toolbarLayout).setDrawerOpen(false, true);
-	}
-
-	private int getPixelSize(final float size) {
-		return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, size, this.getResources().getDisplayMetrics()));
 	}
 
 	public static class DrawerEntry {
@@ -117,14 +97,196 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		public final String text;
 		public final Fragment fragment;
 
-		private DrawerEntry(@DrawableRes final int icon, @Nullable final String text, @Nullable final Fragment fragment) {
+		private DrawerEntry(@DrawableRes final int icon, final String text, final Fragment fragment) {
 			this.icon = icon;
 			this.text = text;
 			this.fragment = fragment;
 		}
 
-		public static @NonNull DrawerEntry create(@DrawableRes final int icon, @Nullable final String text, @Nullable final Fragment fragment) {
+		public static DrawerEntry create(@DrawableRes final int icon, final String text, final Fragment fragment) {
 			return new DrawerEntry(icon, text, fragment);
+		}
+	}
+
+	private static class Payload {
+		private final float time;
+		private final int width;
+
+		private Payload(final float time, final int width) {
+			this.time = time;
+			this.width = width;
+		}
+	}
+
+	private static class ViewHolder extends RecyclerView.ViewHolder {
+		private ViewHolder(@NonNull final View itemView) {
+			super(itemView);
+		}
+	}
+
+	private class Adapter extends RecyclerView.Adapter<SimpleViewHolder<CardView>> implements SlidingPaneLayout.PanelSlideListener {
+		private float time;
+
+		private Adapter() {
+
+		}
+
+		@Override
+		public int getItemCount() {
+			return 100;
+		}
+
+		@Override
+		public void onBindViewHolder(@NonNull final SimpleViewHolder<CardView> holder, final int position) {
+			holder.itemView.setTitle("Hello, world!");
+			holder.itemView.setTopDividerVisible(false);
+			holder.itemView.constraintLayout.setForeground(new ResizableDrawable(R.drawable.drawer_ripple));
+			holder.itemView.setBackground(new ResizableDrawable(R.drawable.drawer_selector));
+			holder.itemView.setIcon(AppCompatResources.getDrawable(NavigationDrawerActivity.this, NavigationDrawerActivity.this.drawerItems.get(0).icon));
+			holder.itemView.setOnClickListener(view -> {
+				holder.itemView.setSelected(!holder.itemView.isSelected());
+			});
+
+			this.applyTime(holder, this.time);
+		}
+
+		@Override
+		public void onBindViewHolder(@NonNull final SimpleViewHolder<CardView> holder, final int position, @NonNull final List<Object> payloads) {
+			if(payloads.isEmpty()) {
+				this.onBindViewHolder(holder, position);
+				return;
+			}
+
+			for(final Object value : payloads) {
+				if(!(value instanceof Payload)) {
+					continue;
+				}
+
+				final Payload payload = (Payload) value;
+				this.applyTime(holder, payload.time);
+				((ResizableDrawable) holder.itemView.getBackground()).setWidth(payload.width);
+				((ResizableDrawable) holder.itemView.constraintLayout.getForeground()).setWidth(payload.width);
+			}
+		}
+
+		@NonNull
+		@Override
+		public SimpleViewHolder<CardView> onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
+			final CardView cardView = new CardView(parent.getContext());
+			final RecyclerView.LayoutParams cardViewParams = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			final int horizontal = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14.0f, NavigationDrawerActivity.this.metrics));
+			final int vertical = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6.0f, NavigationDrawerActivity.this.metrics));
+			cardViewParams.bottomMargin = vertical;
+			cardViewParams.leftMargin = horizontal;
+			cardViewParams.rightMargin = horizontal;
+			cardViewParams.topMargin = vertical;
+			cardView.setLayoutParams(cardViewParams);
+			return new SimpleViewHolder<>(cardView);
+		}
+
+		@Override
+		public void onPanelClosed(@NonNull final View view) {}
+
+		@Override
+		public void onPanelOpened(@NonNull final View view) {}
+
+		@Override
+		public void onPanelSlide(@NonNull final View view, final float time) {
+			this.time = time;
+			//final float iconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 44.0f, metrics);
+			this.notifyItemRangeChanged(0, this.getItemCount(), /*new Payload(time, (int) (time * (((SlidingPaneLayout) containerLayout).seslGetPreferredDrawerPixelSize() - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 85.0f / 3.0f, metrics) - iconSize) + iconSize))*/new Payload(time, 100));
+		}
+
+		private void applyTime(final SimpleViewHolder<CardView> holder, final float time) {
+			holder.itemView.titleView.setAlpha(time);
+		}
+	}
+
+	private class ResizableDrawable extends Drawable implements Drawable.Callback {
+		private final Drawable drawable;
+
+		private int width;
+
+		private ResizableDrawable(final int drawable) {
+			this.drawable = Objects.requireNonNull(AppCompatResources.getDrawable(NavigationDrawerActivity.this, drawable));
+			this.drawable.setCallback(this);
+			this.width = -1;
+		}
+
+		@Override
+		public void draw(@NonNull final Canvas canvas) {
+			this.drawable.draw(canvas);
+		}
+
+		@Override
+		public int getIntrinsicHeight() {
+			return this.drawable.getIntrinsicHeight();
+		}
+
+		@Override
+		public int getIntrinsicWidth() {
+			return this.width < 0 ? this.drawable.getIntrinsicWidth() : this.width;
+		}
+
+		@Override
+		public int getOpacity() {
+			return this.drawable.getOpacity();
+		}
+
+		@Override
+		public void invalidateDrawable(@NonNull final Drawable drawable) {
+			this.invalidateSelf();
+		}
+
+		@Override
+		public boolean isStateful() {
+			return this.drawable.isStateful();
+		}
+
+		@Override
+		public void scheduleDrawable(@NonNull final Drawable drawable, @NonNull final Runnable runnable, final long time) {
+			this.scheduleSelf(runnable, time);
+		}
+
+		@Override
+		public void setAlpha(final int alpha) {
+			this.drawable.setAlpha(alpha);
+		}
+
+		@Override
+		public void setColorFilter(@Nullable final ColorFilter colorFilter) {
+			this.drawable.setColorFilter(colorFilter);
+		}
+
+		@Override
+		public void unscheduleDrawable(@NonNull final Drawable drawable, @NonNull final Runnable runnable) {
+			this.unscheduleSelf(runnable);
+		}
+
+		@Override
+		protected void onBoundsChange(@NonNull final Rect bounds) {
+			this.drawable.setBounds(bounds.left, bounds.top, this.width < 0 ? bounds.right : (this.width - bounds.left), bounds.bottom);
+		}
+
+		@Override
+		protected boolean onLevelChange(final int level) {
+			return this.drawable.setLevel(level);
+		}
+
+		@Override
+		protected boolean onStateChange(@NonNull final int[] state) {
+			final boolean changed = this.drawable.setState(state);
+
+			if(changed) {
+				this.invalidateSelf();
+			}
+
+			return changed;
+		}
+
+		private void setWidth(final int width) {
+			this.width = width;
+			this.drawable.setBounds(0, 0, this.width, this.drawable.getBounds().bottom);
 		}
 	}
 
@@ -236,183 +398,4 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			NavigationDrawerActivity.this.onDrawerSelected(entry, true);
 		}
 	}*/
-
-	private static class Payload {
-		private final float time;
-		private final int width;
-
-		private Payload(final float time, final int width) {
-			this.time = time;
-			this.width = width;
-		}
-	}
-
-	/*private class ViewHolder extends RecyclerView.ViewHolder {
-		private static final int VIEW_TYPE_SEPARATOR = 0;
-		private static final int VIEW_TYPE_DRAWER_ITEM = 1;
-
-		private final AppCompatImageView iconView;
-		private final TextView textView;
-
-		private ViewHolder(@NonNull final ViewGroup parent, final boolean separator) {
-			super(separator ? new View(NavigationDrawerActivity.this) : LayoutInflater.from(NavigationDrawerActivity.this).inflate(R.layout.drawer_item, parent, false));
-
-			if(!separator) {
-				this.iconView = this.itemView.findViewById(R.id.drawer_item_icon);
-				this.textView = this.itemView.findViewById(R.id.drawer_item_text);
-				return;
-			}
-
-			this.iconView = null;
-			this.textView = null;
-			final ViewGroup.MarginLayoutParams parameters = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NavigationDrawerActivity.this.getPixelSize(3.0f));
-			parameters.setMarginStart(NavigationDrawerActivity.this.getPixelSize(24.0f));
-			parameters.setMarginEnd(NavigationDrawerActivity.this.getPixelSize(24.0f));
-			parameters.topMargin = parameters.bottomMargin = NavigationDrawerActivity.this.getPixelSize(6.0f);
-			this.itemView.setLayoutParams(parameters);
-			this.itemView.setForeground(AppCompatResources.getDrawable(NavigationDrawerActivity.this, R.drawable.drawer_separator));
-		}
-	}*/
-
-	private class Adapter extends RecyclerView.Adapter<SimpleViewHolder<CardView>> {
-		@Override
-		public int getItemCount() {
-			return 100;
-		}
-
-		@Override
-		public void onBindViewHolder(@NonNull final SimpleViewHolder<CardView> holder, final int position) {
-			holder.itemView.setTitle("Hello, world!");
-			//holder.itemView.setSummary("Hi");
-			holder.itemView.setTopDividerVisible(false);
-			holder.itemView.constraintLayout.setForeground(new ResizableDrawable(R.drawable.drawer_ripple));
-			holder.itemView.setBackground(new ResizableDrawable(R.drawable.drawer_selector));
-			holder.itemView.setIcon(AppCompatResources.getDrawable(NavigationDrawerActivity.this, NavigationDrawerActivity.this.drawerItems.get(0).icon));
-			holder.itemView.setOnClickListener(view -> {
-				holder.itemView.setSelected(!holder.itemView.isSelected());
-			});
-		}
-
-		@Override
-		public void onBindViewHolder(@NonNull final SimpleViewHolder<CardView> holder, final int position, @NonNull final List<Object> payloads) {
-			if(payloads.isEmpty()) {
-				this.onBindViewHolder(holder, position);
-				return;
-			}
-
-			for(final Object payload : payloads) {
-				if(!(payload instanceof Payload)) {
-					continue;
-				}
-
-				final Payload value = (Payload) payload;
-				holder.itemView.titleView.setAlpha(value.time);
-				((ResizableDrawable) holder.itemView.getBackground()).setWidth(value.width);
-				((ResizableDrawable) holder.itemView.constraintLayout.getForeground()).setWidth(value.width);
-			}
-		}
-
-		@NonNull
-		@Override
-		public SimpleViewHolder<CardView> onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-			final CardView cardView = new CardView(parent.getContext());
-			final RecyclerView.LayoutParams cardViewParams = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-			final int horizontal = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14.0f, NavigationDrawerActivity.this.metrics));
-			final int vertical = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6.0f, NavigationDrawerActivity.this.metrics));
-			cardViewParams.bottomMargin = vertical;
-			cardViewParams.leftMargin = horizontal;
-			cardViewParams.rightMargin = horizontal;
-			cardViewParams.topMargin = vertical;
-			cardView.setLayoutParams(cardViewParams);
-			return new SimpleViewHolder<>(cardView);
-		}
-	}
-
-	private class ResizableDrawable extends Drawable implements Drawable.Callback {
-		private final Drawable drawable;
-
-		private int width;
-
-		private ResizableDrawable(final int drawable) {
-			this.drawable = Objects.requireNonNull(AppCompatResources.getDrawable(NavigationDrawerActivity.this, drawable));
-			this.drawable.setCallback(this);
-			this.width = -1;
-		}
-
-		@Override
-		public void draw(@NonNull final Canvas canvas) {
-			this.drawable.draw(canvas);
-		}
-
-		@Override
-		public int getIntrinsicHeight() {
-			return this.drawable.getIntrinsicHeight();
-		}
-
-		@Override
-		public int getIntrinsicWidth() {
-			return this.width < 0 ? this.drawable.getIntrinsicWidth() : this.width;
-		}
-
-		@Override
-		public int getOpacity() {
-			return this.drawable.getOpacity();
-		}
-
-		@Override
-		public void invalidateDrawable(@NonNull final Drawable drawable) {
-			this.invalidateSelf();
-		}
-
-		@Override
-		public boolean isStateful() {
-			return this.drawable.isStateful();
-		}
-
-		@Override
-		public void scheduleDrawable(@NonNull final Drawable drawable, @NonNull final Runnable runnable, final long time) {
-			this.scheduleSelf(runnable, time);
-		}
-
-		@Override
-		public void setAlpha(final int alpha) {
-			this.drawable.setAlpha(alpha);
-		}
-
-		@Override
-		public void setColorFilter(@Nullable final ColorFilter colorFilter) {
-			this.drawable.setColorFilter(colorFilter);
-		}
-
-		@Override
-		public void unscheduleDrawable(@NonNull final Drawable drawable, @NonNull final Runnable runnable) {
-			this.unscheduleSelf(runnable);
-		}
-
-		@Override
-		protected void onBoundsChange(@NonNull final Rect bounds) {
-			this.drawable.setBounds(bounds.left, bounds.top, this.width < 0 ? bounds.right : (this.width - bounds.left), bounds.bottom);
-		}
-
-		@Override
-		protected boolean onLevelChange(final int level) {
-			return this.drawable.setLevel(level);
-		}
-
-		@Override
-		protected boolean onStateChange(@NonNull final int[] state) {
-			final boolean changed = this.drawable.setState(state);
-
-			if(changed) {
-				this.invalidateSelf();
-			}
-
-			return changed;
-		}
-
-		private void setWidth(final int width) {
-			this.width = width;
-			this.drawable.setBounds(0, 0, this.width, this.drawable.getBounds().bottom);
-		}
-	}
 }
