@@ -1,5 +1,6 @@
 package com.khopan.core.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -48,7 +49,7 @@ import dev.oneuiproject.oneui.utils.TypefaceUtilsKt;
 
 public abstract class NavigationDrawerActivity extends FragmentedActivity {
 	private static final int VIEW_TYPE_DRAWER_ITEM = 0;
-	private static final int VIEW_TYPE_SEPARATOR = 1;
+	private static final int VIEW_TYPE_DIVIDER = 1;
 
 	protected final List<DrawerEntry> drawerItems;
 
@@ -57,8 +58,13 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 	private Adapter adapter;
 	private boolean largeScreen;
-	private float iconSize;
+	private float itemIconSize;
 	private float time;
+	private int dividerHeight;
+	private int dividerMarginHorizontal;
+	private int itemMarginHorizontal;
+	private int itemPadding;
+	private int marginVertical;
 	private int selectedItem;
 
 	public NavigationDrawerActivity() {
@@ -68,11 +74,17 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		this.selectedItem = 0;
 	}
 
+	@SuppressLint("PrivateResource")
 	@Override
 	public void onCreate(@Nullable final Bundle bundle) {
 		super.onCreate(bundle);
 		this.largeScreen = ((NavDrawerLayout) this.toolbarLayout).isLargeScreenMode();
-		this.iconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 44.0f, this.metrics);
+		this.itemIconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 44.0f, this.metrics);
+		this.dividerHeight = this.resources.getDimensionPixelSize(androidx.appcompat.R.dimen.sesl_list_divider_height);
+		this.dividerMarginHorizontal = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24.0f, this.metrics));
+		this.itemMarginHorizontal = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14.0f, this.metrics));
+		this.itemPadding = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10.0f, this.metrics));
+		this.marginVertical = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6.0f, this.metrics));
 
 		this.toolbarLayout.setNavigationButtonIcon(AppCompatResources.getDrawable(this, R.drawable.icon_drawer));
 		final RecyclerView recyclerView = new RecyclerView(this);
@@ -154,27 +166,33 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 		@Override
 		public int getItemViewType(final int position) {
-			return NavigationDrawerActivity.this.drawerItems.get(position) == null ? NavigationDrawerActivity.VIEW_TYPE_SEPARATOR : NavigationDrawerActivity.VIEW_TYPE_DRAWER_ITEM;
+			return NavigationDrawerActivity.this.drawerItems.get(position) == null ? NavigationDrawerActivity.VIEW_TYPE_DIVIDER : NavigationDrawerActivity.VIEW_TYPE_DRAWER_ITEM;
 		}
 
 		// TODO: This function.
 		@Override
 		public void onBindViewHolder(@NonNull final SimpleViewHolder<View> holder, final int position) {
 			final DrawerEntry entry = NavigationDrawerActivity.this.drawerItems.get(position);
-			holder.itemView.setTitle(entry.text);
-			holder.itemView.setTopDividerVisible(false);
-			holder.itemView.constraintLayout.setForeground(new ResizableDrawable(NavigationDrawerActivity.this, R.drawable.drawer_ripple));
-			holder.itemView.setBackground(new ResizableDrawable(NavigationDrawerActivity.this, R.drawable.drawer_selector));
-			holder.itemView.setIcon(AppCompatResources.getDrawable(NavigationDrawerActivity.this, entry.icon));
+
+			if(entry == null) {
+				return;
+			}
+
+			((CardView) holder.itemView).setTitle(entry.text);
+			((CardView) holder.itemView).setIcon(AppCompatResources.getDrawable(NavigationDrawerActivity.this, entry.icon));
 			holder.itemView.setOnClickListener(view -> {
 				holder.itemView.setSelected(!holder.itemView.isSelected());
 			});
 
-			this.applyTime(holder, this.time);
+			this.applyTime(holder, NavigationDrawerActivity.this.time);
 		}
 
 		@Override
 		public void onBindViewHolder(@NonNull final SimpleViewHolder<View> holder, final int position, @NonNull final List<Object> payloads) {
+			if(NavigationDrawerActivity.this.drawerItems.get(position) == null) {
+				return;
+			}
+
 			if(payloads.isEmpty()) {
 				this.onBindViewHolder(holder, position);
 				return;
@@ -190,25 +208,35 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		@NonNull
 		@Override
 		public SimpleViewHolder<View> onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
+			final Context context = parent.getContext();
+
 			if(viewType != NavigationDrawerActivity.VIEW_TYPE_DRAWER_ITEM) {
-				return null;
+				final View view = new View(context);
+				final ViewGroup.MarginLayoutParams viewParams = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NavigationDrawerActivity.this.dividerHeight);
+				viewParams.bottomMargin = NavigationDrawerActivity.this.marginVertical;
+				viewParams.leftMargin = NavigationDrawerActivity.this.dividerMarginHorizontal;
+				viewParams.rightMargin = NavigationDrawerActivity.this.dividerMarginHorizontal;
+				viewParams.topMargin = NavigationDrawerActivity.this.marginVertical;
+				view.setLayoutParams(viewParams);
+				view.setForeground(AppCompatResources.getDrawable(NavigationDrawerActivity.this, R.drawable.drawer_separator));
+				return new SimpleViewHolder<>(view);
 			}
 
 			final CardView cardView = new CardView(context);
 			final RecyclerView.LayoutParams cardViewParams = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-			final int horizontal = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14.0f, NavigationDrawerActivity.adapter.this.metrics));
-			final int vertical = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6.0f, NavigationDrawerActivity.this.metrics));
-			cardViewParams.bottomMargin = vertical;
-			cardViewParams.leftMargin = horizontal;
-			cardViewParams.rightMargin = horizontal;
-			cardViewParams.topMargin = vertical;
+			cardViewParams.bottomMargin = NavigationDrawerActivity.this.marginVertical;
+			cardViewParams.leftMargin = NavigationDrawerActivity.this.itemMarginHorizontal;
+			cardViewParams.rightMargin = NavigationDrawerActivity.this.itemMarginHorizontal;
+			cardViewParams.topMargin = NavigationDrawerActivity.this.marginVertical;
 			cardView.setLayoutParams(cardViewParams);
-			final ConstraintLayout.LayoutParams iconViewParams = (ConstraintLayout.LayoutParams) cardView.iconView.getLayoutParams();
-			iconViewParams.width = iconViewParams.height = Math.round(adapter.iconSize);
+			cardView.setBackground(new ResizableDrawable(NavigationDrawerActivity.this, R.drawable.drawer_selector));
+			cardView.setTopDividerVisible(false);
+			cardView.constraintLayout.setForeground(new ResizableDrawable(NavigationDrawerActivity.this, R.drawable.drawer_ripple));
 			cardView.constraintLayout.setPadding(0, 0, 0, 0);
+			final ConstraintLayout.LayoutParams iconViewParams = (ConstraintLayout.LayoutParams) cardView.iconView.getLayoutParams();
+			iconViewParams.width = iconViewParams.height = Math.round(NavigationDrawerActivity.this.itemIconSize);
+			cardView.iconView.setPadding(NavigationDrawerActivity.this.itemPadding, NavigationDrawerActivity.this.itemPadding, NavigationDrawerActivity.this.itemPadding, NavigationDrawerActivity.this.itemPadding);
 			cardView.iconView.setScaleType(ImageView.ScaleType.FIT_XY);
-			final int padding = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10.0f, NavigationDrawerActivity.this.metrics));
-			cardView.iconView.setPadding(padding, padding, padding, padding);
 			return new SimpleViewHolder<>(cardView);
 		}
 
@@ -228,7 +256,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		private void applyTime(final SimpleViewHolder<View> holder, final float time) {
 			if(NavigationDrawerActivity.this.largeScreen) {
 				((CardView) holder.itemView).titleView.setAlpha(time);
-				final int width = Math.round(time * (holder.itemView.getWidth() - NavigationDrawerActivity.this.iconSize) + NavigationDrawerActivity.this.iconSize);
+				final int width = Math.round(time * (holder.itemView.getWidth() - NavigationDrawerActivity.this.itemIconSize) + NavigationDrawerActivity.this.itemIconSize);
 				((ResizableDrawable) holder.itemView.getBackground()).setWidth(width);
 				((ResizableDrawable) ((CardView) holder.itemView).constraintLayout.getForeground()).setWidth(width);
 			}

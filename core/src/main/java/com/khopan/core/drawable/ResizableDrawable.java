@@ -122,7 +122,7 @@ public class ResizableDrawable extends Drawable implements Drawable.Callback {
 	 */
 	public void setHeight(final int height) {
 		this.height = height;
-		this.setBounds(this.getBounds());
+		this.onBoundsChange(this.getBounds());
 	}
 
 	/**
@@ -134,7 +134,7 @@ public class ResizableDrawable extends Drawable implements Drawable.Callback {
 	public void setSize(final int width, final int height) {
 		this.width = width;
 		this.height = height;
-		this.setBounds(this.getBounds());
+		this.onBoundsChange(this.getBounds());
 	}
 
 	/**
@@ -144,6 +144,6 @@ public class ResizableDrawable extends Drawable implements Drawable.Callback {
 	 */
 	public void setWidth(final int width) {
 		this.width = width;
-		this.setBounds(this.getBounds());
+		this.onBoundsChange(this.getBounds());
 	}
 }
