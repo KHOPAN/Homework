@@ -69,8 +69,8 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 	public NavigationDrawerActivity() {
 		this.drawerItems = new ArrayList<>();
-		this.normalTypeface = TypefaceUtilsKt.getSemiBoldFont();
-		this.selectedTypeface = TypefaceUtilsKt.getRegularFont();
+		this.normalTypeface = TypefaceUtilsKt.getRegularFont();
+		this.selectedTypeface = TypefaceUtilsKt.getSemiBoldFont();
 		this.selectedItem = 0;
 	}
 
@@ -85,7 +85,6 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		this.itemMarginHorizontal = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14.0f, this.metrics));
 		this.itemPadding = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10.0f, this.metrics));
 		this.marginVertical = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6.0f, this.metrics));
-
 		this.toolbarLayout.setNavigationButtonIcon(AppCompatResources.getDrawable(this, R.drawable.icon_drawer));
 		final RecyclerView recyclerView = new RecyclerView(this);
 		final ToolbarLayout.ToolbarLayoutParams recyclerViewParams = new ToolbarLayout.ToolbarLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -137,7 +136,12 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 		final int previousItem = this.selectedItem;
 		this.selectedItem = position;
-		this.drawerItems.get(previousItem).transition = true;
+		final DrawerEntry previousEntry = this.drawerItems.get(previousItem);
+
+		if(previousEntry != null) {
+			previousEntry.transition = true;
+		}
+
 		entry.transition = true;
 		this.adapter.notifyItemChanged(previousItem);
 		this.adapter.notifyItemChanged(this.selectedItem);
@@ -149,7 +153,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		public final String text;
 		public final Fragment fragment;
 
-		private Drawable cache;
+		private Drawable drawable;
 		private boolean transition;
 
 		private DrawerEntry(@DrawableRes final int icon, final String text, final Fragment fragment) {
@@ -174,7 +178,6 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			return NavigationDrawerActivity.this.drawerItems.get(position) == null ? NavigationDrawerActivity.VIEW_TYPE_DIVIDER : NavigationDrawerActivity.VIEW_TYPE_DRAWER_ITEM;
 		}
 
-		// TODO: This function.
 		@Override
 		public void onBindViewHolder(@NonNull final SimpleViewHolder<View> holder, final int position) {
 			final DrawerEntry entry = NavigationDrawerActivity.this.drawerItems.get(position);
@@ -184,25 +187,20 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			}
 
 			final boolean selected = NavigationDrawerActivity.this.selectedItem == position;
-			((CardView) holder.itemView).setTitle(entry.text);
-			((CardView) holder.itemView).setIcon(entry.cache == null ? entry.cache = AppCompatResources.getDrawable(NavigationDrawerActivity.this, entry.icon) : entry.cache);
-			((CardView) holder.itemView).titleView.setEllipsize(selected ? TextUtils.TruncateAt.MARQUEE : TextUtils.TruncateAt.END);
+			holder.itemView.setOnClickListener(view -> NavigationDrawerActivity.this.setSelectedItem(holder.getBindingAdapterPosition()));
 			holder.itemView.setSelected(selected);
+			((CardView) holder.itemView).setIcon(entry.drawable == null ? entry.drawable = AppCompatResources.getDrawable(NavigationDrawerActivity.this, entry.icon) : entry.drawable);
+			((CardView) holder.itemView).setTitle(entry.text);
+			((CardView) holder.itemView).titleView.setEllipsize(selected ? TextUtils.TruncateAt.MARQUEE : TextUtils.TruncateAt.END);
 			((CardView) holder.itemView).titleView.setTypeface(selected ? NavigationDrawerActivity.this.selectedTypeface : NavigationDrawerActivity.this.normalTypeface);
-			holder.itemView.setOnClickListener(view -> {
-				//holder.itemView.setSelected(!holder.itemView.isSelected());
-				NavigationDrawerActivity.this.setSelectedItem(holder.getBindingAdapterPosition());
-			});
-
 			this.applyTime(holder, NavigationDrawerActivity.this.time);
 
-			if(entry.transition) {
-				entry.transition = false;
-				return;
+			if(!entry.transition) {
+				((CardView) holder.itemView).resetForegroundState();
+				((ResizableDrawable) holder.itemView.getBackground()).drawable.jumpToCurrentState();
 			}
 
-			((CardView) holder.itemView).resetForegroundState();
-			((ResizableDrawable) holder.itemView.getBackground()).drawable.jumpToCurrentState();
+			entry.transition = false;
 		}
 
 		@Override
