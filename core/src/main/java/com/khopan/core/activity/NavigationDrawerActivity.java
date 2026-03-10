@@ -253,6 +253,8 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			iconViewParams.width = iconViewParams.height = Math.round(NavigationDrawerActivity.this.itemIconSize);
 			cardView.iconView.setPadding(NavigationDrawerActivity.this.itemPadding, NavigationDrawerActivity.this.itemPadding, NavigationDrawerActivity.this.itemPadding, NavigationDrawerActivity.this.itemPadding);
 			cardView.iconView.setScaleType(ImageView.ScaleType.FIT_XY);
+			cardView.spacerView.getLayoutParams().height = NavigationDrawerActivity.this.itemPadding;
+			((ConstraintLayout.LayoutParams) cardView.titleView.getLayoutParams()).topMargin = NavigationDrawerActivity.this.itemPadding;
 			return new SimpleViewHolder<>(cardView);
 		}
 
