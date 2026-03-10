@@ -17,7 +17,7 @@ import java.util.Objects;
  * A resizable {@link android.graphics.drawable.Drawable} wrapper.
  */
 public class ResizableDrawable extends Drawable implements Drawable.Callback {
-	private final Drawable drawable;
+	public final Drawable drawable;
 
 	private int width;
 	private int height;

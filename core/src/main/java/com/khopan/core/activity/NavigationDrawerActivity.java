@@ -137,6 +137,8 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 		final int previousItem = this.selectedItem;
 		this.selectedItem = position;
+		this.drawerItems.get(previousItem).transition = true;
+		entry.transition = true;
 		this.adapter.notifyItemChanged(previousItem);
 		this.adapter.notifyItemChanged(this.selectedItem);
 		this.onDrawerSelected(entry, true);
@@ -146,6 +148,9 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		public @DrawableRes final int icon;
 		public final String text;
 		public final Fragment fragment;
+
+		private Drawable cache;
+		private boolean transition;
 
 		private DrawerEntry(@DrawableRes final int icon, final String text, final Fragment fragment) {
 			this.icon = icon;
@@ -178,13 +183,26 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 				return;
 			}
 
+			final boolean selected = NavigationDrawerActivity.this.selectedItem == position;
 			((CardView) holder.itemView).setTitle(entry.text);
-			((CardView) holder.itemView).setIcon(AppCompatResources.getDrawable(NavigationDrawerActivity.this, entry.icon));
+			((CardView) holder.itemView).setIcon(entry.cache == null ? entry.cache = AppCompatResources.getDrawable(NavigationDrawerActivity.this, entry.icon) : entry.cache);
+			((CardView) holder.itemView).titleView.setEllipsize(selected ? TextUtils.TruncateAt.MARQUEE : TextUtils.TruncateAt.END);
+			holder.itemView.setSelected(selected);
+			((CardView) holder.itemView).titleView.setTypeface(selected ? NavigationDrawerActivity.this.selectedTypeface : NavigationDrawerActivity.this.normalTypeface);
 			holder.itemView.setOnClickListener(view -> {
-				holder.itemView.setSelected(!holder.itemView.isSelected());
+				//holder.itemView.setSelected(!holder.itemView.isSelected());
+				NavigationDrawerActivity.this.setSelectedItem(holder.getBindingAdapterPosition());
 			});
 
 			this.applyTime(holder, NavigationDrawerActivity.this.time);
+
+			if(entry.transition) {
+				entry.transition = false;
+				return;
+			}
+
+			((CardView) holder.itemView).resetForegroundState();
+			((ResizableDrawable) holder.itemView.getBackground()).drawable.jumpToCurrentState();
 		}
 
 		@Override
@@ -262,27 +280,4 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			}
 		}
 	}
-
-	/*private class Adapter extends RecyclerView.Adapter<ViewHolder> {
-		@Override
-		public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-			if(holder.iconView == null || holder.textView == null) {
-				return;
-			}
-
-			final DrawerEntry entry = NavigationDrawerActivity.this.drawerItems.get(position);
-			final boolean selected = this.selectedItem == position;
-			holder.iconView.setImageResource(entry.icon);
-			holder.textView.setEllipsize(selected ? TextUtils.TruncateAt.MARQUEE : TextUtils.TruncateAt.END);
-			holder.itemView.setOnClickListener(view -> this.selectItem(entry, holder.getBindingAdapterPosition()));
-			holder.itemView.setSelected(selected);
-			holder.textView.setText(entry.text);
-			holder.textView.setTypeface(selected ? this.selected : this.normal);
-
-			if(((NavDrawerLayout) NavigationDrawerActivity.this.toolbarLayout).isLargeScreenMode()) {
-				final float time = ((NavDrawerLayout) NavigationDrawerActivity.this.toolbarLayout).getDrawerOffset();
-				holder.textView.setAlpha(time);
-			}
-		}
-	}*/
 }

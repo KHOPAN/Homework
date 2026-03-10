@@ -30,6 +30,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.khopan.core.R;
 import com.khopan.core.animator.TouchFeedbackAnimator;
+import com.khopan.core.drawable.ResizableDrawable;
 
 import java.lang.reflect.Field;
 
@@ -406,7 +407,11 @@ public class CardView extends RoundedLinearLayout {
 	 * Resets the foreground state and the animations.
 	 */
 	public void resetForegroundState() {
-		final Drawable foreground = this.constraintLayout.getForeground();
+		Drawable foreground = this.constraintLayout.getForeground();
+
+		while(foreground instanceof ResizableDrawable) {
+			foreground = ((ResizableDrawable) foreground).drawable;
+		}
 
 		if(foreground instanceof SeslRecoilDrawable) {
 			try {
