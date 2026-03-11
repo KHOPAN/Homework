@@ -10,24 +10,19 @@ import androidx.annotation.NonNull;
 
 import java.lang.reflect.Method;
 
-import dev.oneuiproject.oneui.widget.CardItemView;
-import dev.oneuiproject.oneui.widget.SwitchItemView;
-
+/**
+ * A layout-related utility class.
+ */
 public class CoreLayout {
 	private CoreLayout() {}
 
-	public static void fixOffCenteredCardItemView(final Object itemView) {
-		if(itemView instanceof CardItemView) {
-			((CardItemView) itemView).setSummary("null");
-			((CardItemView) itemView).setSummary(null);
-		}
-
-		if(itemView instanceof SwitchItemView) {
-			((SwitchItemView) itemView).setSummary("null");
-			((SwitchItemView) itemView).setSummary(null);
-		}
-	}
-
+	/**
+	 * Forces enable the scrollbars of a {@link android.view.View}.
+	 *
+	 * @param view the {@link android.view.View}.
+	 * @param horizontal whether to enable the horizontal scrollbar or not.
+	 * @param vertical whether to enable the vertical scrollbar or not.
+	 */
 	public static void forceEnableScrollbars(final View view, final boolean horizontal, final boolean vertical) {
 		final Context context = view.getContext();
 
@@ -45,12 +40,26 @@ public class CoreLayout {
 		view.setVerticalScrollBarEnabled(vertical);
 	}
 
+	/**
+	 * Forces view remeasure.
+	 *
+	 * @param view the {@link android.view.View}.
+	 */
 	public static void forceRemeasure(final View view) {
 		view.measure(View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(view.getHeight(), View.MeasureSpec.EXACTLY));
 		view.layout(view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
 		view.invalidate();
 	}
 
+	/**
+	 * Forces view remeasure.
+	 *
+	 * @param view the {@link android.view.View}.
+	 * @param visible the {@link java.lang.Runnable} to set the view
+	 *                to visible.
+	 * @param invisible the {@link java.lang.Runnable} to set the view
+	 *                   to invisible.
+	 */
 	public static void forceRemeasure(final ViewGroup view, final Runnable visible, final Runnable invisible) {
 		final LayoutTransition transition = view.getLayoutTransition();
 		view.setLayoutTransition(null);
@@ -61,6 +70,11 @@ public class CoreLayout {
 		view.setLayoutTransition(transition);
 	}
 
+	/**
+	 * Enables a {@link android.view.View}'s {@link android.animation.LayoutTransition}.
+	 *
+	 * @param view {@link android.view.View}.
+	 */
 	public static void setLayoutTransition(@NonNull final ViewGroup view) {
 		final LayoutTransition transition = new LayoutTransition();
 		transition.enableTransitionType(LayoutTransition.APPEARING);
