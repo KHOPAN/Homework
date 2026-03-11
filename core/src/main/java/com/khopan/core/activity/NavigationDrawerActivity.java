@@ -2,30 +2,22 @@ package com.khopan.core.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.Rect;
+import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.graphics.drawable.SeslRecoilDrawable;
-import androidx.appcompat.widget.AppCompatImageView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.widget.ImageViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,7 +32,6 @@ import com.khopan.core.view.card.CardView;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import dev.oneuiproject.oneui.layout.DrawerLayout;
 import dev.oneuiproject.oneui.layout.NavDrawerLayout;
@@ -58,6 +49,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 	private Adapter adapter;
 	private boolean largeScreen;
+	private ColorStateList itemTint;
 	private float itemIconSize;
 	private float time;
 	private int dividerHeight;
@@ -79,8 +71,9 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 	public void onCreate(@Nullable final Bundle bundle) {
 		super.onCreate(bundle);
 		this.largeScreen = ((NavDrawerLayout) this.toolbarLayout).isLargeScreenMode();
+		this.itemTint = this.getColorStateList(dev.oneuiproject.oneui.design.R.color.oui_des_primary_text_color);
 		this.itemIconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 44.0f, this.metrics);
-		this.dividerHeight = this.resources.getDimensionPixelSize(androidx.appcompat.R.dimen.sesl_list_divider_height);
+		this.dividerHeight = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3.0f, this.metrics));
 		this.dividerMarginHorizontal = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24.0f, this.metrics));
 		this.itemMarginHorizontal = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14.0f, this.metrics));
 		this.itemPadding = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10.0f, this.metrics));
@@ -116,6 +109,10 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		if(changed) {
 			this.setFragment(entry.fragment);
 		}
+
+		if(!this.largeScreen) {
+			((NavDrawerLayout) this.toolbarLayout).setDrawerOpen(false, true);
+		}
 	}
 
 	protected void setSelectedItem(final int position) {
@@ -150,20 +147,26 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 	public static class DrawerEntry {
 		public @DrawableRes final int icon;
-		public final String text;
+		public final String title;
+		public final String summary;
 		public final Fragment fragment;
 
 		private Drawable drawable;
 		private boolean transition;
 
-		private DrawerEntry(@DrawableRes final int icon, final String text, final Fragment fragment) {
+		private DrawerEntry(@DrawableRes final int icon, final String title, final String summary, final Fragment fragment) {
 			this.icon = icon;
-			this.text = text;
+			this.title = title;
+			this.summary = summary;
 			this.fragment = fragment;
 		}
 
-		public static DrawerEntry create(@DrawableRes final int icon, final String text, final Fragment fragment) {
-			return new DrawerEntry(icon, text, fragment);
+		public static DrawerEntry create(@DrawableRes final int icon, final String title, final Fragment fragment) {
+			return new DrawerEntry(icon, title, null, fragment);
+		}
+
+		public static DrawerEntry create(@DrawableRes final int icon, final String title, final String summary, final Fragment fragment) {
+			return new DrawerEntry(icon, title, summary, fragment);
 		}
 	}
 
@@ -180,6 +183,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 		@Override
 		public void onBindViewHolder(@NonNull final SimpleViewHolder<View> holder, final int position) {
+			this.applyTime(holder, NavigationDrawerActivity.this.time);
 			final DrawerEntry entry = NavigationDrawerActivity.this.drawerItems.get(position);
 
 			if(entry == null) {
@@ -190,10 +194,10 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			holder.itemView.setOnClickListener(view -> NavigationDrawerActivity.this.setSelectedItem(holder.getBindingAdapterPosition()));
 			holder.itemView.setSelected(selected);
 			((CardView) holder.itemView).setIcon(entry.drawable == null ? entry.drawable = AppCompatResources.getDrawable(NavigationDrawerActivity.this, entry.icon) : entry.drawable);
-			((CardView) holder.itemView).setTitle(entry.text);
+			((CardView) holder.itemView).setSummary(entry.summary);
+			((CardView) holder.itemView).setTitle(entry.title);
 			((CardView) holder.itemView).titleView.setEllipsize(selected ? TextUtils.TruncateAt.MARQUEE : TextUtils.TruncateAt.END);
 			((CardView) holder.itemView).titleView.setTypeface(selected ? NavigationDrawerActivity.this.selectedTypeface : NavigationDrawerActivity.this.normalTypeface);
-			this.applyTime(holder, NavigationDrawerActivity.this.time);
 
 			if(!entry.transition) {
 				((CardView) holder.itemView).resetForegroundState();
@@ -205,10 +209,6 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 		@Override
 		public void onBindViewHolder(@NonNull final SimpleViewHolder<View> holder, final int position, @NonNull final List<Object> payloads) {
-			if(NavigationDrawerActivity.this.drawerItems.get(position) == null) {
-				return;
-			}
-
 			if(payloads.isEmpty()) {
 				this.onBindViewHolder(holder, position);
 				return;
@@ -234,7 +234,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 				viewParams.rightMargin = NavigationDrawerActivity.this.dividerMarginHorizontal;
 				viewParams.topMargin = NavigationDrawerActivity.this.marginVertical;
 				view.setLayoutParams(viewParams);
-				view.setForeground(AppCompatResources.getDrawable(NavigationDrawerActivity.this, R.drawable.drawer_separator));
+				view.setForeground(new ResizableDrawable(NavigationDrawerActivity.this, R.drawable.drawer_separator));
 				return new SimpleViewHolder<>(view);
 			}
 
@@ -251,6 +251,8 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			cardView.constraintLayout.setPadding(0, 0, 0, 0);
 			final ConstraintLayout.LayoutParams iconViewParams = (ConstraintLayout.LayoutParams) cardView.iconView.getLayoutParams();
 			iconViewParams.width = iconViewParams.height = Math.round(NavigationDrawerActivity.this.itemIconSize);
+			cardView.iconView.setAlpha(0.75f);
+			ImageViewCompat.setImageTintList(cardView.iconView, NavigationDrawerActivity.this.itemTint);
 			cardView.iconView.setPadding(NavigationDrawerActivity.this.itemPadding, NavigationDrawerActivity.this.itemPadding, NavigationDrawerActivity.this.itemPadding, NavigationDrawerActivity.this.itemPadding);
 			cardView.iconView.setScaleType(ImageView.ScaleType.FIT_XY);
 			cardView.spacerView.getLayoutParams().height = NavigationDrawerActivity.this.itemPadding;
@@ -272,12 +274,21 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		}
 
 		private void applyTime(final SimpleViewHolder<View> holder, final float time) {
-			if(NavigationDrawerActivity.this.largeScreen) {
-				((CardView) holder.itemView).titleView.setAlpha(time);
-				final int width = Math.round(time * (holder.itemView.getWidth() - NavigationDrawerActivity.this.itemIconSize) + NavigationDrawerActivity.this.itemIconSize);
-				((ResizableDrawable) holder.itemView.getBackground()).setWidth(width);
-				((ResizableDrawable) ((CardView) holder.itemView).constraintLayout.getForeground()).setWidth(width);
+			if(!NavigationDrawerActivity.this.largeScreen) {
+				return;
 			}
+
+			if(!(holder.itemView instanceof CardView)) {
+				final float width = NavigationDrawerActivity.this.itemIconSize - (NavigationDrawerActivity.this.dividerMarginHorizontal - NavigationDrawerActivity.this.itemMarginHorizontal) * 2.0f;
+				((ResizableDrawable) holder.itemView.getForeground()).setWidth(Math.round(time * (holder.itemView.getWidth() - width) + width));
+				return;
+			}
+
+			((CardView) holder.itemView).summaryView.setAlpha(time);
+			((CardView) holder.itemView).titleView.setAlpha(time);
+			final int width = Math.round(time * (holder.itemView.getWidth() - NavigationDrawerActivity.this.itemIconSize) + NavigationDrawerActivity.this.itemIconSize);
+			((ResizableDrawable) holder.itemView.getBackground()).setWidth(width);
+			((ResizableDrawable) ((CardView) holder.itemView).constraintLayout.getForeground()).setWidth(width);
 		}
 	}
 }
