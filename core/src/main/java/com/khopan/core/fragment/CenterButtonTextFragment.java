@@ -7,60 +7,83 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.khopan.core.CoreLayout;
 
+/**
+ * A {@link com.khopan.core.fragment.FunctionalFragment} that
+ * displays a text over a button.
+ */
 public class CenterButtonTextFragment extends FunctionalFragment {
 	private final String text;
 	private final String buttonText;
 	private final Runnable listener;
 
-	public CenterButtonTextFragment() {
-		this(null, null, null);
-	}
-
-	public CenterButtonTextFragment(@Nullable final String text, @Nullable final String buttonText, @Nullable final Runnable listener) {
-		this.text = text == null ? "" : text;
-		this.buttonText = buttonText == null ? "" : buttonText;
+	/**
+	 * Constructs a new {@link com.khopan.core.fragment.CenterButtonTextFragment} instance.
+	 *
+	 * @param text the text.
+	 * @param buttonText the button text.
+	 * @param listener the button press listener.
+	 */
+	public CenterButtonTextFragment(final String text, final String buttonText, final Runnable listener) {
+		this.text = text;
+		this.buttonText = buttonText;
 		this.listener = listener;
 	}
 
 	@Override
 	protected View initialize() {
 		final ConstraintLayout constraintLayout = new ConstraintLayout(this.context);
-		final int constraintLayoutIdentifier = View.generateViewId();
-		constraintLayout.setId(constraintLayoutIdentifier);
 		CoreLayout.setLayoutTransition(constraintLayout);
-		final TypedValue value = new TypedValue();
-		this.context.getTheme().resolveAttribute(androidx.appcompat.R.attr.buttonStyle, value, true);
-		final AppCompatButton button = new AppCompatButton(new ContextThemeWrapper(this.context, value.data));
+		final ConstraintLayout.LayoutParams buttonParams = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		final int buttonIdentifier = View.generateViewId();
-		button.setId(buttonIdentifier);
-		final ConstraintLayout.LayoutParams buttonParameters = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		buttonParameters.leftToLeft = buttonParameters.topToTop = buttonParameters.rightToRight = buttonParameters.bottomToBottom = constraintLayoutIdentifier;
-		button.setLayoutParams(buttonParameters);
-		button.setOnClickListener(view -> {
-			if(this.listener != null) {
-				this.listener.run();
-			}
-		});
 
-		button.setText(this.buttonText);
-		constraintLayout.addView(button);
-		final TextView textView = new TextView(this.context);
-		final ConstraintLayout.LayoutParams textViewParameters = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		textViewParameters.leftToLeft = textViewParameters.topToTop = textViewParameters.rightToRight = constraintLayoutIdentifier;
-		textViewParameters.bottomToTop = buttonIdentifier;
-		textView.setLayoutParams(textViewParameters);
-		textView.setGravity(Gravity.CENTER);
-		textView.setSelected(false);
-		textView.setText(this.text);
-		textView.setTextAppearance(dev.oneuiproject.oneui.design.R.style.OneUI_SearchHighlightedTextAppearance);
-		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16.0f);
-		constraintLayout.addView(textView);
+		if(this.buttonText != null) {
+			final TypedValue value = new TypedValue();
+			this.theme.resolveAttribute(androidx.appcompat.R.attr.buttonStyle, value, true);
+			final AppCompatButton button = new AppCompatButton(new ContextThemeWrapper(this.context, value.data));
+			button.setId(buttonIdentifier);
+			button.setOnClickListener(view -> {
+				if(this.listener != null) {
+					this.listener.run();
+				}
+			});
+
+			button.setText(this.buttonText);
+			buttonParams.leftToLeft = buttonParams.rightToRight = buttonParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
+			constraintLayout.addView(button, buttonParams);
+		}
+
+		final ConstraintLayout.LayoutParams textViewParams = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		final int textViewIdentifier = View.generateViewId();
+
+		if(this.text != null) {
+			final TextView textView = new TextView(this.context);
+			textView.setId(textViewIdentifier);
+			textView.setGravity(Gravity.CENTER);
+			textView.setSelected(false);
+			textView.setText(this.text);
+			textView.setTextAppearance(dev.oneuiproject.oneui.design.R.style.OneUI_SearchHighlightedTextAppearance);
+			textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16.0f);
+			textViewParams.leftToLeft = textViewParams.topToTop = textViewParams.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID;
+			constraintLayout.addView(textView, textViewParams);
+		}
+
+		if(this.text == null) {
+			buttonParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
+		} else {
+			buttonParams.topToBottom = textViewIdentifier;
+		}
+
+		if(this.buttonText == null) {
+			textViewParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
+		} else {
+			textViewParams.bottomToTop = buttonIdentifier;
+		}
+
 		return constraintLayout;
 	}
 }
