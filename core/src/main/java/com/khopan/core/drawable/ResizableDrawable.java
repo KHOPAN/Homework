@@ -14,7 +14,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import java.util.Objects;
 
 /**
- * A resizable {@link android.graphics.drawable.Drawable} wrapper.
+ * A resizable and translatable {@link android.graphics.drawable.Drawable} wrapper.
  */
 public class ResizableDrawable extends Drawable implements Drawable.Callback {
 	public final Drawable drawable;

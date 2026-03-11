@@ -38,10 +38,17 @@ import dev.oneuiproject.oneui.layout.NavDrawerLayout;
 import dev.oneuiproject.oneui.layout.ToolbarLayout;
 import dev.oneuiproject.oneui.utils.TypefaceUtilsKt;
 
+/**
+ * An abstract {@link com.khopan.core.activity.FragmentedActivity}
+ * subclass that has a navigation drawer.
+ */
 public abstract class NavigationDrawerActivity extends FragmentedActivity {
 	private static final int VIEW_TYPE_DRAWER_ITEM = 0;
 	private static final int VIEW_TYPE_DIVIDER = 1;
 
+	/**
+	 * The drawer entry list.
+	 */
 	protected final List<DrawerEntry> drawerItems;
 
 	private final Typeface normalTypeface;
@@ -59,6 +66,9 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 	private int marginVertical;
 	private int selectedItem;
 
+	/**
+	 * Constructs a new {@link com.khopan.core.activity.NavigationDrawerActivity} instance.
+	 */
 	public NavigationDrawerActivity() {
 		this.drawerItems = new ArrayList<>();
 		this.normalTypeface = TypefaceUtilsKt.getRegularFont();
@@ -105,6 +115,13 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		return (ToolbarLayout) this.getLayoutInflater().inflate(R.layout.layout_navigation_drawer, this.findViewById(android.R.id.content), false);
 	}
 
+	/**
+	 * Callback when an entry is selected.
+	 *
+	 * @param entry the {@link com.khopan.core.activity.NavigationDrawerActivity.DrawerEntry}.
+	 * @param changed whether the selected entry is the same as
+	 *                the previous entry or not.
+	 */
 	protected void onDrawerSelected(@NonNull final DrawerEntry entry, final boolean changed) {
 		if(changed) {
 			this.setFragment(entry.fragment);
@@ -115,6 +132,11 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		}
 	}
 
+	/**
+	 * Sets the selected item.
+	 *
+	 * @param position the selected item index.
+	 */
 	protected void setSelectedItem(final int position) {
 		if(position < 0 || position >= this.drawerItems.size()) {
 			return;
@@ -145,10 +167,28 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		this.onDrawerSelected(entry, true);
 	}
 
+	/**
+	 * A class representing a drawer entry.
+	 */
 	public static class DrawerEntry {
+		/**
+		 * The icon resource.
+		 */
 		public @DrawableRes final int icon;
+
+		/**
+		 * The title text.
+		 */
 		public final String title;
+
+		/**
+		 * The summary text.
+		 */
 		public final String summary;
+
+		/**
+		 * The fragment.
+		 */
 		public final Fragment fragment;
 
 		private Drawable drawable;
@@ -161,10 +201,27 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 			this.fragment = fragment;
 		}
 
+		/**
+		 * Constructs a new {@link com.khopan.core.activity.NavigationDrawerActivity.DrawerEntry} instance.
+		 *
+		 * @param icon the icon resource.
+		 * @param title the title text.
+		 * @param fragment the {@link androidx.fragment.app.Fragment}.
+		 * @return the {@link com.khopan.core.activity.NavigationDrawerActivity.DrawerEntry} instance.
+		 */
 		public static DrawerEntry create(@DrawableRes final int icon, final String title, final Fragment fragment) {
 			return new DrawerEntry(icon, title, null, fragment);
 		}
 
+		/**
+		 * Constructs a new {@link com.khopan.core.activity.NavigationDrawerActivity.DrawerEntry} instance.
+		 *
+		 * @param icon the icon resource.
+		 * @param title the title text.
+		 * @param summary the summary text.
+		 * @param fragment the {@link androidx.fragment.app.Fragment}.
+		 * @return the {@link com.khopan.core.activity.NavigationDrawerActivity.DrawerEntry} instance.
+		 */
 		public static DrawerEntry create(@DrawableRes final int icon, final String title, final String summary, final Fragment fragment) {
 			return new DrawerEntry(icon, title, summary, fragment);
 		}
