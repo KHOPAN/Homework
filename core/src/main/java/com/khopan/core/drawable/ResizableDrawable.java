@@ -19,8 +19,25 @@ import java.util.Objects;
 public class ResizableDrawable extends Drawable implements Drawable.Callback {
 	public final Drawable drawable;
 
-	private int width;
-	private int height;
+	/**
+	 * The x-translation.
+	 */
+	public float x;
+
+	/**
+	 * The y-translation.
+	 */
+	public float y;
+
+	/**
+	 * The width.
+	 */
+	public int width;
+
+	/**
+	 * The height.
+	 */
+	public int height;
 
 	/**
 	 * Constructs a new {@link com.khopan.core.drawable.ResizableDrawable} instance.
@@ -46,7 +63,10 @@ public class ResizableDrawable extends Drawable implements Drawable.Callback {
 
 	@Override
 	public void draw(@NonNull final Canvas canvas) {
+		canvas.save();
+		canvas.translate(this.x, this.y);
 		this.drawable.draw(canvas);
+		canvas.restore();
 	}
 
 	@Override
@@ -116,34 +136,10 @@ public class ResizableDrawable extends Drawable implements Drawable.Callback {
 	}
 
 	/**
-	 * Sets the {@link android.graphics.drawable.Drawable}'s height.
-	 *
-	 * @param height the height
+	 * Used for width/height invalidation. For x/y
+	 * invalidation, see {@link #invalidateSelf()}.
 	 */
-	public void setHeight(final int height) {
-		this.height = height;
-		this.onBoundsChange(this.getBounds());
-	}
-
-	/**
-	 * Sets the {@link android.graphics.drawable.Drawable}'s size.
-	 *
-	 * @param width the width
-	 * @param height the height
-	 */
-	public void setSize(final int width, final int height) {
-		this.width = width;
-		this.height = height;
-		this.onBoundsChange(this.getBounds());
-	}
-
-	/**
-	 * Sets the {@link android.graphics.drawable.Drawable}'s width.
-	 *
-	 * @param width the width
-	 */
-	public void setWidth(final int width) {
-		this.width = width;
+	public void update() {
 		this.onBoundsChange(this.getBounds());
 	}
 }

@@ -278,17 +278,28 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 				return;
 			}
 
+			final int itemWidth = holder.itemView.getWidth();
+			final int direction = holder.itemView.getLayoutDirection();
+
 			if(!(holder.itemView instanceof CardView)) {
-				final float width = NavigationDrawerActivity.this.itemIconSize - (NavigationDrawerActivity.this.dividerMarginHorizontal - NavigationDrawerActivity.this.itemMarginHorizontal) * 2.0f;
-				((ResizableDrawable) holder.itemView.getForeground()).setWidth(Math.round(time * (holder.itemView.getWidth() - width) + width));
+				final float dividerWidth = NavigationDrawerActivity.this.itemIconSize - (NavigationDrawerActivity.this.dividerMarginHorizontal - NavigationDrawerActivity.this.itemMarginHorizontal) * 2.0f;
+				final ResizableDrawable foreground = (ResizableDrawable) holder.itemView.getForeground();
+				foreground.width = Math.round(time * (itemWidth - dividerWidth) + dividerWidth);
+				foreground.x = direction * (itemWidth - foreground.width);
+				foreground.update();
 				return;
 			}
 
 			((CardView) holder.itemView).summaryView.setAlpha(time);
 			((CardView) holder.itemView).titleView.setAlpha(time);
-			final int width = Math.round(time * (holder.itemView.getWidth() - NavigationDrawerActivity.this.itemIconSize) + NavigationDrawerActivity.this.itemIconSize);
-			((ResizableDrawable) holder.itemView.getBackground()).setWidth(width);
-			((ResizableDrawable) ((CardView) holder.itemView).constraintLayout.getForeground()).setWidth(width);
+			final ResizableDrawable background = (ResizableDrawable) holder.itemView.getBackground();
+			background.width = Math.round(time * (itemWidth - NavigationDrawerActivity.this.itemIconSize) + NavigationDrawerActivity.this.itemIconSize);
+			background.x = direction * (itemWidth - background.width);
+			background.update();
+			final ResizableDrawable foreground = (ResizableDrawable) ((CardView) holder.itemView).constraintLayout.getForeground();
+			foreground.x = background.x;
+			foreground.width = background.width;
+			foreground.update();
 		}
 	}
 }
