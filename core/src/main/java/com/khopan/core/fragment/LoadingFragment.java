@@ -5,46 +5,50 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.SeslProgressBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.khopan.core.CoreLayout;
 
+/**
+ * A {@link com.khopan.core.fragment.FunctionalFragment} that
+ * displays a loading progress bar and optionally a text.
+ */
 public class LoadingFragment extends FunctionalFragment {
 	private final String text;
 
-	public LoadingFragment() {
-		this(null);
-	}
-
-	public LoadingFragment(@Nullable final String text) {
-		this.text = text == null ? "" : text;
+	/**
+	 * Constructs a new {@link com.khopan.core.fragment.LoadingFragment} instance.
+	 *
+	 * @param text the text.
+	 */
+	public LoadingFragment(final String text) {
+		this.text = text;
 	}
 
 	@Override
 	protected View initialize() {
 		final ConstraintLayout constraintLayout = new ConstraintLayout(this.context);
-		final int constraintLayoutIdentifier = View.generateViewId();
-		constraintLayout.setId(constraintLayoutIdentifier);
 		CoreLayout.setLayoutTransition(constraintLayout);
 		final SeslProgressBar progressBar = new SeslProgressBar(new ContextThemeWrapper(this.context, androidx.constraintlayout.widget.R.style.Widget_AppCompat_ProgressBar));
 		final int progressBarIdentifier = View.generateViewId();
 		progressBar.setId(progressBarIdentifier);
-		final ConstraintLayout.LayoutParams progressBarParameters = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		progressBarParameters.leftToLeft = progressBarParameters.topToTop = progressBarParameters.rightToRight = progressBarParameters.bottomToBottom = constraintLayoutIdentifier;
-		progressBar.setLayoutParams(progressBarParameters);
 		progressBar.setIndeterminate(true);
-		constraintLayout.addView(progressBar);
-		final TextView textView = new TextView(this.context);
-		final ConstraintLayout.LayoutParams textViewParameters = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		textViewParameters.leftToLeft = textViewParameters.rightToRight = constraintLayoutIdentifier;
-		textViewParameters.topToBottom = progressBarIdentifier;
-		textView.setLayoutParams(textViewParameters);
-		textView.setGravity(Gravity.CENTER);
-		textView.setText(this.text);
-		constraintLayout.addView(textView);
+		final ConstraintLayout.LayoutParams progressBarParams = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		progressBarParams.leftToLeft = progressBarParams.topToTop = progressBarParams.rightToRight = progressBarParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
+		constraintLayout.addView(progressBar, progressBarParams);
+
+		if(this.text != null) {
+			final TextView textView = new TextView(this.context);
+			textView.setGravity(Gravity.CENTER);
+			textView.setText(this.text);
+			final ConstraintLayout.LayoutParams textViewParams = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			textViewParams.leftToLeft = textViewParams.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID;
+			textViewParams.topToBottom = progressBarIdentifier;
+			constraintLayout.addView(textView, textViewParams);
+		}
+
 		return constraintLayout;
 	}
 }
