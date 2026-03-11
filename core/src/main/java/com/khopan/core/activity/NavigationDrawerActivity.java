@@ -96,6 +96,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		recyclerView.setAdapter(this.adapter = new Adapter());
 		recyclerView.setItemAnimator(null);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+		recyclerView.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
 		CoreLayout.forceEnableScrollbars(recyclerView, false, true);
 		this.toolbarLayout.addView(recyclerView);
 
