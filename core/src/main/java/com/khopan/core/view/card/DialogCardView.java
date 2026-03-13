@@ -16,7 +16,7 @@ public class DialogCardView extends CardView {
 	/**
 	 * The {@link com.khopan.core.view.card.dialog.Dialog}.
 	 */
-	protected Dialog<?> dialog;
+	protected Dialog dialog;
 
 	/**
 	 * Constructs a new {@link com.khopan.core.view.card.DialogCardView} instance.
@@ -43,7 +43,7 @@ public class DialogCardView extends CardView {
 	 * @param context the {@link android.content.Context}.
 	 * @param dialog the {@link com.khopan.core.view.card.dialog.Dialog}.
 	 */
-	public DialogCardView(@NonNull final Context context, final Dialog<?> dialog) {
+	public DialogCardView(@NonNull final Context context, final Dialog dialog) {
 		this(context, null, 0);
 		this.dialog = dialog;
 	}
@@ -67,7 +67,7 @@ public class DialogCardView extends CardView {
 	/**
 	 * @return the {@link com.khopan.core.view.card.dialog.Dialog}.
 	 */
-	public Dialog<?> getDialog() {
+	public Dialog getDialog() {
 		return this.dialog;
 	}
 
@@ -76,7 +76,7 @@ public class DialogCardView extends CardView {
 	 *
 	 * @param dialog the {@link com.khopan.core.view.card.dialog.Dialog}.
 	 */
-	public void setDialog(final Dialog<?> dialog) {
+	public void setDialog(final Dialog dialog) {
 		this.dialog = dialog;
 
 		if(this.dialog != null) {

@@ -21,13 +21,18 @@ public class NumberPickerDialog extends Dialog {
 	protected NumberPickerListener listener;
 
 	/**
-	 * Constructs a new {@link com.khopan.core.view.card.dialog.NumberPickerDialog}.
+	 * Constructs a new {@link com.khopan.core.view.card.dialog.NumberPickerDialog} instance.
 	 *
 	 * @param context the {@link android.content.Context}.
 	 */
 	public NumberPickerDialog(final Context context) {
 		super(context);
 		this.dialog.setView(this.picker = new SeslNumberPicker(context));
+	}
+
+	@Override
+	public CharSequence getSummary() {
+		return Integer.toString(this.picker.getValue());
 	}
 
 	/**
@@ -92,6 +97,7 @@ public class NumberPickerDialog extends Dialog {
 	 */
 	public void setValue(final int value) {
 		this.picker.setValue(value);
+		this.update(value);
 	}
 
 	@Override
@@ -100,11 +106,18 @@ public class NumberPickerDialog extends Dialog {
 			return false;
 		}
 
+		this.update(this.picker.getValue());
+		return true;
+	}
+
+	private void update(final int value) {
 		if(this.listener != null) {
-			this.listener.numberPicked(this, this.picker.getValue());
+			this.listener.numberPicked(this, value);
 		}
 
-		return true;
+		if(this.updateListener != null) {
+			this.updateListener.dialogUpdated();
+		}
 	}
 
 	/**

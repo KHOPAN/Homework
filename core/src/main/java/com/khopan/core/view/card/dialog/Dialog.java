@@ -28,7 +28,12 @@ public abstract class Dialog {
 	protected final DialogInterface.OnClickListener dialogListener;
 
 	/**
-	 * Constructs a new {@link com.khopan.core.view.card.dialog.Dialog}.
+	 * The {@link com.khopan.core.view.card.dialog.Dialog.DialogUpdateListener}.
+	 */
+	protected DialogUpdateListener updateListener;
+
+	/**
+	 * Constructs a new {@link com.khopan.core.view.card.dialog.Dialog} instance.
 	 *
 	 * @param context the {@link android.content.Context}.
 	 */
@@ -41,27 +46,41 @@ public abstract class Dialog {
 	}
 
 	/**
-	 * Cancels the dialog.
+	 * Cancels the {@link com.khopan.core.view.card.dialog.Dialog}.
 	 */
 	public void cancel() {
 		this.dialog.cancel();
 	}
 
 	/**
-	 * Sets the dialog title.
+	 * Sets the {@link com.khopan.core.view.card.dialog.Dialog.DialogUpdateListener}.
 	 *
-	 * @param title the dialog title.
+	 * @param listener the {@link com.khopan.core.view.card.dialog.Dialog.DialogUpdateListener}.
+	 */
+	public void setDialogUpdateListener(final DialogUpdateListener listener) {
+		this.updateListener = listener;
+	}
+
+	/**
+	 * Sets the title.
+	 *
+	 * @param title the title.
 	 */
 	public void setTitle(final CharSequence title) {
 		this.dialog.setTitle(title);
 	}
 
 	/**
-	 * Shows the dialog.
+	 * Shows the {@link com.khopan.core.view.card.dialog.Dialog}.
 	 */
 	public void show() {
 		this.dialog.show();
 	}
+
+	/**
+	 * @return the summary.
+	 */
+	public abstract CharSequence getSummary();
 
 	/**
 	 * Builds the {@link androidx.appcompat.app.AlertDialog}.
@@ -74,12 +93,23 @@ public abstract class Dialog {
 	}
 
 	/**
-	 * Handles the dialog button clicks.
+	 * Handles a dialog button click.
 	 *
 	 * @param button the button.
 	 * @return true if the event has been handled, false otherwise.
 	 */
 	protected boolean buttonClicked(final int button) {
 		return false;
+	}
+
+	/**
+	 * A listener for handling dialog state changes.
+	 */
+	@FunctionalInterface
+	public interface DialogUpdateListener {
+		/**
+		 * Handles the dialog state changes.
+		 */
+		void dialogUpdated();
 	}
 }
