@@ -10,18 +10,16 @@ import com.khopan.core.view.card.dialog.Dialog;
 
 /**
  * A {@link com.khopan.core.view.card.CardView} that
- * holds a dialog.
- *
- * @param <T> the dialog type.
+ * holds a {@link com.khopan.core.view.card.dialog.Dialog}.
  */
-public abstract class DialogCardView<T extends Dialog> extends CardView {
+public class DialogCardView extends CardView {
 	/**
-	 * The dialog.
+	 * The {@link com.khopan.core.view.card.dialog.Dialog}.
 	 */
-	public final T dialog;
+	protected Dialog<?> dialog;
 
 	/**
-	 * Constructs a new {@link com.khopan.core.view.card.DialogCardView}.
+	 * Constructs a new {@link com.khopan.core.view.card.DialogCardView} instance.
 	 *
 	 * @param context the {@link android.content.Context}.
 	 */
@@ -30,7 +28,7 @@ public abstract class DialogCardView<T extends Dialog> extends CardView {
 	}
 
 	/**
-	 * Constructs a new {@link com.khopan.core.view.card.DialogCardView}.
+	 * Constructs a new {@link com.khopan.core.view.card.DialogCardView} instance.
 	 *
 	 * @param context the {@link android.content.Context}.
 	 * @param attributeSet the {@link android.util.AttributeSet}.
@@ -40,7 +38,18 @@ public abstract class DialogCardView<T extends Dialog> extends CardView {
 	}
 
 	/**
-	 * Constructs a new {@link com.khopan.core.view.card.DialogCardView}.
+	 * Constructs a new {@link com.khopan.core.view.card.DialogCardView} instance.
+	 *
+	 * @param context the {@link android.content.Context}.
+	 * @param dialog the {@link com.khopan.core.view.card.dialog.Dialog}.
+	 */
+	public DialogCardView(@NonNull final Context context, final Dialog<?> dialog) {
+		this(context, null, 0);
+		this.dialog = dialog;
+	}
+
+	/**
+	 * Constructs a new {@link com.khopan.core.view.card.DialogCardView} instance.
 	 *
 	 * @param context the {@link android.content.Context}.
 	 * @param attributeSet the {@link android.util.AttributeSet}.
@@ -48,38 +57,37 @@ public abstract class DialogCardView<T extends Dialog> extends CardView {
 	 */
 	public DialogCardView(@NonNull final Context context, @Nullable final AttributeSet attributeSet, final int defaultStyleAttribute) {
 		super(context, attributeSet, defaultStyleAttribute);
-		this.dialog = this.createDialog(context);
-		this.setOnClickListener(view -> this.showDialog());
+		this.setOnClickListener(view -> {
+			if(this.dialog != null) {
+				this.dialog.show();
+			}
+		});
 	}
 
 	/**
-	 * Cancels the dialog.
+	 * @return the {@link com.khopan.core.view.card.dialog.Dialog}.
 	 */
-	public void cancelDialog() {
-		this.dialog.dialog.cancel();
+	public Dialog<?> getDialog() {
+		return this.dialog;
 	}
 
 	/**
-	 * Sets the dialog title.
+	 * Sets the {@link com.khopan.core.view.card.dialog.Dialog}.
 	 *
-	 * @param title the dialog title.
+	 * @param dialog the {@link com.khopan.core.view.card.dialog.Dialog}.
 	 */
-	public void setDialogTitle(final CharSequence title) {
-		this.dialog.dialog.setTitle(title);
+	public void setDialog(final Dialog<?> dialog) {
+		this.dialog = dialog;
+
+		if(this.dialog != null) {
+			this.dialog.setDialogUpdateListener(this::updateSummary);
+			this.updateSummary();
+		}
 	}
 
-	/**
-	 * Shows the dialog.
-	 */
-	public void showDialog() {
-		this.dialog.dialog.show();
+	private void updateSummary() {
+		if(this.dialog != null) {
+			this.setSummary(this.dialog.getSummary());
+		}
 	}
-
-	/**
-	 * Creates a new dialog instance.
-	 *
-	 * @param context the {@link android.content.Context}.
-	 * @return the new dialog instance.
-	 */
-	protected abstract T createDialog(final Context context);
 }
