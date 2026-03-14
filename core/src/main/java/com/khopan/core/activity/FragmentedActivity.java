@@ -9,6 +9,8 @@ import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.fragment.app.Fragment;
 
+import com.khopan.core.fragment.EmptyFragment;
+
 import dev.oneuiproject.oneui.layout.ToolbarLayout;
 import dev.oneuiproject.oneui.widget.RoundedFrameLayout;
 
@@ -17,6 +19,11 @@ import dev.oneuiproject.oneui.widget.RoundedFrameLayout;
  * subclass that holds a {@link androidx.fragment.app.Fragment}.
  */
 public abstract class FragmentedActivity extends ToolbarActivity {
+	/**
+	 * The {@link com.khopan.core.fragment.EmptyFragment} instance.
+	 */
+	protected final EmptyFragment emptyFragment;
+
 	/**
 	 * The {@link com.khopan.core.activity.FragmentedActivity.BackListener}.
 	 */
@@ -37,6 +44,13 @@ public abstract class FragmentedActivity extends ToolbarActivity {
 	 * The internal {@link dev.oneuiproject.oneui.widget.RoundedFrameLayout}.
 	 */
 	protected RoundedFrameLayout fragmentLayout;
+
+	/**
+	 * Constructs a new {@link com.khopan.core.activity.FragmentedActivity} instance.
+	 */
+	public FragmentedActivity() {
+		this.emptyFragment = new EmptyFragment();
+	}
 
 	/**
 	 * @return the {@link com.khopan.core.activity.FragmentedActivity.BackListener}.
@@ -67,11 +81,7 @@ public abstract class FragmentedActivity extends ToolbarActivity {
 	 * @param fragment the {@link androidx.fragment.app.Fragment}.
 	 */
 	public void setFragment(final Fragment fragment) {
-		if((this.fragment = fragment) == null) {
-			this.fragmentLayout.removeAllViews();
-		} else {
-			this.getSupportFragmentManager().beginTransaction().replace(this.frameLayoutIdentifier, this.fragment).commit();
-		}
+		this.getSupportFragmentManager().beginTransaction().replace(this.frameLayoutIdentifier, (this.fragment = fragment) == null ? this.emptyFragment : this.fragment).commit();
 	}
 
 	@Override

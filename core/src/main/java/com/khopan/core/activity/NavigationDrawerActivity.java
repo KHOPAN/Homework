@@ -73,7 +73,7 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 		this.drawerItems = new ArrayList<>();
 		this.normalTypeface = TypefaceUtilsKt.getRegularFont();
 		this.selectedTypeface = TypefaceUtilsKt.getSemiBoldFont();
-		this.selectedItem = 0;
+		this.selectedItem = -1;
 	}
 
 	@SuppressLint("PrivateResource")
@@ -156,14 +156,21 @@ public abstract class NavigationDrawerActivity extends FragmentedActivity {
 
 		final int previousItem = this.selectedItem;
 		this.selectedItem = position;
-		final DrawerEntry previousEntry = this.drawerItems.get(previousItem);
 
-		if(previousEntry != null) {
-			previousEntry.transition = true;
+		if(previousItem >= 0) {
+			final DrawerEntry previousEntry = this.drawerItems.get(previousItem);
+
+			if(previousEntry != null) {
+				previousEntry.transition = true;
+			}
 		}
 
 		entry.transition = true;
-		this.adapter.notifyItemChanged(previousItem);
+
+		if(previousItem >= 0) {
+			this.adapter.notifyItemChanged(previousItem);
+		}
+
 		this.adapter.notifyItemChanged(this.selectedItem);
 		this.onDrawerSelected(entry, true);
 	}
