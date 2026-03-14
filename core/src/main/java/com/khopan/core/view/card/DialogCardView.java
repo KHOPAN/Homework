@@ -80,14 +80,22 @@ public class DialogCardView extends CardView {
 		this.dialog = dialog;
 
 		if(this.dialog != null) {
-			this.dialog.setDialogUpdateListener(this::updateSummary);
-			this.updateSummary();
+			this.dialog.setDialogUpdateListener(() -> {
+				if(this.dialog != null) {
+					this.updateSummary(this.dialog.getSummary());
+				}
+			});
+
+			this.updateSummary(this.dialog.getSummary());
 		}
 	}
 
-	private void updateSummary() {
-		if(this.dialog != null) {
-			this.setSummary(this.dialog.getSummary());
-		}
+	/**
+	 * Updates the summary.
+	 *
+	 * @param summary the summary.
+	 */
+	protected void updateSummary(final CharSequence summary) {
+		this.setSummary(summary);
 	}
 }
