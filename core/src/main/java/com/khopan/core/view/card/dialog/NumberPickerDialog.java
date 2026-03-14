@@ -115,9 +115,7 @@ public class NumberPickerDialog extends Dialog {
 			this.listener.numberPicked(this, value);
 		}
 
-		if(this.updateListener != null) {
-			this.updateListener.dialogUpdated();
-		}
+		this.updated();
 	}
 
 	/**

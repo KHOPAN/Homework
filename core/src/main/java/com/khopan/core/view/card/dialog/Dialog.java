@@ -103,6 +103,15 @@ public abstract class Dialog {
 	}
 
 	/**
+	 * Calls the {@link com.khopan.core.view.card.dialog.Dialog.DialogUpdateListener}.
+	 */
+	protected void updated() {
+		if(this.updateListener != null) {
+			this.updateListener.dialogUpdated();
+		}
+	}
+
+	/**
 	 * A listener for handling dialog state changes.
 	 */
 	@FunctionalInterface
