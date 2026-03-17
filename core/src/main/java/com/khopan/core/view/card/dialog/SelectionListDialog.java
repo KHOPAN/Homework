@@ -15,13 +15,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.khopan.core.CoreLayout;
 import com.khopan.core.view.SimpleViewHolder;
-import com.khopan.core.view.card.CardView;
 import com.khopan.core.view.card.CheckableCardView;
 
 public class SelectionListDialog extends Dialog {
 	protected final RecyclerView recyclerView;
 	protected final View bottomDividerView;
 	protected final View topDividerView;
+
+	protected Adapter adapter;
+
+	private final RecyclerViewAdapter recyclerViewAdapter;
 
 	@SuppressLint("PrivateResource")
 	public SelectionListDialog(final Context context) {
@@ -30,8 +33,7 @@ public class SelectionListDialog extends Dialog {
 		linearLayout.setOrientation(LinearLayout.VERTICAL);
 		final Resources resources = context.getResources();
 		final DisplayMetrics metrics = resources.getDisplayMetrics();
-		linearLayout.setPadding(0, Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12.0f, metrics)), 0, Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16.0f, metrics))); // TODO: Udpdate me
-
+		linearLayout.setPadding(0, Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12.0f, metrics)), 0, Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16.0f, metrics)));
 		this.topDividerView = new View(this.context);
 		final Resources.Theme theme = context.getTheme();
 		final TypedValue value = new TypedValue();
@@ -44,9 +46,8 @@ public class SelectionListDialog extends Dialog {
 		topDividerViewParams.leftMargin = margin;
 		topDividerViewParams.rightMargin = margin;
 		linearLayout.addView(this.topDividerView, topDividerViewParams);
-
 		this.recyclerView = new RecyclerView(this.context);
-		this.recyclerView.setAdapter(new Adapter());
+		this.recyclerView.setAdapter(this.recyclerViewAdapter = new RecyclerViewAdapter());
 		this.recyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 		this.recyclerView.setPadding(margin, 0, margin, 0);
 		this.recyclerView.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
@@ -54,15 +55,17 @@ public class SelectionListDialog extends Dialog {
 		final LinearLayout.LayoutParams recyclerViewParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
 		recyclerViewParams.weight = 1.0f;
 		linearLayout.addView(this.recyclerView, recyclerViewParams);
-
 		this.bottomDividerView = new View(this.context);
 		this.bottomDividerView.setBackgroundColor(backgroundColor);
 		final LinearLayout.LayoutParams bottomDividerViewParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dividerHeight);
 		bottomDividerViewParams.leftMargin = margin;
 		bottomDividerViewParams.rightMargin = margin;
 		linearLayout.addView(this.bottomDividerView, bottomDividerViewParams);
-
 		this.dialog.setView(linearLayout);
+	}
+
+	public Adapter getAdapter() {
+		return this.adapter;
 	}
 
 	@Override
@@ -70,16 +73,32 @@ public class SelectionListDialog extends Dialog {
 		return null;
 	}
 
-	private static class Adapter extends RecyclerView.Adapter<SimpleViewHolder<CheckableCardView>> {
+	@SuppressLint("NotifyDataSetChanged")
+	public void setAdapter(final Adapter adapter) {
+		this.adapter = adapter;
+		this.recyclerViewAdapter.notifyDataSetChanged();
+	}
+
+	private class RecyclerViewAdapter extends RecyclerView.Adapter<SimpleViewHolder<CheckableCardView>> {
 		@Override
 		public int getItemCount() {
-			return 100;
+			return SelectionListDialog.this.adapter == null ? 0 : SelectionListDialog.this.adapter.getItemCount();
 		}
 
 		@Override
 		public void onBindViewHolder(@NonNull final SimpleViewHolder<CheckableCardView> holder, final int position) {
-			holder.itemView.setTitle("Hello, world!");
 			holder.itemView.resetForegroundState();
+
+			if(SelectionListDialog.this.adapter == null) {
+				return;
+			}
+
+			final boolean state = SelectionListDialog.this.adapter.getCheckboxState(position);
+			holder.itemView.setCheckboxState(state);
+			holder.itemView.setEnabled(SelectionListDialog.this.adapter.getState(position));
+			holder.itemView.setOnClickListener(view -> SelectionListDialog.this.adapter.setCheckboxState(holder.getBindingAdapterPosition(), !state));
+			holder.itemView.setSummary(SelectionListDialog.this.adapter.getSummary(position));
+			holder.itemView.setTitle(SelectionListDialog.this.adapter.getTitle(position));
 		}
 
 		@NonNull
@@ -90,6 +109,21 @@ public class SelectionListDialog extends Dialog {
 			cardView.setCheckboxVisible(true);
 			cardView.setTopDividerVisible(false);
 			return new SimpleViewHolder<>(cardView);
+		}
+	}
+
+	public static abstract class Adapter {
+		public abstract boolean getCheckboxState(final int index);
+		public abstract int getItemCount();
+		public abstract String getTitle(final int index);
+		public abstract void setCheckboxState(final int index, final boolean state);
+
+		public boolean getState(final int index) {
+			return true;
+		}
+
+		public String getSummary(final int index) {
+			return null;
 		}
 	}
 }
