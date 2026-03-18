@@ -3,6 +3,7 @@ package com.khopan.core.view.card.dialog;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -24,6 +25,7 @@ public class SelectionListDialog extends Dialog {
 
 	protected Adapter adapter;
 
+	private final Drawable dividerBackground;
 	private final int itemHeight;
 	private final RecyclerViewAdapter recyclerViewAdapter;
 
@@ -40,8 +42,8 @@ public class SelectionListDialog extends Dialog {
 		final Resources.Theme theme = context.getTheme();
 		final TypedValue value = new TypedValue();
 		theme.resolveAttribute(androidx.appcompat.R.attr.listDividerColor, value, true);
-		final int backgroundColor = resources.getColor(value.resourceId, theme);
-		this.topDividerView.setBackgroundColor(backgroundColor);
+		this.topDividerView.setBackgroundColor(resources.getColor(value.resourceId, theme));
+		this.dividerBackground = this.topDividerView.getBackground();
 		final int dividerHeight = resources.getDimensionPixelSize(androidx.appcompat.R.dimen.sesl_list_divider_height);
 		final LinearLayout.LayoutParams topDividerViewParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dividerHeight);
 		final int margin = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20.0f, metrics));
@@ -49,6 +51,13 @@ public class SelectionListDialog extends Dialog {
 		topDividerViewParams.rightMargin = margin;
 		linearLayout.addView(this.topDividerView, topDividerViewParams);
 		this.recyclerView = new RecyclerView(this.context);
+		this.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+			@Override
+			public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
+				SelectionListDialog.this.updateDividers();
+			}
+		});
+
 		this.recyclerView.setAdapter(this.recyclerViewAdapter = new RecyclerViewAdapter());
 		this.recyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 		this.recyclerView.setPadding(margin, 0, margin, 0);
@@ -58,11 +67,11 @@ public class SelectionListDialog extends Dialog {
 		recyclerViewParams.weight = 1.0f;
 		linearLayout.addView(this.recyclerView, recyclerViewParams);
 		this.bottomDividerView = new View(this.context);
-		this.bottomDividerView.setBackgroundColor(backgroundColor);
 		final LinearLayout.LayoutParams bottomDividerViewParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dividerHeight);
 		bottomDividerViewParams.leftMargin = margin;
 		bottomDividerViewParams.rightMargin = margin;
 		linearLayout.addView(this.bottomDividerView, bottomDividerViewParams);
+		this.updateDividers();
 		this.dialog.setView(linearLayout);
 	}
 
@@ -79,6 +88,11 @@ public class SelectionListDialog extends Dialog {
 	public void setAdapter(final Adapter adapter) {
 		this.adapter = adapter;
 		this.recyclerViewAdapter.notifyDataSetChanged();
+	}
+
+	private void updateDividers() {
+		this.topDividerView.setBackground(this.recyclerView.canScrollVertically(-1) ? this.dividerBackground : null);
+		this.bottomDividerView.setBackground(this.recyclerView.canScrollVertically(1) ? this.dividerBackground : null);
 	}
 
 	private class RecyclerViewAdapter extends RecyclerView.Adapter<SimpleViewHolder<CheckableCardView>> {
