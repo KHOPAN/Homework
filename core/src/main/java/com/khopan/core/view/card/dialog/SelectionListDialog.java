@@ -112,17 +112,17 @@ public class SelectionListDialog extends Dialog {
 		}
 	}
 
-	public static abstract class Adapter {
-		public abstract boolean getCheckboxState(final int index);
-		public abstract int getItemCount();
-		public abstract String getTitle(final int index);
-		public abstract void setCheckboxState(final int index, final boolean state);
+	public interface Adapter {
+		boolean getCheckboxState(final int index);
+		int getItemCount();
+		String getTitle(final int index);
+		void setCheckboxState(final int index, final boolean state);
 
-		public boolean getState(final int index) {
+		default boolean getState(final int index) {
 			return true;
 		}
 
-		public String getSummary(final int index) {
+		default String getSummary(final int index) {
 			return null;
 		}
 	}
