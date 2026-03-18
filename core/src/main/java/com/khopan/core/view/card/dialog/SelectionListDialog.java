@@ -102,6 +102,11 @@ public class SelectionListDialog extends Dialog {
 		}
 
 		@Override
+		public int getItemViewType(final int position) {
+			return SelectionListDialog.this.adapter != null && !SelectionListDialog.this.adapter.isSingle() ? CheckableCardView.CHECKBOX_TYPE_MULTIPLE : CheckableCardView.CHECKBOX_TYPE_SINGLE;
+		}
+
+		@Override
 		public void onBindViewHolder(@NonNull final SimpleViewHolder<CheckableCardView> holder, final int position) {
 			holder.itemView.resetForegroundState();
 
@@ -122,7 +127,7 @@ public class SelectionListDialog extends Dialog {
 		public SimpleViewHolder<CheckableCardView> onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
 			final CheckableCardView cardView = new CheckableCardView(parent.getContext());
 			cardView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-			cardView.setCheckboxVisible(true);
+			cardView.setCheckboxType(viewType);
 			cardView.setTopDividerVisible(false);
 			cardView.constraintLayout.getLayoutParams().height = SelectionListDialog.this.itemHeight;
 			cardView.constraintLayout.setPadding(0, 0, 0, 0);
@@ -142,6 +147,10 @@ public class SelectionListDialog extends Dialog {
 
 		default String getSummary(final int index) {
 			return null;
+		}
+
+		default boolean isSingle() {
+			return true;
 		}
 	}
 }
