@@ -24,15 +24,17 @@ public class SelectionListDialog extends Dialog {
 
 	protected Adapter adapter;
 
+	private final int itemHeight;
 	private final RecyclerViewAdapter recyclerViewAdapter;
 
 	@SuppressLint("PrivateResource")
 	public SelectionListDialog(final Context context) {
 		super(context);
-		final LinearLayout linearLayout = new LinearLayout(this.context);
-		linearLayout.setOrientation(LinearLayout.VERTICAL);
 		final Resources resources = context.getResources();
 		final DisplayMetrics metrics = resources.getDisplayMetrics();
+		this.itemHeight = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 56.0f, metrics));
+		final LinearLayout linearLayout = new LinearLayout(this.context);
+		linearLayout.setOrientation(LinearLayout.VERTICAL);
 		linearLayout.setPadding(0, Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12.0f, metrics)), 0, Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16.0f, metrics)));
 		this.topDividerView = new View(this.context);
 		final Resources.Theme theme = context.getTheme();
@@ -108,6 +110,8 @@ public class SelectionListDialog extends Dialog {
 			cardView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 			cardView.setCheckboxVisible(true);
 			cardView.setTopDividerVisible(false);
+			cardView.constraintLayout.getLayoutParams().height = SelectionListDialog.this.itemHeight;
+			cardView.constraintLayout.setPadding(0, 0, 0, 0);
 			return new SimpleViewHolder<>(cardView);
 		}
 	}
