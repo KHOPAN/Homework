@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatCheckedTextView;
 import androidx.appcompat.widget.AppCompatSeslCheckedTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -220,7 +221,7 @@ public class CheckableCardView extends CardView {
 		final Resources.Theme theme = context.getTheme();
 		final TypedValue value = new TypedValue();
 		theme.resolveAttribute((this.checkboxType = this.checkboxType == CheckableCardView.CHECKBOX_TYPE_MULTIPLE ? CheckableCardView.CHECKBOX_TYPE_MULTIPLE : CheckableCardView.CHECKBOX_TYPE_SINGLE) == CheckableCardView.CHECKBOX_TYPE_SINGLE ? android.R.attr.listChoiceIndicatorSingle : android.R.attr.listChoiceIndicatorMultiple, value, true);
-		this.checkboxView.setCheckMarkDrawable(value.resourceId == 0 ? null : ContextCompat.getDrawable(context, value.resourceId));
+		this.checkboxView.setCheckMarkDrawable(value.resourceId);
 	}
 
 	/**
