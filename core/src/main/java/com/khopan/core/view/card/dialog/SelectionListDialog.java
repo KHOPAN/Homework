@@ -81,7 +81,7 @@ public class SelectionListDialog extends Dialog {
 
 	@Override
 	public CharSequence getSummary() {
-		return null;
+		return this.adapter == null ? null : this.adapter.getSummary();
 	}
 
 	@SuppressLint("NotifyDataSetChanged")
@@ -138,6 +138,7 @@ public class SelectionListDialog extends Dialog {
 	public interface Adapter {
 		boolean getCheckboxState(final int index);
 		int getItemCount();
+		CharSequence getSummary();
 		String getTitle(final int index);
 		void setCheckboxState(final int index, final boolean state);
 
@@ -151,6 +152,45 @@ public class SelectionListDialog extends Dialog {
 
 		default boolean isSingle() {
 			return true;
+		}
+	}
+
+	public static class SimpleRadioAdapter implements Adapter {
+		private int selected;
+
+		@Override
+		public boolean getCheckboxState(int index) {
+			return this.selected == index;
+		}
+
+		@Override
+		public int getItemCount() {
+			return 10;
+		}
+
+		@Override
+		public CharSequence getSummary() {
+			return null;
+		}
+
+		@Override
+		public String getTitle(int index) {
+			return "";
+		}
+
+		@Override
+		public void setCheckboxState(int index, boolean state) {
+
+		}
+
+		@Override
+		public boolean getState(int index) {
+			return Adapter.super.getState(index);
+		}
+
+		@Override
+		public String getSummary(int index) {
+			return Adapter.super.getSummary(index);
 		}
 	}
 }
