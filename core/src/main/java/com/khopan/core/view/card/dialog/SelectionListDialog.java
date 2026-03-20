@@ -2,6 +2,7 @@ package com.khopan.core.view.card.dialog;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
@@ -18,20 +19,56 @@ import com.khopan.core.CoreLayout;
 import com.khopan.core.view.SimpleViewHolder;
 import com.khopan.core.view.card.CheckableCardView;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * A {@link com.khopan.core.view.card.dialog.Dialog}
+ * that displays a selection list. It uses
+ * {@link com.khopan.core.view.card.dialog.SelectionListDialog.Adapter}
+ * to display the data.
+ */
 public class SelectionListDialog extends Dialog {
+	/**
+	 * The {@link androidx.recyclerview.widget.RecyclerView}.
+	 */
 	protected final RecyclerView recyclerView;
+
+	/**
+	 * The bottom divider view.
+	 */
 	protected final View bottomDividerView;
+
+	/**
+	 * The top divider view.
+	 */
 	protected final View topDividerView;
 
+	/**
+	 * The {@link com.khopan.core.view.card.dialog.SelectionListDialog.Adapter}
+	 * to provide the data.
+	 */
 	protected Adapter adapter;
 
 	private final Drawable dividerBackground;
 	private final int itemHeight;
 	private final RecyclerViewAdapter recyclerViewAdapter;
+	private final Set<Integer> updated;
 
+	private boolean multiple;
+	private int selected;
+	private int size;
+
+	/**
+	 * Constructs a new {@link com.khopan.core.view.card.dialog.SelectionListDialog} instance.
+	 *
+	 * @param context the {@link android.content.Context}.
+	 */
 	@SuppressLint("PrivateResource")
 	public SelectionListDialog(final Context context) {
 		super(context);
+		this.updated = new HashSet<>();
 		final Resources resources = context.getResources();
 		final DisplayMetrics metrics = resources.getDisplayMetrics();
 		this.itemHeight = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 56.0f, metrics));
@@ -75,19 +112,57 @@ public class SelectionListDialog extends Dialog {
 		this.dialog.setView(linearLayout);
 	}
 
+	/**
+	 * @return the {@link com.khopan.core.view.card.dialog.SelectionListDialog.Adapter}.
+	 */
 	public Adapter getAdapter() {
 		return this.adapter;
 	}
 
 	@Override
 	public CharSequence getSummary() {
-		return this.adapter == null ? null : this.adapter.getSummary();
+		return this.adapter == null ? null : this.adapter.getCardSummary();
 	}
 
+	/**
+	 * Sets the {@link com.khopan.core.view.card.dialog.SelectionListDialog.Adapter}.
+	 *
+	 * @param adapter the {@link com.khopan.core.view.card.dialog.SelectionListDialog.Adapter}.
+	 */
 	@SuppressLint("NotifyDataSetChanged")
 	public void setAdapter(final Adapter adapter) {
 		this.adapter = adapter;
+
+		if(this.adapter == null) {
+			this.recyclerViewAdapter.notifyDataSetChanged();
+			return;
+		}
+
+		this.multiple = this.adapter.isMultiple();
+		this.size = this.adapter.getItemCount();
 		this.recyclerViewAdapter.notifyDataSetChanged();
+	}
+
+	@Override
+	public void show() {
+		if(this.multiple) {
+			this.updated.forEach(this.recyclerViewAdapter::notifyItemChanged);
+			this.updated.clear();
+		}
+
+		super.show();
+	}
+
+	@Override
+	protected boolean buttonClicked(int button) {
+		if(button != DialogInterface.BUTTON_POSITIVE) {
+			return false;
+		}
+
+		this.updated.forEach(index -> this.adapter.setCheckboxState(index, !this.adapter.getCheckboxState(index)));
+		this.updated.clear();
+		this.updated();
+		return true;
 	}
 
 	private void updateDividers() {
@@ -98,26 +173,53 @@ public class SelectionListDialog extends Dialog {
 	private class RecyclerViewAdapter extends RecyclerView.Adapter<SimpleViewHolder<CheckableCardView>> {
 		@Override
 		public int getItemCount() {
-			return SelectionListDialog.this.adapter == null ? 0 : SelectionListDialog.this.adapter.getItemCount();
+			return SelectionListDialog.this.size;
 		}
 
 		@Override
 		public int getItemViewType(final int position) {
-			return SelectionListDialog.this.adapter != null && !SelectionListDialog.this.adapter.isSingle() ? CheckableCardView.CHECKBOX_TYPE_MULTIPLE : CheckableCardView.CHECKBOX_TYPE_SINGLE;
+			return SelectionListDialog.this.multiple ? CheckableCardView.CHECKBOX_TYPE_MULTIPLE : CheckableCardView.CHECKBOX_TYPE_SINGLE;
 		}
 
 		@Override
 		public void onBindViewHolder(@NonNull final SimpleViewHolder<CheckableCardView> holder, final int position) {
-			holder.itemView.resetForegroundState();
+			this.onBindViewHolder(holder, position, List.of());
+		}
+
+		@Override
+		public void onBindViewHolder(@NonNull final SimpleViewHolder<CheckableCardView> holder, final int position, @NonNull final List<Object> payloads) {
+			if(payloads.isEmpty()) {
+				holder.itemView.resetForegroundState();
+			}
 
 			if(SelectionListDialog.this.adapter == null) {
 				return;
 			}
 
-			final boolean state = SelectionListDialog.this.adapter.getCheckboxState(position);
+			final boolean state = SelectionListDialog.this.multiple ? SelectionListDialog.this.adapter.getCheckboxState(position) ^ SelectionListDialog.this.updated.contains(position) : SelectionListDialog.this.selected == position;
 			holder.itemView.setCheckboxState(state);
 			holder.itemView.setEnabled(SelectionListDialog.this.adapter.getState(position));
-			holder.itemView.setOnClickListener(view -> SelectionListDialog.this.adapter.setCheckboxState(holder.getBindingAdapterPosition(), !state));
+			holder.itemView.setOnClickListener(view -> {
+				final int index = holder.getBindingAdapterPosition();
+
+				if(SelectionListDialog.this.multiple) {
+					if(SelectionListDialog.this.updated.contains(position)) {
+						SelectionListDialog.this.updated.remove(position);
+					} else {
+						SelectionListDialog.this.updated.add(position);
+					}
+
+					this.notifyItemChanged(index, 0);
+					return;
+				}
+
+				final int previousIndex = SelectionListDialog.this.selected;
+				this.notifyItemChanged(SelectionListDialog.this.selected = index, 0);
+				this.notifyItemChanged(previousIndex, 0);
+				SelectionListDialog.this.adapter.setCheckboxState(previousIndex, false);
+				SelectionListDialog.this.adapter.setCheckboxState(SelectionListDialog.this.selected, true);
+			});
+
 			holder.itemView.setSummary(SelectionListDialog.this.adapter.getSummary(position));
 			holder.itemView.setTitle(SelectionListDialog.this.adapter.getTitle(position));
 		}
@@ -136,61 +238,98 @@ public class SelectionListDialog extends Dialog {
 	}
 
 	public interface Adapter {
+		CharSequence getCardSummary();
 		boolean getCheckboxState(final int index);
+		CharSequence getTitle(final int index);
 		int getItemCount();
-		CharSequence getSummary();
-		String getTitle(final int index);
 		void setCheckboxState(final int index, final boolean state);
 
 		default boolean getState(final int index) {
 			return true;
 		}
 
-		default String getSummary(final int index) {
+		default CharSequence getSummary(final int index) {
 			return null;
 		}
 
-		default boolean isSingle() {
-			return true;
+		default boolean isMultiple() {
+			return false;
 		}
 	}
 
-	public static class SimpleRadioAdapter implements Adapter {
-		private int selected;
+	public static class SimpleListAdapter implements Adapter {
+		public final boolean multiple;
+		public final boolean[] selected;
+		public final int size;
+		public final Object[] items;
+
+		public SimpleListAdapter(final boolean multiple, final Object... items) {
+			this.multiple = multiple;
+			this.size = items == null ? 0 : items.length;
+			this.selected = new boolean[this.size];
+			this.items = items;
+		}
 
 		@Override
-		public boolean getCheckboxState(int index) {
-			return this.selected == index;
+		public CharSequence getCardSummary() {
+			final StringBuilder builder = new StringBuilder();
+
+			for(int i = 0; i < this.size; i++) {
+				if(this.getCheckboxState(i)) {
+					if(builder.length() > 0) {
+						builder.append(", ");
+					}
+
+					builder.append(this.getTitle(i));
+				}
+			}
+
+			return builder.toString();
+		}
+
+		@Override
+		public boolean getCheckboxState(final int index) {
+			return this.selected[index];
+		}
+
+		@Override
+		public CharSequence getTitle(final int index) {
+			return this.items[index] instanceof CharSequence ? (CharSequence) this.items[index] : String.valueOf(this.items[index]);
 		}
 
 		@Override
 		public int getItemCount() {
-			return 10;
+			return this.size;
 		}
 
 		@Override
-		public CharSequence getSummary() {
-			return null;
+		public boolean getState(final int index) {
+			return !(this.items[index] instanceof StateProvider) || ((StateProvider) this.items[index]).getState();
 		}
 
 		@Override
-		public String getTitle(int index) {
-			return "";
+		public CharSequence getSummary(final int index) {
+			return this.items[index] instanceof SummaryProvider ? ((SummaryProvider) this.items[index]).getSummary() : null;
 		}
 
 		@Override
-		public void setCheckboxState(int index, boolean state) {
-
+		public boolean isMultiple() {
+			return this.multiple;
 		}
 
 		@Override
-		public boolean getState(int index) {
-			return Adapter.super.getState(index);
+		public void setCheckboxState(final int index, final boolean state) {
+			this.selected[index] = state;
 		}
 
-		@Override
-		public String getSummary(int index) {
-			return Adapter.super.getSummary(index);
+		@FunctionalInterface
+		public interface StateProvider {
+			boolean getState();
+		}
+
+		@FunctionalInterface
+		public interface SummaryProvider {
+			CharSequence getSummary();
 		}
 	}
 }
