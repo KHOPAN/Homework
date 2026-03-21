@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.khopan.core.CoreLayout;
+import com.khopan.core.R;
 import com.khopan.core.view.SimpleViewHolder;
 import com.khopan.core.view.card.CheckableCardView;
 
@@ -50,6 +51,11 @@ public class SelectionListDialog extends Dialog {
 	 * to provide the data.
 	 */
 	protected Adapter adapter;
+
+	/**
+	 * The {@link com.khopan.core.view.card.dialog.SelectionListDialog.SelectionListListener}.
+	 */
+	protected SelectionListListener listener;
 
 	private final Drawable dividerBackground;
 	private final int itemHeight;
@@ -119,9 +125,16 @@ public class SelectionListDialog extends Dialog {
 		return this.adapter;
 	}
 
+	/**
+	 * @return the {@link com.khopan.core.view.card.dialog.SelectionListDialog.SelectionListListener}.
+	 */
+	public SelectionListListener getSelectionListListener() {
+		return this.listener;
+	}
+
 	@Override
 	public CharSequence getSummary() {
-		return this.adapter == null ? null : this.adapter.getCardSummary();
+		return this.adapter == null ? null : this.adapter.getCardSummary(this.selected);
 	}
 
 	/**
@@ -141,6 +154,16 @@ public class SelectionListDialog extends Dialog {
 		this.multiple = this.adapter.isMultiple();
 		this.size = this.adapter.getItemCount();
 		this.recyclerViewAdapter.notifyDataSetChanged();
+		this.dialog.setButton(DialogInterface.BUTTON_POSITIVE, this.multiple ? this.context.getString(R.string.dialog_button_positive) : null, this.multiple ? this.dialogListener : null);
+	}
+
+	/**
+	 * Sets the {@link com.khopan.core.view.card.dialog.SelectionListDialog.SelectionListListener}.
+	 *
+	 * @param listener the {@link com.khopan.core.view.card.dialog.SelectionListDialog.SelectionListListener}.
+	 */
+	public void setSelectionListListener(final SelectionListListener listener) {
+		this.listener = listener;
 	}
 
 	@Override
@@ -161,6 +184,11 @@ public class SelectionListDialog extends Dialog {
 
 		this.updated.forEach(index -> this.adapter.setCheckboxState(index, !this.adapter.getCheckboxState(index)));
 		this.updated.clear();
+
+		if(this.listener != null) {
+			this.listener.itemSelected(this);
+		}
+
 		this.updated();
 		return true;
 	}
@@ -214,10 +242,12 @@ public class SelectionListDialog extends Dialog {
 				}
 
 				final int previousIndex = SelectionListDialog.this.selected;
-				this.notifyItemChanged(SelectionListDialog.this.selected = index, 0);
-				this.notifyItemChanged(previousIndex, 0);
+				this.notifyItemChanged(SelectionListDialog.this.selected = index);
+				this.notifyItemChanged(previousIndex);
 				SelectionListDialog.this.adapter.setCheckboxState(previousIndex, false);
 				SelectionListDialog.this.adapter.setCheckboxState(SelectionListDialog.this.selected, true);
+				SelectionListDialog.this.buttonClicked(DialogInterface.BUTTON_POSITIVE);
+				SelectionListDialog.this.dialog.dismiss();
 			});
 
 			holder.itemView.setSummary(SelectionListDialog.this.adapter.getSummary(position));
@@ -237,32 +267,115 @@ public class SelectionListDialog extends Dialog {
 		}
 	}
 
+	/**
+	 * An interface that defines the data source.
+	 */
 	public interface Adapter {
-		CharSequence getCardSummary();
+		/**
+		 * @param selected the selected item.
+		 * @return the card summary based on the selected item.
+		 */
+		CharSequence getCardSummary(final int selected);
+
+		/**
+		 * @param index the item index.
+		 * @return the checkbox state at the specified index.
+		 */
 		boolean getCheckboxState(final int index);
+
+		/**
+		 * @param index the item index.
+		 * @return the title at the specified index.
+		 */
 		CharSequence getTitle(final int index);
+
+		/**
+		 * @return the total item count.
+		 */
 		int getItemCount();
+
+		/**
+		 * Sets the checkbox state at the specified index.
+		 *
+		 * @param index the item index.
+		 * @param state the checkbox state.
+		 */
 		void setCheckboxState(final int index, final boolean state);
 
+		/**
+		 * @param index the item index.
+		 * @return true if the item at the specified index is enabled, false otherwise.
+		 */
 		default boolean getState(final int index) {
 			return true;
 		}
 
+		/**
+		 * @param index the item index.
+		 * @return the summary at the specified index.
+		 */
 		default CharSequence getSummary(final int index) {
 			return null;
 		}
 
+		/**
+		 * @return true if multiple items can be selected, false otherwise.
+		 */
 		default boolean isMultiple() {
 			return false;
 		}
 	}
 
+	/**
+	 * A listener for handling when items are selected.
+	 */
+	@FunctionalInterface
+	public interface SelectionListListener {
+		/**
+		 * Handles the selected items.
+		 *
+		 * @param dialog the {@link com.khopan.core.view.card.dialog.SelectionListDialog}.
+		 */
+		void itemSelected(final SelectionListDialog dialog);
+	}
+
+	/**
+	 * A {@link com.khopan.core.view.card.dialog.SelectionListDialog.Adapter}
+	 * based on a simple, immutable list.
+	 */
 	public static class SimpleListAdapter implements Adapter {
+		/**
+		 * True if multiple items can be selected, false otherwise.
+		 */
 		public final boolean multiple;
+
+		/**
+		 * The array containing whether the item at a specific index
+		 * is selected or not.
+		 */
 		public final boolean[] selected;
+
+		/**
+		 * The total size.
+		 */
 		public final int size;
+
+		/**
+		 * The item list.
+		 */
 		public final Object[] items;
 
+		/**
+		 * The text to be displayed when nothing is selected.
+		 */
+		public CharSequence emptyText;
+
+		/**
+		 * Constructs a new {@link com.khopan.core.view.card.dialog.SelectionListDialog.SimpleListAdapter} instance.
+		 *
+		 * @param multiple true if multiple items can be selected, false otherwise.
+		 * @param items the item list.
+		 */
 		public SimpleListAdapter(final boolean multiple, final Object... items) {
 			this.multiple = multiple;
 			this.size = items == null ? 0 : items.length;
@@ -271,7 +384,11 @@ public class SelectionListDialog extends Dialog {
 		}
 
 		@Override
-		public CharSequence getCardSummary() {
+		public CharSequence getCardSummary(final int selected) {
+			if(!this.multiple) {
+				return this.getTitle(selected);
+			}
+
 			final StringBuilder builder = new StringBuilder();
 
 			for(int i = 0; i < this.size; i++) {
@@ -284,7 +401,7 @@ public class SelectionListDialog extends Dialog {
 				}
 			}
 
-			return builder.toString();
+			return builder.length() == 0 && this.emptyText != null ? this.emptyText : builder.toString();
 		}
 
 		@Override
@@ -322,13 +439,25 @@ public class SelectionListDialog extends Dialog {
 			this.selected[index] = state;
 		}
 
+		/**
+		 * An interface to be implemented by each item to provide its state.
+		 */
 		@FunctionalInterface
 		public interface StateProvider {
+			/**
+			 * @return true if this item is enabled, false otherwise.
+			 */
 			boolean getState();
 		}
 
+		/**
+		 * An interface to be implemented by each item to provide its summary.
+		 */
 		@FunctionalInterface
 		public interface SummaryProvider {
+			/**
+			 * @return this item's summary.
+			 */
 			CharSequence getSummary();
 		}
 	}
